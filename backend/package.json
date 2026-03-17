@@ -1,0 +1,34 @@
+{
+  "name": "auditflow-backend",
+  "version": "1.0.0",
+  "description": "Backend server for AuditFlow",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@axe-core/puppeteer": "^4.10.4",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
+    "@sendgrid/mail": "^8.1.5",
+    "@supabase/supabase-js": "^2.86.0",
+    "@types/pdfkit": "^0.17.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pdfkit": "^0.17.2",
+    "puppeteer": "^24.3.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.19.5",
+    "typescript": "^5.9.3"
+  }
+}
