@@ -1,108 +1,75 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useAudit } from '@/hooks/useAudit'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Download, ArrowLeft, AlertTriangle, AlertCircle, Info } from 'lucide-react'
 
-interface Violation {
-  id: string
-  page_url: string
-  violation_type: string
-  impact: 'critical' | 'serious' | 'moderate' | 'minor'
-  wcag_criterion: string
-  description: string
-  ai_explanation: string | null
-  ai_fix_steps: string | null
-  affected_elements: number
-  estimated_fix_hours: number | null
+const IMPACT_STYLES: Record<string, string> = {
+  critical: 'bg-red-100 border-red-300 text-red-800',
+  serious:  'bg-orange-100 border-orange-300 text-orange-800',
+  moderate: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+  minor:    'bg-blue-100 border-blue-300 text-blue-800',
 }
 
-interface Audit {
-  id: string
-  website_url: string
-  status: string
-  pages_scanned: number
-  total_violations: number
-  critical_count: number
-  serious_count: number
-  moderate_count: number
-  minor_count: number
-  wcag_score: number | null
-  wcag_level: string | null
-  created_at: string
-  completed_at: string | null
-  violations: Violation[]
+function ImpactIcon({ impact }: { impact: string }) {
+  if (impact === 'critical') return <AlertTriangle className="h-5 w-5 text-red-600" />
+  if (impact === 'serious')  return <AlertCircle className="h-5 w-5 text-orange-600" />
+  if (impact === 'moderate') return <Info className="h-5 w-5 text-yellow-600" />
+  return <Info className="h-5 w-5 text-blue-600" />
+}
+
+function ScoreRing({ score }: { score: number }) {
+  const radius = 40
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (score / 100) * circumference
+  const color = score >= 80 ? '#16a34a' : score >= 60 ? '#ca8a04' : '#dc2626'
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg width="100" height="100" className="-rotate-90">
+        <circle cx="50" cy="50" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="10" />
+        <circle
+          cx="50" cy="50" r={radius} fill="none"
+          stroke={color} strokeWidth="10"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="absolute text-center">
+        <p className="text-2xl font-bold" style={{ color }}>{score.toFixed(0)}</p>
+        <p className="text-xs text-muted-foreground">/ 100</p>
+      </div>
+    </div>
+  )
 }
 
 export function AuditDetail() {
   const { id } = useParams<{ id: string }>()
-  const [audit, setAudit] = useState<Audit | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [impactFilter, setImpactFilter] = useState<string>('all')
+  const navigate = useNavigate()
+  const { audit, loading } = useAudit(id)
+  const [impactFilter, setImpactFilter] = useState('all')
+  const [downloading, setDownloading] = useState(false)
 
-  useEffect(() => {
-    fetchAudit()
-    // Poll for updates if status is scanning
-    const interval = setInterval(() => {
-      if (audit?.status === 'scanning') {
-        fetchAudit()
-      }
-    }, 3000)
-
-    return () => clearInterval(interval)
-  }, [id])
-
-  const fetchAudit = async () => {
-    if (!id) return
-
-    const { data, error } = await auditApi.get(id)
-    if (error) {
-      console.error(error)
-      setLoading(false)
-      return
+  const handleDownload = async () => {
+    if (!audit) return
+    setDownloading(true)
+    const result = await auditApi.downloadPdf(audit.id)
+    if (result && 'error' in result && result.error) {
+      alert(result.error)
     }
-
-    setAudit(data as Audit)
-    setLoading(false)
+    setDownloading(false)
   }
-
-  const getImpactIcon = (impact: string) => {
-    switch (impact) {
-      case 'critical':
-        return <AlertTriangle className="w-5 h-5 text-red-600" />
-      case 'serious':
-        return <AlertCircle className="w-5 h-5 text-orange-600" />
-      case 'moderate':
-        return <Info className="w-5 h-5 text-yellow-600" />
-      default:
-        return <Info className="w-5 h-5 text-blue-600" />
-    }
-  }
-
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case 'critical':
-        return 'bg-red-100 border-red-300 text-red-800'
-      case 'serious':
-        return 'bg-orange-100 border-orange-300 text-orange-800'
-      case 'moderate':
-        return 'bg-yellow-100 border-yellow-300 text-yellow-800'
-      default:
-        return 'bg-blue-100 border-blue-300 text-blue-800'
-    }
-  }
-
-  const filteredViolations = audit?.violations?.filter(
-    (v) => impactFilter === 'all' || v.impact === impactFilter
-  ) || []
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading audit...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
+          <p className="mt-4 text-muted-foreground">Loading audit...</p>
         </div>
       </div>
     )
@@ -110,13 +77,11 @@ export function AuditDetail() {
 
   if (!audit) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center h-full">
         <Card className="p-8 text-center">
           <h2 className="text-xl font-semibold mb-2">Audit Not Found</h2>
-          <p className="text-gray-600 mb-4">The audit you're looking for doesn't exist.</p>
-          <Link to="/dashboard">
-            <Button>Go to Dashboard</Button>
-          </Link>
+          <p className="text-muted-foreground mb-4">The audit you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
         </Card>
       </div>
     )
@@ -124,199 +89,169 @@ export function AuditDetail() {
 
   if (audit.status === 'scanning') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center h-full bg-background">
         <Card className="p-12 text-center max-w-md">
-          <div className="animate-pulse mb-6">
-            <div className="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-primary rounded-full mx-auto flex items-center justify-center animate-pulse">
               <span className="text-white text-2xl">🔍</span>
             </div>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Scanning in Progress</h2>
-          <p className="text-gray-600 mb-4">
-            Analyzing {audit.website_url} for accessibility issues...
+          <h2 className="text-2xl font-bold text-foreground mb-2">Scanning in Progress</h2>
+          <p className="text-muted-foreground mb-4">
+            Analyzing <span className="font-medium text-foreground">{audit.website_url}</span> for accessibility issues...
           </p>
-          <p className="text-sm text-gray-500">This usually takes 2-5 minutes</p>
+          <p className="text-sm text-muted-foreground">This usually takes 2–5 minutes</p>
         </Card>
       </div>
     )
   }
 
+  const filteredViolations = (audit.violations || []).filter(
+    v => impactFilter === 'all' || v.impact === impactFilter
+  )
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="p-6 lg:p-8">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <Link to="/dashboard">
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Dashboard
-              </Button>
-            </Link>
-            <Button onClick={() => auditApi.downloadPdf(audit.id)} className="gap-2">
-              <Download className="w-4 h-4" />
-              Download PDF
-            </Button>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">{audit.website_url}</h1>
-          <p className="text-gray-600">
-            Scanned on {new Date(audit.created_at).toLocaleDateString()}
-          </p>
-        </div>
+      <div className="flex items-center justify-between mb-6">
+        <Button variant="outline" onClick={() => navigate('/reports')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Reports
+        </Button>
+        <Button onClick={handleDownload} disabled={downloading} className="gap-2">
+          <Download className="h-4 w-4" />
+          {downloading ? 'Preparing...' : 'Download PDF'}
+        </Button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">WCAG Score</h3>
-            <p className="text-4xl font-bold text-blue-600">
-              {audit.wcag_score?.toFixed(1) || '—'}
-            </p>
-            {audit.wcag_level && (
-              <p className="text-sm text-gray-600 mt-1">Level {audit.wcag_level}</p>
-            )}
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Pages Scanned</h3>
-            <p className="text-4xl font-bold">{audit.pages_scanned}</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Total Violations</h3>
-            <p className="text-4xl font-bold">{audit.total_violations}</p>
-          </Card>
-          <Card className="p-6">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">Status</h3>
-            <p className="text-xl font-semibold capitalize">{audit.status}</p>
-          </Card>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-foreground break-all">{audit.website_url}</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Scanned on {new Date(audit.created_at).toLocaleDateString()}
+          {audit.wcag_level && <span> · WCAG Level {audit.wcag_level}</span>}
+        </p>
+      </div>
 
-        {/* Violation Breakdown */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Critical</span>
-            </div>
-            <p className="text-2xl font-bold text-red-600">{audit.critical_count}</p>
-          </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <AlertCircle className="w-4 h-4 text-orange-600" />
-              <span className="text-sm font-medium text-orange-800">Serious</span>
-            </div>
-            <p className="text-2xl font-bold text-orange-600">{audit.serious_count}</p>
-          </div>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Info className="w-4 h-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-800">Moderate</span>
-            </div>
-            <p className="text-2xl font-bold text-yellow-600">{audit.moderate_count}</p>
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Info className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-800">Minor</span>
-            </div>
-            <p className="text-2xl font-bold text-blue-600">{audit.minor_count}</p>
-          </div>
-        </div>
+      {/* Score + stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <Card className="border-border bg-card">
+          <CardContent className="p-6 flex flex-col items-center">
+            {audit.wcag_score != null
+              ? <ScoreRing score={audit.wcag_score} />
+              : <p className="text-4xl font-bold text-muted-foreground">—</p>
+            }
+            <p className="text-sm text-muted-foreground mt-2">WCAG Score</p>
+          </CardContent>
+        </Card>
 
-        {/* Filters */}
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant={impactFilter === 'all' ? 'default' : 'outline'}
-            onClick={() => setImpactFilter('all')}
-          >
-            All ({audit.total_violations})
-          </Button>
-          <Button
-            variant={impactFilter === 'critical' ? 'default' : 'outline'}
-            onClick={() => setImpactFilter('critical')}
-          >
-            Critical ({audit.critical_count})
-          </Button>
-          <Button
-            variant={impactFilter === 'serious' ? 'default' : 'outline'}
-            onClick={() => setImpactFilter('serious')}
-          >
-            Serious ({audit.serious_count})
-          </Button>
-          <Button
-            variant={impactFilter === 'moderate' ? 'default' : 'outline'}
-            onClick={() => setImpactFilter('moderate')}
-          >
-            Moderate ({audit.moderate_count})
-          </Button>
-          <Button
-            variant={impactFilter === 'minor' ? 'default' : 'outline'}
-            onClick={() => setImpactFilter('minor')}
-          >
-            Minor ({audit.minor_count})
-          </Button>
-        </div>
+        <Card className="border-border bg-card">
+          <CardContent className="p-6 text-center">
+            <p className="text-4xl font-bold text-foreground">{audit.pages_scanned}</p>
+            <p className="text-sm text-muted-foreground mt-2">Pages Scanned</p>
+          </CardContent>
+        </Card>
 
-        {/* Violations List */}
-        <div className="space-y-4">
-          {filteredViolations && filteredViolations.length > 0 ? (
-            filteredViolations.map((violation) => (
-              <Card key={violation.id} className="p-6">
+        <Card className="border-border bg-card">
+          <CardContent className="p-6 text-center">
+            <p className="text-4xl font-bold text-foreground">{audit.total_violations}</p>
+            <p className="text-sm text-muted-foreground mt-2">Total Violations</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border bg-card">
+          <CardContent className="p-6 text-center">
+            <p className="text-xl font-semibold text-foreground capitalize">{audit.status}</p>
+            <p className="text-sm text-muted-foreground mt-2">Status</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Severity breakdown */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {[
+          { label: 'Critical', count: audit.critical_count, color: 'bg-red-50 border-red-200', text: 'text-red-600', icon: <AlertTriangle className="h-4 w-4 text-red-600" /> },
+          { label: 'Serious',  count: audit.serious_count,  color: 'bg-orange-50 border-orange-200', text: 'text-orange-600', icon: <AlertCircle className="h-4 w-4 text-orange-600" /> },
+          { label: 'Moderate', count: audit.moderate_count, color: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-600', icon: <Info className="h-4 w-4 text-yellow-600" /> },
+          { label: 'Minor',    count: audit.minor_count,    color: 'bg-blue-50 border-blue-200',  text: 'text-blue-600', icon: <Info className="h-4 w-4 text-blue-600" /> },
+        ].map(({ label, count, color, text, icon }) => (
+          <div key={label} className={`rounded-lg border p-4 ${color}`}>
+            <div className="flex items-center gap-2 mb-1">{icon}<span className={`text-sm font-medium ${text}`}>{label}</span></div>
+            <p className={`text-2xl font-bold ${text}`}>{count}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {[
+          { key: 'all',      label: `All (${audit.total_violations})` },
+          { key: 'critical', label: `Critical (${audit.critical_count})` },
+          { key: 'serious',  label: `Serious (${audit.serious_count})` },
+          { key: 'moderate', label: `Moderate (${audit.moderate_count})` },
+          { key: 'minor',    label: `Minor (${audit.minor_count})` },
+        ].map(({ key, label }) => (
+          <Button
+            key={key}
+            variant={impactFilter === key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setImpactFilter(key)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
+      {/* Violations */}
+      <div className="space-y-4">
+        {filteredViolations.length > 0 ? (
+          filteredViolations.map((v) => (
+            <Card key={v.id} className="border-border bg-card">
+              <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">{getImpactIcon(violation.impact)}</div>
+                  <div className="shrink-0 mt-0.5"><ImpactIcon impact={v.impact} /></div>
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold">{violation.violation_type}</h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getImpactColor(
-                          violation.impact
-                        )} border`}
-                      >
-                        {violation.impact}
-                      </span>
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <h3 className="text-base font-semibold text-foreground">{v.violation_type}</h3>
+                      <Badge className={`border shrink-0 ${IMPACT_STYLES[v.impact] || ''}`} variant="outline">
+                        {v.impact}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                      WCAG {violation.wcag_criterion}
-                    </p>
-                    <p className="text-gray-700 mb-4">{violation.description}</p>
 
-                    {violation.ai_explanation && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium mb-2">Why This Matters</h4>
-                        <p className="text-sm text-gray-700">{violation.ai_explanation}</p>
+                    <p className="text-sm text-muted-foreground mb-1">WCAG {v.wcag_criterion}</p>
+                    <p className="text-sm text-foreground mb-4">{v.description}</p>
+
+                    {v.ai_explanation && (
+                      <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 mb-3">
+                        <h4 className="text-sm font-medium text-blue-900 mb-1">Why This Matters</h4>
+                        <p className="text-sm text-blue-800">{v.ai_explanation}</p>
                       </div>
                     )}
 
-                    {violation.ai_fix_steps && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium mb-2">How to Fix</h4>
-                        <div className="text-sm text-gray-700 whitespace-pre-line">
-                          {violation.ai_fix_steps}
-                        </div>
+                    {v.ai_fix_steps && (
+                      <div className="rounded-lg bg-green-50 border border-green-200 p-4 mb-3">
+                        <h4 className="text-sm font-medium text-green-900 mb-1">How to Fix</h4>
+                        <p className="text-sm text-green-800 whitespace-pre-line">{v.ai_fix_steps}</p>
                       </div>
                     )}
 
-                    <div className="flex items-center gap-6 text-sm text-gray-600">
-                      <span>
-                        <strong>{violation.affected_elements}</strong> instance
-                        {violation.affected_elements !== 1 ? 's' : ''}
-                      </span>
-                      {violation.estimated_fix_hours && (
-                        <span>
-                          <strong>{violation.estimated_fix_hours}h</strong> estimated fix time
-                        </span>
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <span><strong className="text-foreground">{v.affected_elements}</strong> instance{v.affected_elements !== 1 ? 's' : ''}</span>
+                      {v.estimated_fix_hours && (
+                        <span><strong className="text-foreground">{v.estimated_fix_hours}h</strong> estimated fix time</span>
                       )}
                     </div>
                   </div>
                 </div>
-              </Card>
-            ))
-          ) : (
-            <Card className="p-12 text-center">
-              <p className="text-gray-600">No violations found in this category</p>
+              </CardContent>
             </Card>
-          )}
-        </div>
+          ))
+        ) : (
+          <Card className="border-border bg-card">
+            <CardContent className="py-12 text-center text-muted-foreground">
+              No violations found in this category
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

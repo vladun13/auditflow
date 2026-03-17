@@ -1,30 +1,43 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+
+// Layouts
+import { DashboardLayout } from '@/layouts/DashboardLayout'
+import { SettingsLayout } from '@/layouts/SettingsLayout'
+
+// Public pages
 import { Landing } from '@/pages/Landing'
 import { SignUp } from '@/pages/SignUp'
 import { Login } from '@/pages/Login'
 import { ForgotPassword } from '@/pages/ForgotPassword'
-import { DashboardNew as Dashboard } from '@/pages/DashboardNew'
-import { NewScan } from '@/pages/NewScan'
-import { AuditDetail } from '@/pages/AuditDetail'
 import { Pricing } from '@/pages/Pricing'
 
-// Protected route component
+// Authenticated pages
+import { DashboardNew as Dashboard } from '@/pages/DashboardNew'
+import { NewScan } from '@/pages/NewScan'
+import { Reports } from '@/pages/Reports'
+import { AuditDetail } from '@/pages/AuditDetail'
+
+// Settings pages
+import { Account } from '@/pages/settings/Account'
+import { Security } from '@/pages/settings/Security'
+import { Notifications } from '@/pages/settings/Notifications'
+import { PlansAndCredits } from '@/pages/settings/PlansAndCredits'
+import { PaymentHistory } from '@/pages/settings/PaymentHistory'
+import { CreditHistory } from '@/pages/settings/CreditHistory'
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     )
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
-
+  if (!user) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 
@@ -33,40 +46,38 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
+          {/* Public */}
           <Route path="/" element={<Landing />} />
-          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/pricing" element={<Pricing />} />
 
-          {/* Protected routes */}
+          {/* Protected — all share DashboardLayout */}
           <Route
-            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/scan"
-            element={
-              <ProtectedRoute>
-                <NewScan />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/audits/:id"
-            element={
-              <ProtectedRoute>
-                <AuditDetail />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scan" element={<NewScan />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/audits/:id" element={<AuditDetail />} />
 
-          {/* 404 */}
+            {/* Settings — nested under SettingsLayout */}
+            <Route path="/settings" element={<SettingsLayout />}>
+              <Route index element={<Navigate to="/settings/account" replace />} />
+              <Route path="account" element={<Account />} />
+              <Route path="security" element={<Security />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="plans" element={<PlansAndCredits />} />
+              <Route path="payments" element={<PaymentHistory />} />
+              <Route path="credits" element={<CreditHistory />} />
+            </Route>
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

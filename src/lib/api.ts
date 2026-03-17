@@ -7,21 +7,18 @@ interface ApiResponse<T = unknown> {
   error?: string
 }
 
-// API client helper
 async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    // Get the current session token
     const { data: { session } } = await supabase.auth.getSession()
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     }
 
-    // Add authorization header if user is logged in
     if (session?.access_token) {
       headers['Authorization'] = `Bearer ${session.access_token}`
     }
@@ -29,7 +26,7 @@ async function apiCall<T>(
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers,
-      credentials: 'include', // Include cookies
+      credentials: 'include',
     })
 
     const data = await response.json()
@@ -39,109 +36,117 @@ async function apiCall<T>(
     }
 
     return { data }
-  } catch (error) {
+  } catch {
     return { error: 'Network error. Please try again.' }
   }
 }
 
-// Audit API
+// ─── Audit API ────────────────────────────────────────────────────────────────
+
 export const auditApi = {
-  create: async (websiteUrl: string, crawlDepth: number) => {
-    return apiCall('/api/audits/create', {
+  create: (websiteUrl: string, crawlDepth: number) =>
+    apiCall('/api/audits/create', {
       method: 'POST',
       body: JSON.stringify({ website_url: websiteUrl, crawl_depth: crawlDepth }),
-    })
-  },
+    }),
 
-  startScan: async (auditId: string) => {
-    return apiCall(`/api/audits/${auditId}/scan`, {
-      method: 'POST',
-    })
-  },
+  startScan: (auditId: string) =>
+    apiCall(`/api/audits/${auditId}/scan`, { method: 'POST' }),
 
-  get: async (auditId: string) => {
-    return apiCall(`/api/audits/${auditId}`)
-  },
+  get: (auditId: string) =>
+    apiCall(`/api/audits/${auditId}`),
 
-  list: async () => {
-    return apiCall('/api/audits')
-  },
+  list: () =>
+    apiCall('/api/audits'),
 
-  delete: async (auditId: string) => {
-    return apiCall(`/api/audits/${auditId}`, {
-      method: 'DELETE',
-    })
-  },
+  delete: (auditId: string) =>
+    apiCall(`/api/audits/${auditId}`, { method: 'DELETE' }),
+
+  rescan: (auditId: string) =>
+    apiCall(`/api/audits/${auditId}/rescan`, { method: 'POST' }),
+
+  share: (auditId: string) =>
+    apiCall(`/api/audits/${auditId}/share`, { method: 'POST' }),
 
   downloadPdf: async (auditId: string) => {
     try {
-      // Get the current session token
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
-        alert('Please log in to download the report')
-        return
+        return { error: 'Please log in to download the report' }
       }
 
-      // Fetch PDF with authentication
       const response = await fetch(`${API_URL}/api/audits/${auditId}/report/pdf`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
       })
 
       if (!response.ok) {
         const errorData = await response.json()
-        alert(errorData.error || 'Failed to download PDF')
-        return
+        return { error: errorData.error || 'Failed to download PDF' }
       }
 
-      // Check if response is JSON (placeholder) or actual PDF
       const contentType = response.headers.get('content-type')
       if (contentType?.includes('application/json')) {
         const data = await response.json()
-        alert(data.message || 'PDF generation coming soon')
-        return
+        return { error: data.message || 'PDF generation coming soon' }
       }
 
-      // Get the blob
       const blob = await response.blob()
-
-      // Create a download link and trigger it
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `auditflow-report-${auditId}.pdf`
       document.body.appendChild(a)
       a.click()
-
-      // Cleanup
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-    } catch (error) {
-      console.error('Error downloading PDF:', error)
-      alert('An error occurred while downloading the report')
+      return { data: true }
+    } catch {
+      return { error: 'An error occurred while downloading the report' }
     }
   },
 }
 
-// User API
+// ─── User API ─────────────────────────────────────────────────────────────────
+
 export const userApi = {
-  getCredits: async () => {
-    return apiCall('/api/user/credits')
-  },
+  getCredits: () =>
+    apiCall('/api/user/credits'),
+
+  getProfile: () =>
+    apiCall('/api/user/profile'),
+
+  updateProfile: (profile: { full_name?: string; email?: string }) =>
+    apiCall('/api/user/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profile),
+    }),
+
+  updatePassword: (currentPassword: string, newPassword: string) =>
+    apiCall('/api/user/password', {
+      method: 'PUT',
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+    }),
+
+  getCreditHistory: () =>
+    apiCall('/api/user/credit-history'),
 }
 
-// Payment API
+// ─── Payment API ──────────────────────────────────────────────────────────────
+
 export const paymentApi = {
-  createCheckout: async (plan: string) => {
-    return apiCall('/api/payments/checkout', {
+  createCheckout: (plan: string) =>
+    apiCall('/api/payments/checkout', {
       method: 'POST',
       body: JSON.stringify({ plan }),
-    })
-  },
+    }),
 
-  confirmPayment: async (sessionId: string) => {
-    return apiCall(`/api/payments/success/${sessionId}`)
-  },
+  confirmPayment: (sessionId: string) =>
+    apiCall(`/api/payments/success/${sessionId}`),
+
+  getHistory: () =>
+    apiCall('/api/payments/history'),
+
+  getSubscription: () =>
+    apiCall('/api/payments/subscription'),
 }

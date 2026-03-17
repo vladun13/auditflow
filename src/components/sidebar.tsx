@@ -1,23 +1,29 @@
 import { cn } from "@/lib/utils"
-import type { ViewType } from "@/app/page"
-import { LayoutDashboard, ScanSearch, FileText, HelpCircle } from "lucide-react"
+import { LayoutDashboard, ScanSearch, FileText, Settings, HelpCircle } from "lucide-react"
 import { useState } from "react"
+import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { GearIcon, ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
-
-interface SidebarProps {
-  currentView: ViewType
-  onViewChange: (view: ViewType) => void
-}
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 
 const navItems = [
-  { id: "dashboard" as ViewType, label: "Dashboard", icon: LayoutDashboard },
-  { id: "scan" as ViewType, label: "New Scan", icon: ScanSearch },
-  { id: "reports" as ViewType, label: "Reports", icon: FileText },
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/scan",      label: "New Scan",  icon: ScanSearch },
+  { path: "/reports",   label: "Reports",   icon: FileText },
 ]
 
-export function Sidebar({ currentView, onViewChange }: SidebarProps) {
+const footerItems = [
+  { path: "/settings", label: "Settings",     icon: Settings },
+  { path: "/help",     label: "Help & Support", icon: HelpCircle },
+]
+
+export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
+  const location = useLocation()
+
+  const isActive = (path: string) =>
+    path === "/settings"
+      ? location.pathname.startsWith("/settings")
+      : location.pathname === path
 
   return (
     <aside
@@ -26,14 +32,15 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
         collapsed ? "w-16" : "w-64",
       )}
     >
+      {/* Logo */}
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {!collapsed && (
-          <div className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <span className="text-sm font-bold text-primary-foreground">A</span>
             </div>
-            <span className="font-semibold text-foreground">AccessAudit</span>
-          </div>
+            <span className="font-semibold text-foreground">AuditFlow</span>
+          </Link>
         )}
         <Button
           variant="ghost"
@@ -41,45 +48,54 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
           onClick={() => setCollapsed(!collapsed)}
           className="h-8 w-8 text-muted-foreground hover:text-foreground"
         >
-          {collapsed ? <ChevronRightIcon className="h-4 w-4" /> : <ChevronLeftIcon className="h-4 w-4" />}
+          {collapsed
+            ? <ChevronRightIcon className="h-4 w-4" />
+            : <ChevronLeftIcon className="h-4 w-4" />
+          }
         </Button>
       </div>
 
+      {/* Main nav */}
       <nav className="flex-1 p-2">
         <ul className="space-y-1">
           {navItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => onViewChange(item.id)}
+            <li key={item.path}>
+              <Link
+                to={item.path}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  currentView === item.id
+                  isActive(item.path)
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                 )}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
                 {!collapsed && <span>{item.label}</span>}
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
       </nav>
 
+      {/* Footer nav */}
       <div className="border-t border-border p-2">
         <ul className="space-y-1">
-          <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
-              <GearIcon className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>Settings</span>}
-            </button>
-          </li>
-          <li>
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground">
-              <HelpCircle className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>Help & Support</span>}
-            </button>
-          </li>
+          {footerItems.map((item) => (
+            <li key={item.path}>
+              <Link
+                to={item.path}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive(item.path)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                )}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </aside>

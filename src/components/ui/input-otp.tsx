@@ -1,5 +1,5 @@
 import * as React from "react"
-import { OTPInput, OTPInputContext } from "@/components/ui/input-otp"
+import { OTPInput, OTPInputContext } from "input-otp"
 import { cn } from "@/lib/utils"
 import { MinusIcon } from "@radix-ui/react-icons"
 
