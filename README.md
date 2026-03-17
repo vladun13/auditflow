@@ -1,4 +1,6 @@
-# Accessibility Audit Reports Generator
+# AuditFlow — Accessibility Audit Generator
+
+**GitHub:** https://github.com/vladun13/auditflow
 
 A full-stack B2B SaaS tool that automatically generates WCAG-compliant accessibility audit reports for websites. Built with React, Express.js, Supabase, and Claude AI.
 
@@ -9,7 +11,7 @@ A full-stack B2B SaaS tool that automatically generates WCAG-compliant accessibi
 - 🤖 **AI-Powered Recommendations** - Claude generates fix instructions for each violation
 - 📊 **WCAG Scoring** - Automatic compliance scoring (A, AA, AAA levels)
 - 📄 **PDF Reports** - Professional downloadable reports
-- 💳 **Payment Integration** - Stripe checkout for credit purchases
+- 💳 **Payment Integration** - LemonSqueezy checkout for credit purchases
 - 📧 **Email Notifications** - Scan completion alerts
 - 📱 **Responsive Design** - Mobile-friendly interface
 
@@ -129,34 +131,74 @@ The app will be available at:
 ```
 .
 ├── src/                          # Frontend source
-│   ├── components/               # React components
-│   │   └── ui/                   # UI components (buttons, cards)
-│   ├── contexts/                 # React contexts (Auth)
-│   ├── lib/                      # Utilities (API client, Supabase)
-│   └── pages/                    # Page components
-│       ├── Landing.tsx           # Landing page
-│       ├── SignUp.tsx            # Signup page
-│       ├── Login.tsx             # Login page
-│       ├── Dashboard.tsx         # User dashboard
+│   ├── types/
+│   │   └── index.ts              # Centralized types (Audit, Violation, Payment, etc.)
+│   ├── contexts/
+│   │   └── AuthContext.tsx       # Supabase auth state
+│   ├── lib/
+│   │   ├── api.ts                # API client (all backend calls)
+│   │   ├── supabase.ts           # Supabase client init
+│   │   └── utils.ts              # cn() helper
+│   ├── layouts/                  # Shared page layouts
+│   │   ├── DashboardLayout.tsx   # Sidebar + header + <Outlet/>
+│   │   └── SettingsLayout.tsx    # Settings left nav + <Outlet/>
+│   ├── hooks/                    # Custom data hooks
+│   │   ├── useAudits.ts
+│   │   ├── useAudit.ts
+│   │   ├── useCredits.ts
+│   │   └── usePayments.ts
+│   ├── components/
+│   │   ├── Navbar.tsx            # Landing navbar
+│   │   ├── Hero.tsx              # Landing hero
+│   │   ├── Features.tsx          # Landing features
+│   │   ├── HowItWorks.tsx        # Landing how-it-works
+│   │   ├── Footer.tsx            # Landing footer
+│   │   ├── sidebar.tsx           # Dashboard sidebar
+│   │   ├── modals/               # Modal dialogs
+│   │   │   ├── BuyCreditsModal.tsx
+│   │   │   ├── UpgradeModal.tsx
+│   │   │   ├── ShareReportModal.tsx
+│   │   │   └── ...
+│   │   └── ui/                   # shadcn/ui primitives (65+ components)
+│   └── pages/
+│       ├── Landing.tsx           # Public landing page
+│       ├── Login.tsx             # Auth
+│       ├── SignUp.tsx            # Auth
+│       ├── ForgotPassword.tsx    # Auth
+│       ├── Pricing.tsx           # Pricing & checkout
+│       ├── DashboardNew.tsx      # Main dashboard
 │       ├── NewScan.tsx           # Scan creation
 │       ├── AuditDetail.tsx       # Audit results
-│       └── Pricing.tsx           # Pricing page
+│       ├── Reports.tsx           # All reports list
+│       └── settings/
+│           ├── Account.tsx
+│           ├── Security.tsx
+│           ├── Notifications.tsx
+│           ├── PlansAndCredits.tsx
+│           ├── PaymentHistory.tsx
+│           └── CreditHistory.tsx
 │
 ├── backend/                      # Backend source
 │   └── src/
-│       ├── config/               # Configuration (Supabase)
-│       ├── middleware/           # Express middleware (auth)
-│       ├── routes/               # API routes
+│       ├── config/
+│       │   └── supabase.ts       # Supabase admin client
+│       ├── middleware/
+│       │   └── auth.ts           # JWT verification
+│       ├── routes/
 │       │   ├── auth.ts           # Auth endpoints
-│       │   ├── audits.ts         # Audit endpoints
-│       │   ├── payments.ts       # Payment endpoints
-│       │   └── user.ts           # User endpoints
-│       ├── services/             # Business logic
-│       │   ├── scanService.ts    # Puppeteer + Axe scanning
-│       │   └── aiService.ts      # Claude AI integration
-│       └── server.ts             # Express app
+│       │   ├── audits.ts         # Audit CRUD + scan + PDF
+│       │   ├── payments.ts       # LemonSqueezy checkout + webhook
+│       │   └── user.ts           # Credits + profile
+│       ├── services/
+│       │   ├── scanService.ts    # Puppeteer + axe-core scanning
+│       │   ├── aiService.ts      # Claude AI recommendations
+│       │   └── pdfService.ts     # PDF generation
+│       └── server.ts             # Express app entry point
 │
-└── supabase-schema.sql           # Database schema
+├── supabase-schema.sql           # Database schema (run in Supabase SQL Editor)
+├── PRD.md                        # Product Requirements Document
+├── CLAUDE.md                     # Claude Code project guide
+└── SETUP_GUIDE.md                # Detailed step-by-step setup
 ```
 
 ## API Endpoints
@@ -252,15 +294,27 @@ When testing in development mode:
 - Verify webhook secret is correctly set
 - Check Lemon Squeezy dashboard for payment status
 
-## Future Enhancements (v1.1+)
+## Roadmap
 
-- [ ] PDF report generation (currently placeholder)
+### In Progress (v1.0)
+- [ ] Shared dashboard layout (sidebar + header extracted to `DashboardLayout`)
+- [ ] Redesigned Dashboard, NewScan, AuditDetail, Pricing pages (matching Figma)
+- [ ] Settings pages: Account, Security, Notifications
+- [ ] Billing pages: Plans & Credits, Payment History, Credit History
+- [ ] PDF report generation
+- [ ] Buy Credits / Upgrade / Share Report modals
+- [ ] Custom hooks for all API calls
+
+### Future (v1.1+)
 - [ ] Email notifications with SendGrid
 - [ ] Scheduled recurring scans
-- [ ] Custom report branding
-- [ ] Team collaboration features
-- [ ] Historical trend reports
-- [ ] API for third-party integrations
+- [ ] Custom report branding / white-label
+- [ ] Team collaboration (multi-user accounts)
+- [ ] Historical trend charts
+- [ ] CI/CD integration (GitHub Actions)
+- [ ] REST API for third-party integrations
+
+See `PRD.md` for the full product requirements and implementation plan.
 
 ## License
 
@@ -269,9 +323,10 @@ MIT License - See LICENSE file for details
 ## Support
 
 For issues or questions:
-1. Check the troubleshooting section
-2. Review the PRD document
-3. Open an issue on GitHub
+1. Check the troubleshooting section above
+2. Review `PRD.md` for feature specifications
+3. Review `CLAUDE.md` for architecture and implementation details
+4. Open an issue at https://github.com/vladun13/auditflow/issues
 
 ---
 
