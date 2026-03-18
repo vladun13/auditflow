@@ -20,8 +20,8 @@ const footerLinks = {
     { label: 'Community', href: '#' },
   ],
   Legal: [
-    { label: 'Privacy', href: '#' },
-    { label: 'Terms', href: '#' },
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Terms', href: '/terms' },
   ],
 }
 

@@ -15,6 +15,8 @@ import { Login } from '@/pages/Login'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { Pricing } from '@/pages/Pricing'
+import { Privacy } from '@/pages/Privacy'
+import { Terms } from '@/pages/Terms'
 
 // Onboarding
 import { Onboarding } from '@/pages/Onboarding'
@@ -96,6 +98,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
 
           {/* Email verified (public, auto-redirects) */}
           <Route path="/email-verified" element={<EmailVerified />} />

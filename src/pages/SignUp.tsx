@@ -416,9 +416,9 @@ export function SignUp() {
           {/* Terms */}
           <p className="mt-8 text-center text-xs text-gray-400 max-w-sm mx-auto">
             By signing up, you agree to our{' '}
-            <a href="#" className="underline hover:text-gray-600 transition-colors">Terms of Service</a>
+            <a href="/terms" className="underline hover:text-gray-600 transition-colors">Terms of Service</a>
             {' '}and{' '}
-            <a href="#" className="underline hover:text-gray-600 transition-colors">Privacy policy</a>.
+            <a href="/privacy" className="underline hover:text-gray-600 transition-colors">Privacy policy</a>.
           </p>
         </div>
       </div>
