@@ -4,6 +4,7 @@ import { supabase } from '../config/supabase.js'
 import { ScanService } from '../services/scanService.js'
 import { AIService } from '../services/aiService.js'
 import { PDFService } from '../services/pdfService.js'
+import { validateScanUrl } from '../utils/validateUrl.js'
 
 const router = express.Router()
 const scanService = new ScanService()
@@ -19,11 +20,10 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
-    // Validate URL
-    try {
-      new URL(website_url)
-    } catch {
-      return res.status(400).json({ error: 'Invalid URL format' })
+    // Validate URL — blocks private/internal networks (SSRF protection)
+    const urlCheck = await validateScanUrl(website_url)
+    if (!urlCheck.valid) {
+      return res.status(400).json({ error: urlCheck.reason || 'Invalid URL' })
     }
 
     // Check user credits
@@ -53,7 +53,8 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
       .single()
 
     if (auditError) {
-      return res.status(500).json({ error: auditError.message })
+      console.error('Error creating audit record:', auditError)
+      return res.status(500).json({ error: 'Failed to create audit' })
     }
 
     res.status(201).json({
@@ -88,18 +89,31 @@ router.post('/:id/scan', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Audit already started or completed' })
     }
 
-    // Deduct credit
-    const { data: userData } = await supabase
+    // Atomically deduct 1 credit using optimistic locking:
+    // Read the current credit count, then UPDATE only if it hasn't changed.
+    // This prevents a TOCTOU race condition where two concurrent scan requests
+    // could both pass the credit check and both deduct a credit.
+    const { data: userCredits } = await supabase
       .from('users')
       .select('credits')
       .eq('id', req.user!.id)
       .single()
 
-    if (userData) {
-      await supabase
-        .from('users')
-        .update({ credits: userData.credits - 1 })
-        .eq('id', req.user!.id)
+    if (!userCredits || userCredits.credits < 1) {
+      return res.status(402).json({ error: 'Insufficient credits' })
+    }
+
+    // Conditional update: only succeeds if credits still equals the value we read
+    const { data: deducted } = await supabase
+      .from('users')
+      .update({ credits: userCredits.credits - 1 })
+      .eq('id', req.user!.id)
+      .eq('credits', userCredits.credits)  // optimistic lock
+      .select('credits')
+
+    if (!deducted || deducted.length === 0) {
+      // Another concurrent request already used this credit
+      return res.status(402).json({ error: 'Insufficient credits' })
     }
 
     // Start scan in background (don't await)
@@ -171,7 +185,8 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
       .order('created_at', { ascending: false })
 
     if (error) {
-      return res.status(500).json({ error: error.message })
+      console.error('Error listing audits:', error)
+      return res.status(500).json({ error: 'Failed to fetch audits' })
     }
 
     res.json(audits)
@@ -193,7 +208,8 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
       .eq('user_id', req.user!.id)
 
     if (error) {
-      return res.status(500).json({ error: error.message })
+      console.error('Error deleting audit:', error)
+      return res.status(500).json({ error: 'Failed to delete audit' })
     }
 
     res.json({ message: 'Audit deleted successfully' })

@@ -104,6 +104,74 @@ Pay-as-you-go credit packs. Each scan consumes 1 credit. No monthly subscription
 
 ## 4. User Stories & Acceptance Criteria
 
+### 4.0 Landing Page
+
+**US-000 — View Landing Page**
+```
+As a first-time visitor,
+I want to understand what AuditFlow does and how to get started,
+So that I can decide whether to create an account.
+
+Acceptance Criteria:
+- Given I visit /
+- When the page loads
+- Then I see a hero section with a clear headline, subheadline, and a URL input CTA
+- And I see a features section explaining the product's key capabilities
+- And I see a "How It Works" section with 3 steps
+- And I see a pricing CTA or link to /pricing
+- And I see a footer with Product / Resources / Legal links
+
+Definition of Done:
+- [x] Hero URL input navigates to /scan?url= when submitted
+- [x] "Start Free Trial" CTA in navbar navigates to /signup
+- [x] "Log In" CTA navigates to /login
+- [x] All nav links scroll to correct sections or navigate to correct routes
+- [x] Page is fully responsive at 375px, 768px, 1280px
+- [x] All text meets 4.5:1 contrast ratio
+- [x] Plus Jakarta Sans font loaded via Google Fonts
+```
+
+**US-000b — Hero URL Submission**
+```
+As a visitor who wants to try the product,
+I want to enter a URL in the hero and be taken directly to the scan page,
+So that I can experience the product immediately without signing up first.
+
+Acceptance Criteria:
+- Given I am on /
+- When I type a URL into the hero input and press "Start Scanning"
+- Then I am navigated to /scan?url=<entered_url>
+- When I am not authenticated and reach /scan
+- Then I am redirected to /login with a return redirect to /scan?url=
+- When I submit an invalid URL
+- Then I see an inline validation error under the input
+
+Definition of Done:
+- [x] URL pre-filled in /scan page from query param
+- [ ] Unauthenticated redirect preserves the ?url= param through login
+```
+
+**US-000c — Social Proof & Trust**
+```
+As a skeptical visitor,
+I want to see evidence that AuditFlow is credible and trusted,
+So that I feel confident enough to sign up.
+
+Acceptance Criteria:
+- Given I scroll through the landing page
+- Then I see a "Trusted by" logo strip or testimonial section
+- And I see the WCAG compliance badge or audit count stat
+
+Definition of Done:
+- [x] SocialProof.tsx — "Trusted by developers at..." logo strip after hero
+- [x] StatsBar.tsx — 4 headline stats (pages scanned, violations detected, AI fix rate, avg scan time)
+- [x] Testimonials.tsx — 3 testimonial cards with name/role/company
+- [x] ComplianceBadges.tsx — 6 compliance standards pill badges (WCAG 2.1 AA/AAA, Section 508, ADA, EN 301 549, AODA)
+- [x] CtaBanner.tsx — Indigo full-width CTA banner above footer
+```
+
+---
+
 ### 4.1 Authentication
 
 **US-001 — Sign Up**
@@ -391,6 +459,50 @@ Acceptance Criteria:
 ---
 
 ## 5. Functional Requirements
+
+### 5.0 Landing Page
+
+| Priority | Section | Requirement |
+|----------|---------|-------------|
+| Must | Navbar | Logo + nav links (Product ▾, Solutions ▾, Pricing, Resources ▾) + "Log In" text link + "Start Free Trial" filled button |
+| Must | Navbar | Sticky/fixed at top; transparent on scroll start, white on scroll |
+| Must | Hero | Headline: "Automated Accessibility Audits, Powered by AI" (or equivalent) |
+| Must | Hero | Subheadline explaining WCAG scanning + AI fix recommendations |
+| Must | Hero | URL input field with "Start Scanning" CTA that navigates to /scan?url= |
+| Must | Hero | Decorative gradient blobs (indigo/blue/pink) for visual depth |
+| Must | Features | 4-card grid explaining: AI Fix Recommendations, WCAG 2.1 Compliance, Multi-Page Scanning, PDF Reports |
+| Must | How It Works | 3-step numbered flow: Input URL → Run Audit → Get Fixes |
+| Must | Pricing CTA | Link or button directing to /pricing |
+| Must | Footer | 3 link groups: Product (Features, Pricing, API), Resources (Docs, Blog, Community), Legal (Privacy, Terms) |
+| Must | Footer | AuditFlow logo + tagline + copyright |
+| Should | Social Proof | Testimonials section (2–3 quotes) or "Trusted by" logo strip | ✓ Done |
+| Should | Stats bar | 3 headline stats (e.g. "10,000+ pages scanned", "WCAG 2.1 AA", "< 60s per scan") | ✓ Done |
+| Should | Hero | Animated browser mockup or dashboard screenshot | Pending |
+| Could | Navbar | Dropdown menus for Product ▾, Solutions ▾, Resources ▾ | Pending |
+| Could | CTA section | Mid-page "Start Free Trial" CTA banner above footer | ✓ Done |
+
+**Content per section:**
+
+**Hero**
+- Primary headline: `Fix Accessibility Issues Before They Cost You`
+- Subheadline: `AuditFlow scans your website against WCAG 2.1 guidelines and gives you AI-generated fix instructions for every violation.`
+- CTA label: `Start Scanning →`
+- Secondary CTA: `View Sample Report`
+
+**Features (4 cards)**
+1. AI Fix Recommendations — Plain-English explanations + step-by-step code fixes
+2. WCAG 2.1 Compliance Scoring — Instant score with AA/AAA level badge
+3. Multi-Page Scanning — Crawl up to unlimited pages in one scan
+4. PDF Report Export — Shareable reports for clients and legal teams
+
+**How It Works (3 steps)**
+1. Input URL — Enter the URL you want to audit
+2. Run Audit — Engine scans against WCAG 2.1 guidelines in seconds
+3. Get Fixes — AI-generated code snippets for every violation
+
+**Figma reference:** Landing page node `220:44843` (HowItWorks + Footer confirmed); full landing `220:44874`
+
+---
 
 ### 5.1 Navigation & Routing
 
@@ -689,6 +801,10 @@ Files to delete after Phase 1–2:
 ### Acquisition
 - **Visitor-to-signup rate:** > 5% (landing page → /signup completion)
 - **Hero CTA click-through:** > 15% of visitors click "Start Scanning"
+- **Bounce rate:** < 60% on landing page
+- **Pricing page visit rate:** > 30% of landing page visitors navigate to /pricing
+- **Average time on landing page:** > 90 seconds (indicates content engagement)
+- **Free trial signup rate from hero CTA:** > 8% of visitors who use the hero URL input complete signup
 
 ### Activation
 - **Time to first scan:** < 5 minutes from signup
@@ -716,7 +832,8 @@ Files to delete after Phase 1–2:
 | Audit Dashboard | `172:20570` | 1B |
 | Pricing | `263:59336` | 1E |
 | Scanning Website | `105:16689` | 1C |
-| Landing Page (HowItWorks + Footer) | `220:44843` | 1F |
+| Landing Page (full — HowItWorks + Footer) | `220:44843` | 1F |
+| Landing Page (responsive variants) | `220:44874` | 1F |
 | Audit Results | `105:15858` | 1D |
 | Issues | `250:47714` | 1D |
 | Settings | `185:35236` | 2A |

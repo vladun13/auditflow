@@ -25,31 +25,34 @@ This file is the authoritative context document for Claude Code working on this 
 ### What is DONE (built and styled)
 - Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme
 - Auth pages: `Login`, `SignUp`, `ForgotPassword` — redesigned and working
-- `DashboardNew.tsx` — functional with real API data, but inline layout (no shared layout yet)
-- `NewScan.tsx` — functional, basic styling (not yet redesigned)
-- `AuditDetail.tsx` — functional with polling, basic styling (not yet redesigned)
-- `Pricing.tsx` — functional with LemonSqueezy, basic styling (not yet redesigned)
-- `src/types/index.ts` — centralized type definitions created
-- `src/layouts/`, `src/hooks/`, `src/pages/settings/`, `src/components/modals/` — directories created, files pending
+- `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout`
+- `NewScan.tsx` — functional, basic styling (not yet redesigned to Figma)
+- `AuditDetail.tsx` — functional with polling, basic styling (not yet redesigned to Figma)
+- `Pricing.tsx` — functional with LemonSqueezy, basic styling (not yet redesigned to Figma)
+- `Reports.tsx` — extracted reports route with status filtering and delete
+- `src/types/index.ts` — centralized type definitions
+- `src/layouts/DashboardLayout.tsx` — shared sidebar + header + `<Outlet/>` for all auth pages ✓
+- `src/layouts/SettingsLayout.tsx` — left nav tabs for settings sub-pages ✓
+- `src/hooks/useAudits.ts`, `useAudit.ts`, `useCredits.ts`, `usePayments.ts` — all created ✓
+- `src/pages/settings/Account.tsx`, `Security.tsx`, `Notifications.tsx` ✓
+- `src/pages/settings/PlansAndCredits.tsx`, `PaymentHistory.tsx`, `CreditHistory.tsx` ✓
+- `App.tsx` — restructured with nested routes under `DashboardLayout` and `SettingsLayout` ✓
+- `src/lib/api.ts` — expanded with `userApi.getProfile/updateProfile/updatePassword/getCreditHistory`, `paymentApi.getHistory/getSubscription` ✓
 - Full backend: scanning service, AI service, payment routes, auth middleware
+- `backend/src/utils/validateUrl.ts` — SSRF protection utility ✓
+- Backend security hardened: `helmet`, rate limiting, timing-safe webhook, IDOR fix, TOCTOU fix, error sanitization ✓
+- Test suite: 18 test files, 133 tests passing (Vitest + React Testing Library + happy-dom) ✓
 - Supabase database schema deployed
 - PRD.md created
 
 ### What is NOT YET DONE (pending implementation)
-See the full implementation plan in the plan transcript. Summary:
-- `DashboardLayout.tsx` — shared sidebar+header layout for all authenticated pages
-- `SettingsLayout.tsx` — left nav tabs for settings sub-pages
-- `Reports.tsx` — extracted reports route
-- Redesigned `NewScan`, `AuditDetail`, `Pricing` pages (Figma designs pending fetch)
-- All settings pages: `Settings`, `Account`, `Security`, `Notifications`
-- All billing pages: `PlansAndCredits`, `PaymentHistory`, `CreditHistory`
+- Figma redesigns: `NewScan`, `AuditDetail`, `Pricing`, `DashboardNew` (Figma designs not yet fetched)
 - All modals: `BuyCreditsModal`, `CancelSubscriptionModal`, `UpgradeModal`, `ReactivateModal`, `ShareReportModal`
-- Custom hooks: `useAudits`, `useAudit`, `useCredits`, `usePayments`
-- `App.tsx` route restructure to nested routes under `DashboardLayout`
-- Expanded API endpoints in `api.ts`
-- PDF report generation
+- Backend endpoints not yet implemented: `/api/user/profile` (GET/PUT), `/api/user/password` (PUT), `/api/payments/history`, `/api/payments/subscription`, `/api/user/credit-history`
+- PDF report generation (`PdfReport` component + `pdf.ts` lib)
 - Onboarding + tutorial flows
-- Delete dead code (mock-data view components, `Dashboard.tsx`)
+- Delete dead code: mock-data view components (`dashboard-view.tsx`, `scan-view.tsx`, etc.), `Dashboard.tsx`
+- `HowItWorks` + `Footer` Figma redesign (node `220:44843`)
 
 ---
 
@@ -69,44 +72,43 @@ See the full implementation plan in the plan transcript. Summary:
 │   │   ├── api.ts                    # All API calls (apiCall helper + auditApi/userApi/paymentApi)
 │   │   ├── supabase.ts               # Supabase client initialization
 │   │   └── utils.ts                  # cn() classname helper
-│   ├── layouts/                      # (to be created)
-│   │   ├── DashboardLayout.tsx       # Sidebar + header + <Outlet/>
-│   │   └── SettingsLayout.tsx        # Settings left nav + <Outlet/>
-│   ├── hooks/                        # (to be created)
-│   │   ├── useAudits.ts
-│   │   ├── useAudit.ts
-│   │   ├── useCredits.ts
-│   │   └── usePayments.ts
+│   ├── layouts/
+│   │   ├── DashboardLayout.tsx       # Sidebar + header + <Outlet/> ✓
+│   │   └── SettingsLayout.tsx        # Settings left nav + <Outlet/> ✓
+│   ├── hooks/
+│   │   ├── useAudits.ts              # wraps auditApi.list() ✓
+│   │   ├── useAudit.ts               # wraps auditApi.get() with polling ✓
+│   │   ├── useCredits.ts             # wraps userApi.getCredits() ✓
+│   │   └── usePayments.ts            # wraps payment/credit history ✓
+│   ├── test/
+│   │   ├── setup.ts                  # Vitest global setup (jest-dom matchers)
+│   │   └── helpers.tsx               # makeAudit() factory, renderWithRouter()
 │   ├── pages/
 │   │   ├── Landing.tsx               # Public landing page
 │   │   ├── Login.tsx                 # Auth — redesigned ✓
 │   │   ├── SignUp.tsx                # Auth — redesigned ✓
 │   │   ├── ForgotPassword.tsx        # Auth — redesigned ✓
-│   │   ├── Pricing.tsx               # Pricing — functional, needs redesign
-│   │   ├── Dashboard.tsx             # OLD — delete after DashboardNew is complete
-│   │   ├── DashboardNew.tsx          # Active dashboard — strip inline layout later
-│   │   ├── NewScan.tsx               # Scan form — functional, needs redesign
-│   │   ├── AuditDetail.tsx           # Results — functional, needs redesign
-│   │   └── settings/                 # (to be created)
-│   │       ├── Settings.tsx
-│   │       ├── Account.tsx
-│   │       ├── Security.tsx
-│   │       ├── Notifications.tsx
-│   │       ├── PlansAndCredits.tsx
-│   │       ├── PaymentHistory.tsx
-│   │       └── CreditHistory.tsx
+│   │   ├── Pricing.tsx               # Pricing — functional, needs Figma redesign
+│   │   ├── Dashboard.tsx             # OLD — delete (superseded by DashboardNew)
+│   │   ├── DashboardNew.tsx          # Active dashboard — uses DashboardLayout ✓
+│   │   ├── NewScan.tsx               # Scan form — functional, needs Figma redesign
+│   │   ├── Reports.tsx               # Reports list with filtering ✓
+│   │   ├── AuditDetail.tsx           # Results — functional, needs Figma redesign
+│   │   └── settings/
+│   │       ├── Account.tsx           # Profile info, danger zone ✓
+│   │       ├── Security.tsx          # Password change, 2FA placeholder ✓
+│   │       ├── Notifications.tsx     # Email notification prefs ✓
+│   │       ├── PlansAndCredits.tsx   # Credit balance, upgrade ✓
+│   │       ├── PaymentHistory.tsx    # Past payments list ✓
+│   │       └── CreditHistory.tsx     # Credit usage log ✓
 │   ├── components/
 │   │   ├── Navbar.tsx                # Landing navbar — redesigned ✓
 │   │   ├── Hero.tsx                  # Landing hero — redesigned ✓
 │   │   ├── Features.tsx              # Landing features — redesigned ✓
 │   │   ├── HowItWorks.tsx            # Landing how-it-works
 │   │   ├── Footer.tsx                # Landing footer
-│   │   ├── sidebar.tsx               # Dashboard sidebar — BROKEN IMPORT, needs fix
-│   │   ├── dashboard-view.tsx        # Dead code (mock data) — delete
-│   │   ├── scan-view.tsx             # Dead code (mock data) — delete
-│   │   ├── reports-view.tsx          # Dead code (mock data) — delete
-│   │   ├── audit-results-view.tsx    # Dead code (mock data) — delete
-│   │   ├── modals/                   # (to be created)
+│   │   ├── sidebar.tsx               # Dashboard sidebar
+│   │   ├── modals/                   # (pending — Phase 4A)
 │   │   │   ├── BuyCreditsModal.tsx
 │   │   │   ├── CancelSubscriptionModal.tsx
 │   │   │   ├── UpgradeModal.tsx
@@ -117,20 +119,22 @@ See the full implementation plan in the plan transcript. Summary:
 │
 ├── backend/                          # Node.js Express API
 │   └── src/
-│       ├── server.ts                 # Express app, middleware, route mounts
+│       ├── server.ts                 # Express app, helmet, rate limiting, route mounts
 │       ├── config/
 │       │   └── supabase.ts           # Supabase admin client (service_role key)
 │       ├── middleware/
 │       │   └── auth.ts               # JWT verification middleware
 │       ├── routes/
 │       │   ├── auth.ts               # GET /auth/me
-│       │   ├── audits.ts             # CRUD + scan + PDF
-│       │   ├── payments.ts           # LemonSqueezy checkout + webhook
+│       │   ├── audits.ts             # CRUD + scan + PDF (SSRF + TOCTOU fixed)
+│       │   ├── payments.ts           # LemonSqueezy checkout + webhook (IDOR + timing fixed)
 │       │   └── user.ts               # Credits
-│       └── services/
-│           ├── scanService.ts        # Puppeteer crawl + axe-core scan + DB save
-│           ├── aiService.ts          # Claude API — generates explanations + fix steps
-│           └── pdfService.ts         # PDF generation (placeholder)
+│       ├── services/
+│       │   ├── scanService.ts        # Puppeteer crawl + axe-core scan + DB save
+│       │   ├── aiService.ts          # Claude API — generates explanations + fix steps
+│       │   └── pdfService.ts         # PDF generation (placeholder)
+│       └── utils/
+│           └── validateUrl.ts        # SSRF protection — blocks private IPs, cloud metadata
 │
 ├── supabase-schema.sql               # Full DB schema — run in Supabase SQL Editor
 ├── PRD.md                            # Product Requirements Document
@@ -173,6 +177,8 @@ See the full implementation plan in the plan transcript. Summary:
 | @supabase/supabase-js | latest | DB access (service_role key) |
 | @lemonsqueezy/lemonsqueezy.js | latest | Payment processing |
 | SendGrid | optional | Email notifications |
+| helmet | latest | Security headers |
+| express-rate-limit | latest | Rate limiting (scans: 20/hr, payments: 10/hr, global: 200/15min) |
 
 ### Infrastructure
 | Service | Purpose |
@@ -350,6 +356,7 @@ PORT=3001
 NODE_ENV=development
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...        # Never expose to frontend
+SUPABASE_ANON_KEY=eyJ...               # Public anon key — used for current-password verification
 ANTHROPIC_API_KEY=sk-ant-...
 LEMONSQUEEZY_API_KEY=eyJ0...
 LEMONSQUEEZY_STORE_ID=your_store_id
@@ -380,16 +387,17 @@ Both must be running for scanning to work. The frontend calls the backend API; t
 
 ## Known Issues & Gotchas
 
-### Broken imports to fix
-`src/components/sidebar.tsx` line 2 imports `ViewType` from `@/app/page` — this is a Next.js artifact. The type is now in `src/types/index.ts`. Fix this before using the sidebar in any new layout.
+### Pre-existing TypeScript errors in scanService.ts
+`backend/src/services/scanService.ts` has 3 pre-existing TS errors (missing `baseDomain` type annotation and `document`/`HTMLAnchorElement` DOM types in a Node.js context). These don't affect runtime since Puppeteer provides DOM APIs. Do not fix unless refactoring the scan service.
 
-### Dead code to delete (Phase 5)
-- `src/pages/Dashboard.tsx` — superseded by `DashboardNew.tsx`
-- `src/components/dashboard-view.tsx` — uses mock data + broken `@/app/page` import
-- `src/components/scan-view.tsx` — same
-- `src/components/reports-view.tsx` — same
-- `src/components/audit-results-view.tsx` — same
-- The `@/` directory at project root — appears to be a misrouted component copy
+### `full_name` stored in Supabase auth user_metadata
+Profile name is stored via `supabase.auth.admin.updateUserById()` user_metadata (not a DB column). This avoids a schema migration. The `GET /api/user/profile` endpoint reads it back via `admin.getUserById()`.
+
+### Password change requires `SUPABASE_ANON_KEY` in backend `.env`
+`PUT /api/user/password` verifies the current password by signing in via the anon client. Without this key the verification step falls back to service_role (which skips the check).
+
+### Dead code deleted (Phase 3B complete)
+All mock-data view files and the stray `@/` root directory have been removed.
 
 ### No "use client" directives
 This is a Vite app, not Next.js. Never add `"use client"`. Remove it from any file that has it.
@@ -443,17 +451,19 @@ Refer to `PRD.md` for full details. Summary:
 
 | Phase | What | Status |
 |-------|------|--------|
-| 1A | Shared types, DashboardLayout, fix sidebar, restructure App.tsx routes | In progress |
+| 1A | Shared types, DashboardLayout, fix sidebar, restructure App.tsx routes | **Done** ✓ |
 | 1B | Dashboard redesign (Figma `172:20570`) | Pending |
 | 1C | NewScan redesign (Figma `105:16689`) | Pending |
 | 1D | AuditDetail redesign (Figma `105:15858`, `250:47714`) | Pending |
 | 1E | Pricing redesign (Figma `263:59336`) | Pending |
 | 1F | HowItWorks + Footer redesign (Figma `220:44843`) | Pending |
-| 2A | Settings pages (Settings, Account, Security, Notifications) | Pending |
-| 2B | Billing pages (Plans, PaymentHistory, CreditHistory) | Pending |
-| 2C | API expansion (profile, password, history endpoints) | Pending |
-| 3A | Custom hooks (useAudits, useAudit, useCredits, usePayments) | Pending |
-| 3B | Remove mock data components | Pending |
+| 2A | Settings pages (Account, Security, Notifications) | **Done** ✓ |
+| 2B | Billing pages (PlansAndCredits, PaymentHistory, CreditHistory) | **Done** ✓ |
+| 2C | API expansion — backend routes for profile, password, history | **Done** ✓ |
+| 3A | Custom hooks (useAudits, useAudit, useCredits, usePayments) | **Done** ✓ |
+| 3B | Remove mock data components | **Done** ✓ |
+| Security | Helmet, rate limiting, SSRF, IDOR, TOCTOU, timing attack, error sanitization | **Done** ✓ |
+| Tests | 18 test files, 133 tests — all pages, hooks, layouts | **Done** ✓ |
 | 4A | Modals (BuyCredits, CancelSub, Upgrade, Reactivate, ShareReport) | Pending |
 | 4B | PDF report (PdfReport component + pdf.ts lib) | Pending |
 | 4C | Onboarding + Tutorial flows | Pending |

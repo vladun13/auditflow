@@ -8,11 +8,11 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-white flex flex-col items-center justify-center pt-14">
-      {/* Gradient blobs */}
+      {/* Gradient blobs — matches Figma: vivid blue right, pink-lavender bottom-left */}
       <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
-        <div className="absolute -top-32 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-violet-400/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-pink-300/25 via-purple-300/20 to-blue-300/15 blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-300/15 to-blue-300/15 blur-3xl" />
+        <div className="absolute -top-20 -right-20 h-[650px] w-[650px] rounded-full bg-gradient-to-bl from-blue-500/50 via-indigo-500/40 to-violet-500/30 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 h-[550px] w-[550px] rounded-full bg-gradient-to-tr from-pink-400/40 via-purple-300/30 to-blue-400/20 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-400/20 via-indigo-300/15 to-blue-300/10 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-3xl px-6 text-center">

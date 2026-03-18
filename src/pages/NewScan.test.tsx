@@ -1,0 +1,135 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { NewScan } from './NewScan'
+
+const mockUseAuth = vi.fn()
+vi.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
+const mockUseCredits = vi.fn()
+vi.mock('@/hooks/useCredits', () => ({
+  useCredits: () => mockUseCredits(),
+}))
+
+const mockCreate = vi.fn()
+const mockStartScan = vi.fn()
+vi.mock('@/lib/api', () => ({
+  auditApi: {
+    create: (...args: unknown[]) => mockCreate(...args),
+    startScan: (...args: unknown[]) => mockStartScan(...args),
+  },
+}))
+
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return { ...actual, useNavigate: () => mockNavigate }
+})
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  mockUseAuth.mockReturnValue({ user: { id: 'u-1' } })
+  mockUseCredits.mockReturnValue({ credits: 5, loading: false })
+})
+
+function renderNewScan(path = '/scan') {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/scan" element={<NewScan />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+describe('NewScan', () => {
+  it('renders the page heading', () => {
+    renderNewScan()
+    expect(screen.getByText('New Accessibility Scan')).toBeInTheDocument()
+  })
+
+  it('renders the URL input and Start Scan button', () => {
+    renderNewScan()
+    expect(screen.getByLabelText(/website url/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /start scan/i })).toBeInTheDocument()
+  })
+
+  it('pre-fills URL from query param', () => {
+    renderNewScan('/scan?url=https://prefilled.com')
+    expect(screen.getByLabelText(/website url/i)).toHaveValue('https://prefilled.com')
+  })
+
+  it('shows validation error for non-http/https URL', async () => {
+    const user = userEvent.setup()
+    renderNewScan()
+
+    // ftp:// passes HTML5 type="url" validation but fails our custom http/https check
+    await user.type(screen.getByLabelText(/website url/i), 'ftp://example.com')
+    await user.click(screen.getByRole('button', { name: /start scan/i }))
+
+    await waitFor(() =>
+      expect(screen.getByText(/please enter a valid url/i)).toBeInTheDocument()
+    )
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
+  it('shows credit balance', () => {
+    renderNewScan()
+    expect(screen.getByText(/5 credits/i)).toBeInTheDocument()
+  })
+
+  it('shows no-credit warning when credits are 0', () => {
+    mockUseCredits.mockReturnValue({ credits: 0, loading: false })
+    renderNewScan()
+    expect(screen.getByText(/you have no credits left/i)).toBeInTheDocument()
+  })
+
+  it('disables Start Scan button when no credits', () => {
+    mockUseCredits.mockReturnValue({ credits: 0, loading: false })
+    renderNewScan()
+    expect(screen.getByRole('button', { name: /start scan/i })).toBeDisabled()
+  })
+
+  it('renders "what we check" list items', () => {
+    renderNewScan()
+    expect(screen.getByText(/wcag 2\.1/i)).toBeInTheDocument()
+    expect(screen.getByText(/color contrast/i)).toBeInTheDocument()
+  })
+
+  it('submits form and navigates on success', async () => {
+    const user = userEvent.setup()
+    mockCreate.mockResolvedValueOnce({ data: { audit_id: 'new-audit-1' } })
+    mockStartScan.mockResolvedValueOnce({ error: null })
+
+    renderNewScan()
+    await user.type(screen.getByLabelText(/website url/i), 'https://example.com')
+    await user.click(screen.getByRole('button', { name: /start scan/i }))
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/audits/new-audit-1'))
+  })
+
+  it('shows API error when create fails', async () => {
+    const user = userEvent.setup()
+    mockCreate.mockResolvedValueOnce({ data: null, error: 'Quota exceeded' })
+
+    renderNewScan()
+    await user.type(screen.getByLabelText(/website url/i), 'https://example.com')
+    await user.click(screen.getByRole('button', { name: /start scan/i }))
+
+    await waitFor(() => expect(screen.getByText('Quota exceeded')).toBeInTheDocument())
+  })
+
+  it('navigates to /login when user is null on submit', async () => {
+    const user = userEvent.setup()
+    mockUseAuth.mockReturnValue({ user: null })
+
+    renderNewScan()
+    await user.type(screen.getByLabelText(/website url/i), 'https://example.com')
+    await user.click(screen.getByRole('button', { name: /start scan/i }))
+
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/login'))
+  })
+})

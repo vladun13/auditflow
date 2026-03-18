@@ -132,6 +132,7 @@ export function Reports() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label="Delete audit"
                       className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       onClick={(e) => handleDelete(e, audit.id)}
                       disabled={deleting === audit.id}

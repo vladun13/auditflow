@@ -102,38 +102,58 @@ router.get('/success/:order_id', authenticate, async (req: AuthRequest, res) => 
   try {
     const { order_id } = req.params
 
-    // Update payment record
+    // Fetch payment and verify it belongs to the authenticated user (IDOR fix)
     const { data: payment } = await supabase
       .from('payments')
       .select('*')
       .eq('stripe_session_id', order_id)
+      .eq('user_id', req.user!.id)  // enforce ownership
       .single()
 
-    if (payment && payment.status === 'pending') {
-      // Update payment status
-      await supabase
-        .from('payments')
-        .update({ status: 'completed' })
-        .eq('stripe_session_id', order_id)
-
-      // Add credits to user
-      await supabase
-        .from('users')
-        .update({
-          credits: supabase.raw(`credits + ${payment.credits_added}`)
-        })
-        .eq('id', req.user!.id)
-
-      res.json({
-        success: true,
-        credits_added: payment.credits_added,
-        message: 'Payment successful'
-      })
-    } else if (payment && payment.status === 'completed') {
-      res.json({ success: true, message: 'Payment already processed' })
-    } else {
-      res.status(404).json({ error: 'Payment not found' })
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' })
     }
+
+    if (payment.status === 'completed') {
+      return res.json({ success: true, message: 'Payment already processed' })
+    }
+
+    if (payment.status !== 'pending') {
+      return res.status(400).json({ error: 'Payment cannot be confirmed' })
+    }
+
+    // Validate credits_added is a safe positive integer before using in raw SQL
+    const creditsToAdd = Math.floor(Number(payment.credits_added))
+    if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 1000) {
+      console.error('Invalid credits_added value in payment record:', payment.credits_added)
+      return res.status(500).json({ error: 'Failed to confirm payment' })
+    }
+
+    // Update payment status
+    await supabase
+      .from('payments')
+      .update({ status: 'completed' })
+      .eq('stripe_session_id', order_id)
+      .eq('user_id', req.user!.id)
+
+    // Add credits to user — read current value then update.
+    // Double-processing is prevented by the payment.status === 'pending' check above.
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('credits')
+      .eq('id', req.user!.id)
+      .single()
+
+    await supabase
+      .from('users')
+      .update({ credits: (currentUser?.credits ?? 0) + creditsToAdd })
+      .eq('id', req.user!.id)
+
+    res.json({
+      success: true,
+      credits_added: creditsToAdd,
+      message: 'Payment successful'
+    })
   } catch (error) {
     console.error('Payment confirmation error:', error)
     res.status(500).json({ error: 'Failed to confirm payment' })
@@ -149,12 +169,19 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       return res.status(400).send('Missing signature')
     }
 
-    // Verify webhook signature using HMAC SHA256
+    // Verify webhook signature using HMAC SHA256 with timing-safe comparison
     const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!
     const hmac = crypto.createHmac('sha256', secret)
     const digest = hmac.update(req.body).digest('hex')
 
-    if (signature !== digest) {
+    // Use timingSafeEqual to prevent timing attacks
+    const sigBuffer = Buffer.from(signature, 'hex')
+    const digestBuffer = Buffer.from(digest, 'hex')
+    const signatureValid =
+      sigBuffer.length === digestBuffer.length &&
+      crypto.timingSafeEqual(sigBuffer, digestBuffer)
+
+    if (!signatureValid) {
       console.error('Invalid webhook signature')
       return res.status(400).send('Invalid signature')
     }
@@ -178,17 +205,28 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         .single()
 
       if (payment && payment.status === 'pending') {
+        // Validate credits_added before using in raw SQL
+        const creditsToAdd = Math.floor(Number(payment.credits_added))
+        if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 1000) {
+          console.error('Invalid credits_added in webhook payment record:', payment.credits_added)
+          return res.status(500).send('Webhook processing error')
+        }
+
         await supabase
           .from('payments')
           .update({ status: 'completed' })
           .eq('stripe_session_id', orderId)
 
-        // Add credits
+        // Add credits — idempotency is protected by payment.status check above
+        const { data: webhookUser } = await supabase
+          .from('users')
+          .select('credits')
+          .eq('id', payment.user_id)
+          .single()
+
         await supabase
           .from('users')
-          .update({
-            credits: supabase.raw(`credits + ${payment.credits_added}`)
-          })
+          .update({ credits: (webhookUser?.credits ?? 0) + creditsToAdd })
           .eq('id', payment.user_id)
       }
     }
@@ -198,6 +236,42 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     console.error('Webhook error:', error)
     res.status(400).send('Webhook error')
   }
+})
+
+// Payment history
+router.get('/history', authenticate, async (req: AuthRequest, res) => {
+  try {
+    const { data: payments, error } = await supabase
+      .from('payments')
+      .select('id, amount, credits_added, status, created_at')
+      .eq('user_id', req.user!.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching payment history:', error)
+      return res.status(500).json({ error: 'Failed to fetch payment history' })
+    }
+
+    const mapped = (payments ?? []).map((p) => ({
+      id: p.id,
+      amount: p.amount, // in cents
+      credits_added: p.credits_added,
+      status: p.status,
+      created_at: p.created_at,
+      // Derive plan name from credit count
+      plan: p.credits_added === 1 ? 'Basic' : p.credits_added === 5 ? 'Pro' : 'Enterprise',
+    }))
+
+    res.json(mapped)
+  } catch (error) {
+    console.error('Error fetching payment history:', error)
+    res.status(500).json({ error: 'Failed to fetch payment history' })
+  }
+})
+
+// Subscription info — AuditFlow is pay-as-you-go, no recurring subscriptions
+router.get('/subscription', authenticate, async (req: AuthRequest, res) => {
+  res.json({ subscription: null, plan: 'pay_as_you_go' })
 })
 
 export default router
