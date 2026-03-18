@@ -6,29 +6,36 @@ export function AuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Try to get the session — Supabase processes the hash automatically
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/dashboard', { replace: true })
-        return
+    let redirected = false
+
+    const redirect = (to: string) => {
+      if (!redirected) {
+        redirected = true
+        navigate(to, { replace: true })
       }
-      // Fallback: wait for the auth state change
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (session) {
-          navigate('/dashboard', { replace: true })
-        } else if (event === 'SIGNED_OUT') {
-          navigate('/', { replace: true })
-        }
-      })
-      // Timeout fallback — if nothing happens in 5s, go home
-      const timeout = setTimeout(() => {
-        navigate('/', { replace: true })
-      }, 5000)
-      return () => {
-        subscription.unsubscribe()
-        clearTimeout(timeout)
+    }
+
+    // Subscribe first so we don't miss the event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        redirect('/dashboard')
+      } else if (event === 'SIGNED_OUT') {
+        redirect('/')
       }
     })
+
+    // Also check if session is already available
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) redirect('/dashboard')
+    })
+
+    // Safety timeout
+    const timeout = setTimeout(() => redirect('/'), 8000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [navigate])
 
   return (
