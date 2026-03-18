@@ -23,14 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
+    // If the URL has an OAuth hash (#access_token=...), keep loading until
+    // onAuthStateChange fires (Supabase processes the hash asynchronously)
+    const hasAuthHash = window.location.hash.includes('access_token')
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
-      setLoading(false)
+      if (!hasAuthHash) setLoading(false)
     })
 
-    // Listen for auth changes
+    // Listen for auth changes — always clears loading
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
