@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAudit } from '@/hooks/useAudit'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, Share2, RefreshCw } from 'lucide-react'
 import type { Violation } from '@/types'
 import { cn } from '@/lib/utils'
 import { ScoreRing } from '@/components/audit-detail/ScoreRing'
 import { ScanningView } from '@/components/audit-detail/ScanningView'
 import { IMPACT_COLOR } from '@/components/audit-detail/constants'
+import { AuditHeader } from '@/components/audit-detail/AuditHeader'
 
 /* ── Main component ─────────────────────────────────────────────── */
 export function AuditDetail() {
@@ -63,30 +63,11 @@ export function AuditDetail() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Top header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </button>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-            <Share2 className="h-3.5 w-3.5" />
-            Share
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-            <RefreshCw className="h-3.5 w-3.5" />
-            Rescan
-          </Button>
-          <Button size="sm" onClick={handleDownload} disabled={downloading} className="gap-1.5 text-xs bg-[#4F46E5] hover:bg-[#4338CA]">
-            <Download className="h-3.5 w-3.5" />
-            PDF
-          </Button>
-        </div>
-      </div>
+      <AuditHeader
+        onBack={() => navigate('/dashboard')}
+        onDownload={handleDownload}
+        downloading={downloading}
+      />
 
       {/* Overview section */}
       <div className="px-6 py-5 border-b border-gray-100 bg-white shrink-0">
