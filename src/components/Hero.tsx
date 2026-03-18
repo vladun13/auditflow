@@ -102,74 +102,10 @@ function CrawlDepthButton({
 
 // ── Decorative showcase cards ────────────────────────────────────────────────
 
-function PurpleCard() {
+function HeroCard({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#7646ff]" style={{ minHeight: 220 }}>
-      {/* Abstract circle shapes */}
-      <div className="absolute -top-8 -left-8 h-36 w-36 rounded-full bg-purple-400/40" />
-      <div className="absolute -bottom-8 -right-8 h-28 w-28 rounded-full bg-indigo-300/30" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-24 w-24 rounded-full bg-white/10 blur-xl" />
-      {/* Cloud-like element */}
-      <div className="absolute bottom-4 left-4 h-10 w-20 rounded-full bg-white/20" />
-      <div className="absolute top-4 right-4 h-8 w-16 rounded-full bg-white/15" />
-      {/* Label */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-white/40 uppercase">WCAG Report</div>
-    </div>
-  )
-}
-
-function GlassCard() {
-  return (
-    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50" style={{ minHeight: 220 }}>
-      <div className="absolute inset-4 rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm shadow-inner" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 rounded-full bg-indigo-200/30 blur-2xl" />
-      {/* Score ring mock */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <svg width="64" height="64" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r="26" fill="none" stroke="#e0e7ff" strokeWidth="6"/>
-          <circle cx="32" cy="32" r="26" fill="none" stroke="#6366f1" strokeWidth="6" strokeDasharray="100 63" strokeLinecap="round" transform="rotate(-90 32 32)"/>
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-500">85</div>
-      </div>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-gray-300 uppercase">Score</div>
-    </div>
-  )
-}
-
-function BlueCard() {
-  return (
-    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#a6ace9]" style={{ minHeight: 220 }}>
-      <div className="absolute inset-0 bg-gradient-to-br from-[#8b91e3]/80 to-[#b0b5eb]" />
-      {/* Vertical highlight lines */}
-      <div className="absolute left-1/4 top-0 bottom-0 w-px bg-white/30" />
-      <div className="absolute left-2/4 top-0 bottom-0 w-px bg-white/20" />
-      <div className="absolute left-3/4 top-0 bottom-0 w-px bg-white/15" />
-      {/* Abstract badge */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 rounded-full bg-white/20 px-4 py-1 text-[10px] font-semibold text-white/80">AA</div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-28 rounded-full bg-white/10 blur-xl" />
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-white/40 uppercase">Compliance</div>
-    </div>
-  )
-}
-
-function LavenderCard() {
-  return (
-    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#f5edff]" style={{ minHeight: 220 }}>
-      {/* Conic gradient grid pattern */}
-      <div className="absolute inset-0" style={{
-        backgroundImage: `
-          radial-gradient(circle at 25% 25%, #d8b4fe 0%, transparent 50%),
-          radial-gradient(circle at 75% 75%, #c4b5fd 0%, transparent 50%)
-        `,
-        opacity: 0.5,
-      }} />
-      <div className="absolute inset-4 grid grid-cols-3 grid-rows-3 gap-1 opacity-20">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="rounded-md bg-indigo-400" />
-        ))}
-      </div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-purple-300/30 blur-xl" />
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-purple-300 uppercase">AI Fixes</div>
+    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ minHeight: 220 }}>
+      <img src={src} alt={alt} className="w-full h-full object-cover" />
     </div>
   )
 }
@@ -295,10 +231,10 @@ export function Hero() {
 
         {/* 4 decorative cards */}
         <div className="flex gap-4 overflow-hidden" style={{ height: 200 }}>
-          <PurpleCard />
-          <GlassCard />
-          <BlueCard />
-          <LavenderCard />
+          <HeroCard src="/illustrations/hero-wcag-report.png" alt="WCAG Report" />
+          <HeroCard src="/illustrations/hero-score.png" alt="Accessibility Score" />
+          <HeroCard src="/illustrations/hero-compliance.png" alt="AA Compliance" />
+          <HeroCard src="/illustrations/hero-ai-fixes.png" alt="AI Fixes" />
         </div>
       </div>
     </section>
