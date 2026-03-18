@@ -1,81 +1,264 @@
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { Globe, ChevronDown, Eye } from "lucide-react"
+import { Globe, ChevronDown, Check, Shield } from "lucide-react"
+
+const STANDARDS = [
+  { id: "wcag21", label: "WCAG 2.1", description: "Web Content Accessibility Guidelines 2.1" },
+  { id: "wcag22", label: "WCAG 2.2", description: "Web Content Accessibility Guidelines 2.2" },
+  { id: "ada", label: "ADA", description: "Americans with Disabilities Act" },
+  { id: "eaa", label: "EAA", description: "European Accessibility Act" },
+  { id: "section508", label: "Section 508", description: "US Federal accessibility standard" },
+  { id: "aoda", label: "AODA", description: "Accessibility for Ontarians with Disabilities Act" },
+]
+
+function StandardsDropdown({
+  selected,
+  onChange,
+}: {
+  selected: string[]
+  onChange: (ids: string[]) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
+
+  const toggle = (id: string) => {
+    if (selected.includes(id)) {
+      if (selected.length === 1) return // keep at least one
+      onChange(selected.filter((s) => s !== id))
+    } else {
+      onChange([...selected, id])
+    }
+  }
+
+  const label =
+    selected.length === 1
+      ? STANDARDS.find((s) => s.id === selected[0])?.label
+      : `${selected.length} Standards`
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 h-10 text-sm text-gray-700 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+      >
+        <Shield className="h-4 w-4 text-[#4F46E5]" />
+        <span className="font-medium">{label}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-200/60 overflow-hidden z-50">
+          <div className="px-4 pt-3 pb-2 border-b border-gray-50">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Accessibility Standards</p>
+          </div>
+          <div className="py-1.5">
+            {STANDARDS.map((std) => {
+              const active = selected.includes(std.id)
+              return (
+                <button
+                  key={std.id}
+                  type="button"
+                  onClick={() => toggle(std.id)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer text-left"
+                >
+                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${active ? "border-[#4F46E5] bg-[#4F46E5]" : "border-gray-300 bg-white"}`}>
+                    {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{std.label}</p>
+                    <p className="text-xs text-gray-400 truncate">{std.description}</p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          <div className="px-4 py-2.5 border-t border-gray-50 bg-gray-50/50">
+            <p className="text-[11px] text-gray-400 text-center">
+              {selected.length} standard{selected.length !== 1 ? "s" : ""} selected
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Decorative showcase cards ────────────────────────────────────────────────
+
+function PurpleCard() {
+  return (
+    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#7646ff]" style={{ minHeight: 220 }}>
+      {/* Abstract circle shapes */}
+      <div className="absolute -top-8 -left-8 h-36 w-36 rounded-full bg-purple-400/40" />
+      <div className="absolute -bottom-8 -right-8 h-28 w-28 rounded-full bg-indigo-300/30" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+      {/* Cloud-like element */}
+      <div className="absolute bottom-4 left-4 h-10 w-20 rounded-full bg-white/20" />
+      <div className="absolute top-4 right-4 h-8 w-16 rounded-full bg-white/15" />
+      {/* Label */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-white/40 uppercase">WCAG Report</div>
+    </div>
+  )
+}
+
+function GlassCard() {
+  return (
+    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-50" style={{ minHeight: 220 }}>
+      <div className="absolute inset-4 rounded-xl border border-white/60 bg-white/50 backdrop-blur-sm shadow-inner" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 rounded-full bg-indigo-200/30 blur-2xl" />
+      {/* Score ring mock */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#e0e7ff" strokeWidth="6"/>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#6366f1" strokeWidth="6" strokeDasharray="100 63" strokeLinecap="round" transform="rotate(-90 32 32)"/>
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-500">85</div>
+      </div>
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-gray-300 uppercase">Score</div>
+    </div>
+  )
+}
+
+function BlueCard() {
+  return (
+    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#a6ace9]" style={{ minHeight: 220 }}>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#8b91e3]/80 to-[#b0b5eb]" />
+      {/* Vertical highlight lines */}
+      <div className="absolute left-1/4 top-0 bottom-0 w-px bg-white/30" />
+      <div className="absolute left-2/4 top-0 bottom-0 w-px bg-white/20" />
+      <div className="absolute left-3/4 top-0 bottom-0 w-px bg-white/15" />
+      {/* Abstract badge */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 rounded-full bg-white/20 px-4 py-1 text-[10px] font-semibold text-white/80">AA</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-28 rounded-full bg-white/10 blur-xl" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-white/40 uppercase">Compliance</div>
+    </div>
+  )
+}
+
+function LavenderCard() {
+  return (
+    <div className="relative flex-1 min-w-0 rounded-2xl overflow-hidden bg-[#f5edff]" style={{ minHeight: 220 }}>
+      {/* Conic gradient grid pattern */}
+      <div className="absolute inset-0" style={{
+        backgroundImage: `
+          radial-gradient(circle at 25% 25%, #d8b4fe 0%, transparent 50%),
+          radial-gradient(circle at 75% 75%, #c4b5fd 0%, transparent 50%)
+        `,
+        opacity: 0.5,
+      }} />
+      <div className="absolute inset-4 grid grid-cols-3 grid-rows-3 gap-1 opacity-20">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div key={i} className="rounded-md bg-indigo-400" />
+        ))}
+      </div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-purple-300/30 blur-xl" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold tracking-widest text-purple-300 uppercase">AI Fixes</div>
+    </div>
+  )
+}
+
+// ── Hero ─────────────────────────────────────────────────────────────────────
 
 export function Hero() {
   const [url, setUrl] = useState("")
+  const [standards, setStandards] = useState(["wcag21"])
+  const hasUrl = url.trim().length > 0
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-white flex flex-col items-center justify-center pt-14">
-      {/* Gradient blobs — matches Figma: vivid blue right, pink-lavender bottom-left */}
-      <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
-        <div className="absolute -top-20 -right-20 h-[650px] w-[650px] rounded-full bg-gradient-to-bl from-blue-500/50 via-indigo-500/40 to-violet-500/30 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-[550px] w-[550px] rounded-full bg-gradient-to-tr from-pink-400/40 via-purple-300/30 to-blue-400/20 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-400/20 via-indigo-300/15 to-blue-300/10 blur-3xl" />
+    <section className="relative overflow-hidden bg-white flex flex-col items-center pt-20">
+      {/* Gradient background blobs */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-32 -right-32 h-[700px] w-[700px] rounded-full bg-gradient-to-bl from-blue-500/45 via-indigo-500/35 to-violet-500/25 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-pink-400/35 via-purple-300/25 to-blue-400/15 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-400/15 via-indigo-300/10 to-blue-300/5 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-3xl px-6 text-center">
+      {/* Main content */}
+      <div className="relative z-10 mx-auto w-full max-w-[868px] px-6 text-center pt-20 pb-16">
         {/* Badge */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-500 opacity-75"></span>
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-500 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-500" />
           </span>
           AI-Powered Accessibility Audits
         </div>
 
         {/* Headline */}
-        <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+        <h1 className="mb-3 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-[52px] md:leading-[60px]">
           Fix Accessibility Issues{" "}
           <span className="text-[#4F46E5]">Before They Reach Production</span>
         </h1>
 
-        <p className="mb-10 mx-auto max-w-xl text-base text-gray-500 sm:text-lg">
-          Generate comprehensive accessibility audits for your websites and get instant, AI-driven recommendations. Built for developers and QA teams.
+        <p className="mb-10 mx-auto max-w-xl text-base text-gray-500 sm:text-lg leading-relaxed">
+          Generate comprehensive WCAG audit reports for your websites and get instant, AI-driven fix recommendations. Built for developers and QA teams.
         </p>
 
-        {/* Scan card */}
-        <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white shadow-lg shadow-gray-200/60 p-4">
-          {/* URL input */}
-          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 mb-3">
-            <Globe className="h-4 w-4 shrink-0 text-gray-400" />
+        {/* URL Input Card — matches Figma URLInput component */}
+        <div className="mx-auto max-w-[800px] rounded-3xl border border-gray-100 bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03),0px_1px_6px_-1px_rgba(0,0,0,0.02),0px_2px_4px_0px_rgba(0,0,0,0.02)] overflow-hidden">
+          {/* URL row */}
+          <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
+            <Globe className="h-5 w-5 shrink-0 text-gray-400" />
             <input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
-              className="flex-1 bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+              className="flex-1 bg-transparent text-base text-gray-700 placeholder:text-gray-300 outline-none"
             />
           </div>
 
           {/* Controls row */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {/* Crawl Depth */}
-              <button className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
-                </svg>
-                Crawl Depth
-                <ChevronDown className="h-3 w-3 text-gray-400" />
-              </button>
-
-              {/* Preview */}
-              <button className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                <Eye className="h-3.5 w-3.5" />
-                Preview
-              </button>
+          <div className="flex items-center justify-between px-4 py-4">
+            {/* Left controls */}
+            <div className="flex items-center gap-2">
+              {/* Standards picker */}
+              <StandardsDropdown selected={standards} onChange={setStandards} />
             </div>
 
-            <Link to={url ? `/scan?url=${encodeURIComponent(url)}` : "/scan"}>
-              <Button
-                size="sm"
-                className="bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg px-5 text-sm font-medium"
+            <div className="flex items-center gap-3">
+              {/* Preview — disabled until URL typed */}
+              <button
+                disabled={!hasUrl}
+                className={`inline-flex items-center gap-2 rounded-full border h-10 px-5 text-sm transition-colors ${
+                  hasUrl
+                    ? "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 shadow-sm cursor-pointer"
+                    : "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
+                }`}
               >
-                Start Scanning
-              </Button>
-            </Link>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Preview
+              </button>
+
+              {/* Start Scanning — indigo when URL typed, gray when empty */}
+              {hasUrl ? (
+                <Link
+                  to={`/scan?url=${encodeURIComponent(url)}&standards=${standards.join(",")}`}
+                  className="inline-flex items-center justify-center rounded-full bg-[#4F46E5] hover:bg-[#4338CA] h-10 px-6 text-sm font-medium text-white transition-colors shadow-sm"
+                >
+                  Start Scanning
+                </Link>
+              ) : (
+                <button
+                  disabled
+                  className="inline-flex items-center justify-center rounded-full bg-gray-100 border border-gray-200 h-10 px-6 text-sm text-gray-300 cursor-not-allowed"
+                >
+                  Start Scanning
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -87,25 +270,33 @@ export function Hero() {
         </p>
 
         {/* Trust indicators */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <svg className="h-3.5 w-3.5 text-[#4F46E5]" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            WCAG 2.1 AA &amp; AAA
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="h-3.5 w-3.5 text-[#4F46E5]" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Instant AI Fixes
-          </span>
-          <span className="flex items-center gap-1.5">
-            <svg className="h-3.5 w-3.5 text-[#4F46E5]" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            PDF &amp; JSON Reports
-          </span>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400">
+          {["WCAG 2.1 AA & AAA", "Instant AI Fixes", "PDF & JSON Reports"].map((item) => (
+            <span key={item} className="flex items-center gap-1.5">
+              <svg className="h-3.5 w-3.5 text-[#4F46E5]" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Page preview card — Figma "Page" section at bottom of hero */}
+      <div className="relative z-10 mx-6 mb-0 w-full max-w-[1360px] rounded-t-3xl bg-white px-8 pt-8 pb-0 shadow-[0px_-4px_24px_0px_rgba(0,0,0,0.06)]">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">See what your report looks like</h2>
+          <p className="text-sm text-gray-500 max-w-2xl">
+            Every scan generates a full accessibility breakdown — scored by severity, enriched with AI explanations, and ready to share or download as PDF.
+          </p>
+        </div>
+
+        {/* 4 decorative cards */}
+        <div className="flex gap-4 overflow-hidden" style={{ height: 200 }}>
+          <PurpleCard />
+          <GlassCard />
+          <BlueCard />
+          <LavenderCard />
         </div>
       </div>
     </section>

@@ -15,6 +15,10 @@ import { Login } from '@/pages/Login'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { Pricing } from '@/pages/Pricing'
 
+// Onboarding
+import { Onboarding } from '@/pages/Onboarding'
+import { Tutorial } from '@/pages/Tutorial'
+
 // Authenticated pages
 import { DashboardNew as Dashboard } from '@/pages/DashboardNew'
 import { NewScan } from '@/pages/NewScan'
@@ -44,6 +48,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function OnboardingRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    )
+  }
+
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
@@ -55,7 +74,10 @@ function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) {
+    const onboardingDone = localStorage.getItem('onboarding_complete')
+    return <Navigate to={onboardingDone ? '/dashboard' : '/onboarding'} replace />
+  }
   return <>{children}</>
 }
 
@@ -71,6 +93,10 @@ function App() {
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/pricing" element={<Pricing />} />
+
+          {/* Onboarding (requires auth, no sidebar) */}
+          <Route path="/onboarding" element={<OnboardingRoute><Onboarding /></OnboardingRoute>} />
+          <Route path="/tutorial" element={<OnboardingRoute><Tutorial /></OnboardingRoute>} />
 
           {/* Protected — all share DashboardLayout */}
           <Route

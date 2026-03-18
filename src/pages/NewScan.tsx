@@ -5,7 +5,16 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Globe, AlertCircle, CheckCircle, Zap } from 'lucide-react'
+import { Globe, AlertCircle, CheckCircle, Zap, Shield, Check } from 'lucide-react'
+
+const STANDARDS = [
+  { id: 'wcag21', label: 'WCAG 2.1', description: 'Web Content Accessibility Guidelines 2.1' },
+  { id: 'wcag22', label: 'WCAG 2.2', description: 'Web Content Accessibility Guidelines 2.2' },
+  { id: 'ada', label: 'ADA', description: 'Americans with Disabilities Act' },
+  { id: 'eaa', label: 'EAA', description: 'European Accessibility Act' },
+  { id: 'section508', label: 'Section 508', description: 'US Federal accessibility standard' },
+  { id: 'aoda', label: 'AODA', description: 'Accessibility for Ontarians with Disabilities Act' },
+]
 
 const CHECKS = [
   'WCAG 2.1 Level A, AA & AAA compliance',
@@ -55,6 +64,17 @@ export function NewScan() {
 
   const [websiteUrl, setWebsiteUrl] = useState(searchParams.get('url') || '')
   const [crawlDepth, setCrawlDepth] = useState(3)
+  const [standards, setStandards] = useState<string[]>(
+    searchParams.get('standards')?.split(',').filter(Boolean) || ['wcag21']
+  )
+
+  const toggleStandard = (id: string) => {
+    setStandards(prev =>
+      prev.includes(id)
+        ? prev.length === 1 ? prev : prev.filter(s => s !== id)
+        : [...prev, id]
+    )
+  }
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [scanningText, setScanningText] = useState('Initializing scan...')
@@ -236,6 +256,38 @@ export function NewScan() {
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>1 page</span>
                 <span>5 pages</span>
+              </div>
+            </div>
+
+            {/* Accessibility standards */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-3.5 w-3.5 text-[#4F46E5]" />
+                <label className="block text-xs font-medium text-gray-700">Accessibility Standards</label>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {STANDARDS.map(std => {
+                  const active = standards.includes(std.id)
+                  return (
+                    <button
+                      key={std.id}
+                      type="button"
+                      onClick={() => toggleStandard(std.id)}
+                      className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                        active
+                          ? 'border-[#4F46E5] bg-indigo-50 text-[#4F46E5]'
+                          : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${active ? 'border-[#4F46E5] bg-[#4F46E5]' : 'border-gray-300'}`}>
+                        {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold">{std.label}</p>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAudit } from '@/hooks/useAudit'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, Share2, RefreshCw, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Download, Share2, RefreshCw } from 'lucide-react'
 import type { Violation } from '@/types'
 import { cn } from '@/lib/utils'
 

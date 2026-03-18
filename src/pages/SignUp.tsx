@@ -5,10 +5,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Eye, EyeOff, Globe, Shield } from 'lucide-react'
 
-type Step = 'form' | 'verify'
-
 export function SignUp() {
-  const [step, setStep] = useState<Step>('form')
+  const [step] = useState<'form' | 'verify'>('form')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +34,7 @@ export function SignUp() {
     if (error) {
       setError(error.message)
     } else {
-      navigate('/dashboard')
+      navigate('/onboarding')
     }
   }
 

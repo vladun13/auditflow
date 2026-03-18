@@ -4,8 +4,7 @@ import { useAudits } from '@/hooks/useAudits'
 import { useCredits } from '@/hooks/useCredits'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { FileText, BarChart2, Zap, Eye, Download, MoreHorizontal, Search, Trash2, ScanSearch } from 'lucide-react'
+import { FileText, BarChart2, Zap, Eye, Download, Search, Trash2, ScanSearch } from 'lucide-react'
 import type { Audit } from '@/types'
 
 function StatCard({ label, value, icon, iconBg }: { label: string; value: string | number; icon: React.ReactNode; iconBg: string }) {
