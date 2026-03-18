@@ -20,17 +20,19 @@ This file is the authoritative context document for Claude Code working on this 
 
 ---
 
-## Current State (as of 2026-03-17)
+## Current State (as of 2026-03-18)
 
 ### What is DONE (built and styled)
-- Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme
-- Auth pages: `Login`, `SignUp`, `ForgotPassword` — redesigned and working
-- `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout`
+- Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme ✓
+- Landing page new sections: `SocialProof`, `StatsBar`, `ComplianceBadges`, `Testimonials`, `CtaBanner` — added based on accessibilitycloud.com reference ✓
+- Auth pages: `Login`, `SignUp`, `ForgotPassword` — redesigned and working ✓
+- Google Sign-In button on `Login` and `SignUp` via Supabase OAuth (`signInWithGoogle()` in AuthContext) ✓
+- `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout` ✓
 - `NewScan.tsx` — functional, basic styling (not yet redesigned to Figma)
 - `AuditDetail.tsx` — functional with polling, basic styling (not yet redesigned to Figma)
-- `Pricing.tsx` — functional with LemonSqueezy, basic styling (not yet redesigned to Figma)
-- `Reports.tsx` — extracted reports route with status filtering and delete
-- `src/types/index.ts` — centralized type definitions
+- `Pricing.tsx` — functional with LemonSqueezy, redesigned to light theme ✓
+- `Reports.tsx` — extracted reports route with status filtering and delete ✓
+- `src/types/index.ts` — centralized type definitions ✓
 - `src/layouts/DashboardLayout.tsx` — shared sidebar + header + `<Outlet/>` for all auth pages ✓
 - `src/layouts/SettingsLayout.tsx` — left nav tabs for settings sub-pages ✓
 - `src/hooks/useAudits.ts`, `useAudit.ts`, `useCredits.ts`, `usePayments.ts` — all created ✓
@@ -38,21 +40,28 @@ This file is the authoritative context document for Claude Code working on this 
 - `src/pages/settings/PlansAndCredits.tsx`, `PaymentHistory.tsx`, `CreditHistory.tsx` ✓
 - `App.tsx` — restructured with nested routes under `DashboardLayout` and `SettingsLayout` ✓
 - `src/lib/api.ts` — expanded with `userApi.getProfile/updateProfile/updatePassword/getCreditHistory`, `paymentApi.getHistory/getSubscription` ✓
-- Full backend: scanning service, AI service, payment routes, auth middleware
+- Full backend: scanning service, AI service, payment routes, auth middleware ✓
 - `backend/src/utils/validateUrl.ts` — SSRF protection utility ✓
 - Backend security hardened: `helmet`, rate limiting, timing-safe webhook, IDOR fix, TOCTOU fix, error sanitization ✓
+- Backend new routes: `GET/PUT /api/user/profile`, `PUT /api/user/password`, `GET /api/user/credit-history`, `GET /api/payments/history`, `GET /api/payments/subscription` ✓
 - Test suite: 18 test files, 133 tests passing (Vitest + React Testing Library + happy-dom) ✓
-- Supabase database schema deployed
-- PRD.md created
+- Plus Jakarta Sans font loaded globally (Google Fonts + Tailwind config + `index.css`) ✓
+- `vercel.json` — SPA rewrite config for Vercel deployment ✓
+- `tsconfig.app.json` — test files excluded from `tsc -b` (prevents Vercel build failures) ✓
+- Frontend deployed to Vercel ✓
+- Supabase database schema deployed ✓
+- PRD.md created and updated with landing page sections ✓
 
 ### What is NOT YET DONE (pending implementation)
-- Figma redesigns: `NewScan`, `AuditDetail`, `Pricing`, `DashboardNew` (Figma designs not yet fetched)
+- Figma redesigns: `NewScan`, `AuditDetail`, `DashboardNew` (Figma designs not yet fetched)
 - All modals: `BuyCreditsModal`, `CancelSubscriptionModal`, `UpgradeModal`, `ReactivateModal`, `ShareReportModal`
-- Backend endpoints not yet implemented: `/api/user/profile` (GET/PUT), `/api/user/password` (PUT), `/api/payments/history`, `/api/payments/subscription`, `/api/user/credit-history`
 - PDF report generation (`PdfReport` component + `pdf.ts` lib)
 - Onboarding + tutorial flows
-- Delete dead code: mock-data view components (`dashboard-view.tsx`, `scan-view.tsx`, etc.), `Dashboard.tsx`
-- `HowItWorks` + `Footer` Figma redesign (node `220:44843`)
+- Unauthenticated redirect preserving `?url=` param through login flow
+- Replace placeholder stats in `StatsBar.tsx` with real API data when available
+- Replace placeholder company names in `SocialProof.tsx` with real customer logos
+- Enable Google OAuth provider in Supabase dashboard (Authentication → Providers → Google)
+- Set Vercel environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
 
 ---
 
@@ -84,12 +93,11 @@ This file is the authoritative context document for Claude Code working on this 
 │   │   ├── setup.ts                  # Vitest global setup (jest-dom matchers)
 │   │   └── helpers.tsx               # makeAudit() factory, renderWithRouter()
 │   ├── pages/
-│   │   ├── Landing.tsx               # Public landing page
-│   │   ├── Login.tsx                 # Auth — redesigned ✓
-│   │   ├── SignUp.tsx                # Auth — redesigned ✓
+│   │   ├── Landing.tsx               # Public landing page (all sections assembled) ✓
+│   │   ├── Login.tsx                 # Auth — redesigned + Google OAuth ✓
+│   │   ├── SignUp.tsx                # Auth — redesigned + Google OAuth ✓
 │   │   ├── ForgotPassword.tsx        # Auth — redesigned ✓
-│   │   ├── Pricing.tsx               # Pricing — functional, needs Figma redesign
-│   │   ├── Dashboard.tsx             # OLD — delete (superseded by DashboardNew)
+│   │   ├── Pricing.tsx               # Pricing — redesigned to light theme ✓
 │   │   ├── DashboardNew.tsx          # Active dashboard — uses DashboardLayout ✓
 │   │   ├── NewScan.tsx               # Scan form — functional, needs Figma redesign
 │   │   ├── Reports.tsx               # Reports list with filtering ✓
@@ -105,8 +113,13 @@ This file is the authoritative context document for Claude Code working on this 
 │   │   ├── Navbar.tsx                # Landing navbar — redesigned ✓
 │   │   ├── Hero.tsx                  # Landing hero — redesigned ✓
 │   │   ├── Features.tsx              # Landing features — redesigned ✓
-│   │   ├── HowItWorks.tsx            # Landing how-it-works
-│   │   ├── Footer.tsx                # Landing footer
+│   │   ├── HowItWorks.tsx            # Landing how-it-works — redesigned ✓
+│   │   ├── Footer.tsx                # Landing footer — redesigned ✓
+│   │   ├── SocialProof.tsx           # "Trusted by..." company strip ✓
+│   │   ├── StatsBar.tsx              # 4 headline stats (pages/violations/AI fix rate/speed) ✓
+│   │   ├── ComplianceBadges.tsx      # WCAG/Section 508/ADA/EN 301 549/AODA pills ✓
+│   │   ├── Testimonials.tsx          # 3 testimonial cards (Dev/QA/PM personas) ✓
+│   │   ├── CtaBanner.tsx             # Indigo full-width CTA banner above footer ✓
 │   │   ├── sidebar.tsx               # Dashboard sidebar
 │   │   ├── modals/                   # (pending — Phase 4A)
 │   │   │   ├── BuyCreditsModal.tsx
@@ -327,14 +340,18 @@ GET    /auth/me                        Get current user info
 GET    /health                         Health check
 ```
 
-### Planned endpoints (not yet in `api.ts`)
+### Implemented endpoints (added 2026-03-18)
 ```
-GET    /api/user/profile               Get user profile
+GET    /api/user/profile               Get user profile (full_name from user_metadata)
 PUT    /api/user/profile               Update profile
-PUT    /api/user/password              Change password
+PUT    /api/user/password              Change password (verifies current via authClient)
 GET    /api/payments/history           Payment history list
 GET    /api/payments/subscription      Subscription info
-GET    /api/user/credit-history        Credit usage log
+GET    /api/user/credit-history        Credit usage log (synthesized from payments + audits)
+```
+
+### Planned endpoints (not yet implemented)
+```
 POST   /api/audits/:id/rescan          Re-run scan
 POST   /api/audits/:id/share           Generate shareable link
 ```
@@ -397,7 +414,13 @@ Profile name is stored via `supabase.auth.admin.updateUserById()` user_metadata 
 `PUT /api/user/password` verifies the current password by signing in via the anon client. Without this key the verification step falls back to service_role (which skips the check).
 
 ### Dead code deleted (Phase 3B complete)
-All mock-data view files and the stray `@/` root directory have been removed.
+All mock-data view files (`dashboard-view.tsx`, `scan-view.tsx`, `reports-view.tsx`, `audit-results-view.tsx`), the stray `@/` root directory, and deprecated `Dashboard.tsx` have been removed.
+
+### Google OAuth requires Supabase dashboard setup
+`signInWithGoogle()` in `AuthContext` calls `supabase.auth.signInWithOAuth({ provider: 'google' })`. This will 400 until Google is enabled in the Supabase project: Authentication → Providers → Google → enable + add Client ID/Secret.
+
+### Vercel deployment
+Frontend is deployed. Build command: `npm run build` (`tsc -b && vite build`). Test files are excluded from `tsconfig.app.json` so they don't break the production build. `vercel.json` handles SPA rewrites. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` in Vercel project settings.
 
 ### No "use client" directives
 This is a Vite app, not Next.js. Never add `"use client"`. Remove it from any file that has it.
@@ -455,8 +478,9 @@ Refer to `PRD.md` for full details. Summary:
 | 1B | Dashboard redesign (Figma `172:20570`) | Pending |
 | 1C | NewScan redesign (Figma `105:16689`) | Pending |
 | 1D | AuditDetail redesign (Figma `105:15858`, `250:47714`) | Pending |
-| 1E | Pricing redesign (Figma `263:59336`) | Pending |
-| 1F | HowItWorks + Footer redesign (Figma `220:44843`) | Pending |
+| 1E | Pricing redesign (Figma `263:59336`) | **Done** ✓ (light theme, no Figma fetch needed) |
+| 1F | HowItWorks + Footer redesign (Figma `220:44843`) | **Done** ✓ |
+| Landing+ | SocialProof, StatsBar, ComplianceBadges, Testimonials, CtaBanner | **Done** ✓ |
 | 2A | Settings pages (Account, Security, Notifications) | **Done** ✓ |
 | 2B | Billing pages (PlansAndCredits, PaymentHistory, CreditHistory) | **Done** ✓ |
 | 2C | API expansion — backend routes for profile, password, history | **Done** ✓ |
@@ -464,11 +488,13 @@ Refer to `PRD.md` for full details. Summary:
 | 3B | Remove mock data components | **Done** ✓ |
 | Security | Helmet, rate limiting, SSRF, IDOR, TOCTOU, timing attack, error sanitization | **Done** ✓ |
 | Tests | 18 test files, 133 tests — all pages, hooks, layouts | **Done** ✓ |
+| Deploy | Vercel frontend deploy + vercel.json + tsconfig build fix | **Done** ✓ |
+| Auth+ | Google OAuth on Login/SignUp | **Done** ✓ (requires Supabase dashboard config) |
 | 4A | Modals (BuyCredits, CancelSub, Upgrade, Reactivate, ShareReport) | Pending |
 | 4B | PDF report (PdfReport component + pdf.ts lib) | Pending |
 | 4C | Onboarding + Tutorial flows | Pending |
 | 4D | Animations, skeletons, toasts | Pending |
-| 5 | Cleanup: delete dead code, design consistency, responsive, E2E testing | Pending |
+| 5 | Cleanup: design consistency, responsive polish, E2E testing | Pending |
 
 ---
 
