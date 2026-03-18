@@ -5,6 +5,9 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { SettingsLayout } from '@/layouts/SettingsLayout'
 
+// Auth callback
+import { AuthCallback } from '@/pages/AuthCallback'
+
 // Public pages
 import { Landing } from '@/pages/Landing'
 import { SignUp } from '@/pages/SignUp'
@@ -65,6 +68,7 @@ function App() {
           <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><SignUp /></PublicOnlyRoute>} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/pricing" element={<Pricing />} />
 
