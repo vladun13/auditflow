@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 // Layouts
 import { DashboardLayout } from '@/layouts/DashboardLayout'
@@ -40,13 +41,7 @@ import { CreditHistory } from '@/pages/settings/CreditHistory'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    )
-  }
+  if (loading) return <LoadingSpinner />
 
   if (!user) return <Navigate to="/" replace />
   return <>{children}</>
@@ -55,13 +50,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function OnboardingRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    )
-  }
+  if (loading) return <LoadingSpinner />
 
   if (!user) return <Navigate to="/login" replace />
   return <>{children}</>
@@ -70,13 +59,7 @@ function OnboardingRoute({ children }: { children: React.ReactNode }) {
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    )
-  }
+  if (loading) return <LoadingSpinner />
 
   if (user) {
     const onboardingDone = localStorage.getItem('onboarding_complete')
