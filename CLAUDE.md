@@ -51,12 +51,17 @@ This file is the authoritative context document for Claude Code working on this 
 - Frontend deployed to Vercel ✓
 - Supabase database schema deployed ✓
 - PRD.md created and updated with landing page sections ✓
+- `Login.tsx` — redesigned: Google OAuth button restored, icon-only logo, new right-panel illustration (blue→pink gradient, floating cards, cursor arrows, squiggly line, progress pill, Crawl Depth pill, Service cost row) ✓
+- `SignUp.tsx` — same illustration as Login (shared design), `h-screen overflow-hidden` full-height layout ✓
+- `Hero.tsx` — Crawl Depth dropdown redesigned: card-row list (1–5 pages with icon + label + description), `z-20` stacking context fix so dropdown renders above page preview section ✓
+- `NewScan.tsx` — Crawl Depth dropdown redesigned to match Hero style (1–5 pages, same card-row layout) ✓
+- `DashboardLayout.tsx` — FREE badge + Upgrade button shown for free-tier users (`credits <= 1`) ✓
+- `DashboardNew.tsx` — enhanced empty state with ScanSearch icon, heading, subtext, pill CTA ✓
 
 ### What is NOT YET DONE (pending implementation)
 - Figma redesigns: `NewScan`, `AuditDetail`, `DashboardNew` (Figma designs not yet fetched)
 - All modals: `BuyCreditsModal`, `CancelSubscriptionModal`, `UpgradeModal`, `ReactivateModal`, `ShareReportModal`
 - PDF report generation (`PdfReport` component + `pdf.ts` lib)
-- Onboarding + tutorial flows
 - Unauthenticated redirect preserving `?url=` param through login flow
 - Replace placeholder stats in `StatsBar.tsx` with real API data when available
 - Replace placeholder company names in `SocialProof.tsx` with real customer logos

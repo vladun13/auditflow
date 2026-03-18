@@ -151,9 +151,18 @@ export function DashboardNew() {
 
         {/* Table */}
         {audits.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-gray-400 mb-4 text-sm">No audits yet</p>
-            <Button onClick={() => navigate('/scan')} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white">
+          <div className="py-20 flex flex-col items-center text-center px-6">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50">
+              <ScanSearch className="h-8 w-8 text-[#4F46E5]" />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">No audits yet</h3>
+            <p className="text-sm text-gray-500 mb-6 max-w-xs">
+              Run your first accessibility scan to see results here. It only takes a minute.
+            </p>
+            <Button
+              onClick={() => navigate('/scan')}
+              className="rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white px-6"
+            >
               Run Your First Scan
             </Button>
           </div>

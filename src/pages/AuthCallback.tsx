@@ -10,12 +10,19 @@ export function AuthCallback() {
     const params = new URLSearchParams(hash)
     const accessToken = params.get('access_token')
     const refreshToken = params.get('refresh_token')
+    const type = params.get('type')
 
     if (accessToken && refreshToken) {
       supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
         .then(({ data, error }) => {
           if (data.session && !error) {
-            navigate('/dashboard', { replace: true })
+            // Password recovery flow → send to reset password page
+            if (type === 'recovery') {
+              navigate('/reset-password', { replace: true })
+            } else {
+              const onboardingDone = localStorage.getItem('onboarding_complete')
+              navigate(onboardingDone ? '/dashboard' : '/onboarding', { replace: true })
+            }
           } else {
             navigate('/', { replace: true })
           }

@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
 import { Sidebar } from '@/components/sidebar'
 import { Button } from '@/components/ui/button'
-import { Zap } from 'lucide-react'
+import { Zap, ArrowUpRight } from 'lucide-react'
 
 export function DashboardLayout() {
   const { user, signOut } = useAuth()
@@ -16,6 +16,7 @@ export function DashboardLayout() {
   }
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? '?'
+  const isFree = credits !== null && credits <= 1
 
   return (
     <div className="flex h-screen bg-white">
@@ -27,6 +28,13 @@ export function DashboardLayout() {
           <div />
 
           <div className="flex items-center gap-3">
+            {/* FREE badge (shown when on free tier) */}
+            {isFree && (
+              <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-[#4F46E5]">
+                FREE
+              </span>
+            )}
+
             {/* Credits badge */}
             <button
               onClick={() => navigate('/pricing')}
@@ -36,13 +44,18 @@ export function DashboardLayout() {
               <span>{credits ?? '—'} credit{credits !== 1 ? 's' : ''}</span>
             </button>
 
-            {/* Buy Credits */}
+            {/* Upgrade / Buy Credits */}
             <Button
               size="sm"
               onClick={() => navigate('/pricing')}
-              className="rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4"
+              className="rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4 gap-1"
             >
-              Buy Credits
+              {isFree ? (
+                <>
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                  Upgrade
+                </>
+              ) : 'Buy Credits'}
             </Button>
 
             {/* Avatar + logout */}

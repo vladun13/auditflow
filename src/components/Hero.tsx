@@ -1,22 +1,31 @@
 import { useState, useRef, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { Globe, ChevronDown, Check, Shield } from "lucide-react"
+import { Globe, Link2, X, Eye } from "lucide-react"
 
-const STANDARDS = [
-  { id: "wcag21", label: "WCAG 2.1", description: "Web Content Accessibility Guidelines 2.1" },
-  { id: "wcag22", label: "WCAG 2.2", description: "Web Content Accessibility Guidelines 2.2" },
-  { id: "ada", label: "ADA", description: "Americans with Disabilities Act" },
-  { id: "eaa", label: "EAA", description: "European Accessibility Act" },
-  { id: "section508", label: "Section 508", description: "US Federal accessibility standard" },
-  { id: "aoda", label: "AODA", description: "Accessibility for Ontarians with Disabilities Act" },
+const DEPTH_OPTIONS = [
+  { value: 1, label: "1 page", description: "Quick check" },
+  { value: 2, label: "2 pages", description: "Light Scan" },
+  { value: 3, label: "3 pages", description: "Standard Scan" },
+  { value: 4, label: "4 pages", description: "Deep Scan" },
+  { value: 5, label: "5 pages", description: "Full Scan" },
 ]
 
-function StandardsDropdown({
-  selected,
-  onChange,
+function PagesIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[#4F46E5]">
+      <rect x="4" y="6" width="13" height="16" rx="2" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="7" y="3" width="13" height="16" rx="2" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 11h7M8 14h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function CrawlDepthButton({
+  depth,
+  onDepthChange,
 }: {
-  selected: string[]
-  onChange: (ids: string[]) => void
+  depth: number
+  onDepthChange: (v: number) => void
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -29,62 +38,61 @@ function StandardsDropdown({
     return () => document.removeEventListener("mousedown", handleClick)
   }, [])
 
-  const toggle = (id: string) => {
-    if (selected.includes(id)) {
-      if (selected.length === 1) return // keep at least one
-      onChange(selected.filter((s) => s !== id))
-    } else {
-      onChange([...selected, id])
-    }
-  }
-
-  const label =
-    selected.length === 1
-      ? STANDARDS.find((s) => s.id === selected[0])?.label
-      : `${selected.length} Standards`
+  const selected = DEPTH_OPTIONS.find(o => o.value === depth) ?? DEPTH_OPTIONS[2]
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 h-10 text-sm text-gray-700 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
+        className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 h-10 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
       >
-        <Shield className="h-4 w-4 text-[#4F46E5]" />
-        <span className="font-medium">{label}</span>
-        <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <Link2 className="h-4 w-4 text-gray-500" />
+        Crawl Depth
+        {depth !== 3 && (
+          <span className="ml-1 rounded-full bg-indigo-100 px-1.5 py-0.5 text-xs font-semibold text-[#4F46E5]">{depth}</span>
+        )}
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 w-72 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-200/60 overflow-hidden z-50">
-          <div className="px-4 pt-3 pb-2 border-b border-gray-50">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Accessibility Standards</p>
+        <div
+          className="absolute top-full left-0 mt-2 rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-200/60 overflow-hidden"
+          style={{ minWidth: 280, zIndex: 9999 }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <span className="text-base font-bold text-gray-900">Crawl Depth</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <div className="py-1.5">
-            {STANDARDS.map((std) => {
-              const active = selected.includes(std.id)
-              return (
-                <button
-                  key={std.id}
-                  type="button"
-                  onClick={() => toggle(std.id)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors cursor-pointer text-left"
-                >
-                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${active ? "border-[#4F46E5] bg-[#4F46E5]" : "border-gray-300 bg-white"}`}>
-                    {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{std.label}</p>
-                    <p className="text-xs text-gray-400 truncate">{std.description}</p>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          <div className="px-4 py-2.5 border-t border-gray-50 bg-gray-50/50">
-            <p className="text-[11px] text-gray-400 text-center">
-              {selected.length} standard{selected.length !== 1 ? "s" : ""} selected
-            </p>
+
+          {/* Options */}
+          <div className="p-3 flex flex-col gap-1.5">
+            {DEPTH_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => { onDepthChange(opt.value); setOpen(false) }}
+                className={`flex items-center gap-3 w-full rounded-xl px-3 py-3 text-left transition-colors cursor-pointer ${
+                  selected.value === opt.value
+                    ? "border-2 border-[#4F46E5] bg-indigo-50/50"
+                    : "border border-gray-100 bg-white hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50">
+                  <PagesIcon />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">{opt.label}</p>
+                  <p className="text-xs text-gray-400">{opt.description}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -170,11 +178,11 @@ function LavenderCard() {
 
 export function Hero() {
   const [url, setUrl] = useState("")
-  const [standards, setStandards] = useState(["wcag21"])
+  const [crawlDepth, setCrawlDepth] = useState(3)
   const hasUrl = url.trim().length > 0
 
   return (
-    <section className="relative overflow-hidden bg-white flex flex-col items-center pt-20">
+    <section className="relative bg-white flex flex-col items-center pt-20" style={{ overflow: 'visible' }}>
       {/* Gradient background blobs */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         <div className="absolute -top-32 -right-32 h-[700px] w-[700px] rounded-full bg-gradient-to-bl from-blue-500/45 via-indigo-500/35 to-violet-500/25 blur-3xl" />
@@ -183,7 +191,7 @@ export function Hero() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 mx-auto w-full max-w-[868px] px-6 text-center pt-20 pb-16">
+      <div className="relative z-20 mx-auto w-full max-w-[868px] px-6 text-center pt-20 pb-16">
         {/* Badge */}
         <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
           <span className="relative flex h-1.5 w-1.5">
@@ -203,8 +211,8 @@ export function Hero() {
           Generate comprehensive WCAG audit reports for your websites and get instant, AI-driven fix recommendations. Built for developers and QA teams.
         </p>
 
-        {/* URL Input Card — matches Figma URLInput component */}
-        <div className="mx-auto max-w-[800px] rounded-3xl border border-gray-100 bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03),0px_1px_6px_-1px_rgba(0,0,0,0.02),0px_2px_4px_0px_rgba(0,0,0,0.02)] overflow-hidden">
+        {/* URL Input Card */}
+        <div className="mx-auto max-w-[800px] rounded-3xl border border-gray-100 bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.03),0px_1px_6px_-1px_rgba(0,0,0,0.02),0px_2px_4px_0px_rgba(0,0,0,0.02)]" style={{ overflow: 'visible' }}>
           {/* URL row */}
           <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
             <Globe className="h-5 w-5 shrink-0 text-gray-400" />
@@ -219,14 +227,11 @@ export function Hero() {
 
           {/* Controls row */}
           <div className="flex items-center justify-between px-4 py-4">
-            {/* Left controls */}
-            <div className="flex items-center gap-2">
-              {/* Standards picker */}
-              <StandardsDropdown selected={standards} onChange={setStandards} />
-            </div>
+            {/* Crawl Depth pill button */}
+            <CrawlDepthButton depth={crawlDepth} onDepthChange={setCrawlDepth} />
 
             <div className="flex items-center gap-3">
-              {/* Preview — disabled until URL typed */}
+              {/* Preview */}
               <button
                 disabled={!hasUrl}
                 className={`inline-flex items-center gap-2 rounded-full border h-10 px-5 text-sm transition-colors ${
@@ -235,17 +240,14 @@ export function Hero() {
                     : "border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
                 }`}
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
+                <Eye className="h-4 w-4" />
                 Preview
               </button>
 
-              {/* Start Scanning — indigo when URL typed, gray when empty */}
+              {/* Start Scanning */}
               {hasUrl ? (
                 <Link
-                  to={`/scan?url=${encodeURIComponent(url)}&standards=${standards.join(",")}`}
+                  to={`/scan?url=${encodeURIComponent(url)}&depth=${crawlDepth}`}
                   className="inline-flex items-center justify-center rounded-full bg-[#4F46E5] hover:bg-[#4338CA] h-10 px-6 text-sm font-medium text-white transition-colors shadow-sm"
                 >
                   Start Scanning

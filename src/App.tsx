@@ -13,11 +13,13 @@ import { Landing } from '@/pages/Landing'
 import { SignUp } from '@/pages/SignUp'
 import { Login } from '@/pages/Login'
 import { ForgotPassword } from '@/pages/ForgotPassword'
+import { ResetPassword } from '@/pages/ResetPassword'
 import { Pricing } from '@/pages/Pricing'
 
 // Onboarding
 import { Onboarding } from '@/pages/Onboarding'
 import { Tutorial } from '@/pages/Tutorial'
+import { EmailVerified } from '@/pages/EmailVerified'
 
 // Authenticated pages
 import { DashboardNew as Dashboard } from '@/pages/DashboardNew'
@@ -92,7 +94,11 @@ function App() {
           <Route path="/signup" element={<PublicOnlyRoute><SignUp /></PublicOnlyRoute>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} />
+
+          {/* Email verified (public, auto-redirects) */}
+          <Route path="/email-verified" element={<EmailVerified />} />
 
           {/* Onboarding (requires auth, no sidebar) */}
           <Route path="/onboarding" element={<OnboardingRoute><Onboarding /></OnboardingRoute>} />
