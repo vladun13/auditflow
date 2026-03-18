@@ -1,225 +1,244 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAudits } from '@/hooks/useAudits'
+import { useCredits } from '@/hooks/useCredits'
+import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FileText, AlertTriangle, CheckCircle, TrendingUp, Clock, ScanSearch, ArrowRight } from 'lucide-react'
+import { FileText, BarChart2, Zap, Eye, Download, MoreHorizontal, Search, Trash2, ScanSearch } from 'lucide-react'
+import type { Audit } from '@/types'
+
+function StatCard({ label, value, icon, iconBg }: { label: string; value: string | number; icon: React.ReactNode; iconBg: string }) {
+  return (
+    <div className="flex-1 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <div className="flex items-center gap-2">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-md ${iconBg}`}>{icon}</span>
+        <span className="text-2xl font-bold text-gray-900">{value}</span>
+      </div>
+    </div>
+  )
+}
+
+function StatusBadge({ audit }: { audit: Audit }) {
+  if (audit.status === 'scanning') return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+      Scanning
+    </span>
+  )
+  if (audit.status === 'failed') return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+      Failed
+    </span>
+  )
+  if (audit.status === 'completed') {
+    const label = audit.wcag_score && audit.wcag_score >= 80 ? 'Completed' : 'Completed'
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+        <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+        {label}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+      Pending
+    </span>
+  )
+}
+
+function WcagBadge({ level }: { level: string | null }) {
+  if (!level) return <span className="text-gray-400 text-sm">—</span>
+  return (
+    <span className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-0.5 text-xs font-medium text-gray-700">
+      {level}
+    </span>
+  )
+}
 
 export function DashboardNew() {
   const navigate = useNavigate()
-  const { audits, loading } = useAudits()
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600'
-    if (score >= 60) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const getScoreBg = (score: number) => {
-    if (score >= 80) return 'bg-green-50'
-    if (score >= 60) return 'bg-yellow-50'
-    return 'bg-red-50'
-  }
+  const { audits, loading, refetch } = useAudits()
+  const { credits } = useCredits()
+  const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState<string | null>(null)
 
   const completedAudits = audits.filter(a => a.status === 'completed')
   const avgScore = completedAudits.length > 0
-    ? completedAudits.reduce((sum, a) => sum + (a.wcag_score || 0), 0) / completedAudits.length
+    ? Math.round(completedAudits.reduce((sum, a) => sum + (a.wcag_score || 0), 0) / completedAudits.length)
     : 0
-  const totalCritical = audits.reduce((sum, a) => sum + a.critical_count, 0)
-  const compliantSites = audits.filter(a => a.wcag_score && a.wcag_score >= 85).length
+
+  const filtered = audits.filter(a =>
+    a.website_url.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    if (!confirm('Delete this audit? This cannot be undone.')) return
+    setDeleting(id)
+    await auditApi.delete(id)
+    await refetch()
+    setDeleting(null)
+  }
+
+  const handleDownload = async (e: React.MouseEvent, audit: Audit) => {
+    e.stopPropagation()
+    setDownloading(audit.id)
+    await auditApi.downloadPdf(audit.id)
+    setDownloading(null)
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
-        </div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4F46E5]" />
       </div>
     )
   }
 
   return (
     <div className="p-6 lg:p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500">Monitor your accessibility audits and compliance status</p>
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Audit Dashboard</h1>
+        <p className="text-sm text-gray-500">Your main hub for viewing and managing all previous audits.</p>
       </div>
 
-      {/* Stats */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-gray-100 bg-white shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Audits</p>
-                <p className="text-3xl font-bold text-foreground">{audits.length}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">{completedAudits.length} completed</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-gray-100 bg-white shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg. Score</p>
-                <p className="text-3xl font-bold text-foreground">{avgScore.toFixed(0)}%</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-                <TrendingUp className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">WCAG compliance</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-gray-100 bg-white shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Critical Issues</p>
-                <p className="text-3xl font-bold text-foreground">{totalCritical}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">Needs immediate attention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-gray-100 bg-white shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Compliant Sites</p>
-                <p className="text-3xl font-bold text-foreground">{compliantSites}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">WCAG 2.1 AA compliant</p>
-          </CardContent>
-        </Card>
+      {/* Stat cards */}
+      <div className="flex gap-4 mb-6">
+        <StatCard
+          label="Total Audits"
+          value={audits.length}
+          icon={<FileText className="h-4 w-4 text-blue-600" />}
+          iconBg="bg-blue-50"
+        />
+        <StatCard
+          label="Average Score"
+          value={avgScore ? `${avgScore}%` : '—'}
+          icon={<BarChart2 className="h-4 w-4 text-orange-500" />}
+          iconBg="bg-orange-50"
+        />
+        <StatCard
+          label="Credits Used"
+          value={credits !== null ? credits : '—'}
+          icon={<Zap className="h-4 w-4 text-purple-600" />}
+          iconBg="bg-purple-50"
+        />
       </div>
 
-      {/* Quick Actions */}
-      <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <Card className="border-gray-100 bg-white shadow-sm transition-colors hover:border-indigo-200 hover:shadow-sm cursor-pointer">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary">
-                <ScanSearch className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Start New Audit</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Enter a URL to scan for WCAG accessibility violations and generate AI-powered recommendations.
-                </p>
-                <Button onClick={() => navigate('/scan')} className="mt-4">
-                  Scan Website
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-gray-100 bg-white shadow-sm transition-colors hover:border-indigo-200 hover:shadow-sm cursor-pointer">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
-                <FileText className="h-6 w-6 text-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">View All Reports</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Access your complete audit history, export PDFs, and track compliance progress over time.
-                </p>
-                <Button onClick={() => navigate('/reports')} variant="outline" className="mt-4">
-                  Browse Reports
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Audits */}
-      <Card className="border-gray-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Recent Audits</h2>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/reports')} className="text-muted-foreground hover:text-foreground">
-            View All <ArrowRight className="ml-2 h-4 w-4" />
+      {/* Table card */}
+      <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+        {/* Toolbar */}
+        <div className="flex items-center justify-between gap-4 p-4 border-b border-gray-100">
+          <div className="relative w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-[#4F46E5] focus:border-[#4F46E5]"
+            />
+          </div>
+          <Button size="sm" onClick={() => navigate('/scan')} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg gap-2">
+            <ScanSearch className="h-3.5 w-3.5" />
+            New Scan
           </Button>
         </div>
-        <CardContent className="p-6">
-          {audits.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No audits yet</p>
-              <Button onClick={() => navigate('/scan')}>Run Your First Scan</Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {audits.slice(0, 5).map((audit) => (
-                <div
+
+        {/* Table */}
+        {audits.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-gray-400 mb-4 text-sm">No audits yet</p>
+            <Button onClick={() => navigate('/scan')} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white">
+              Run Your First Scan
+            </Button>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">URL</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Date</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">WCAG Score</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Pages</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map(audit => (
+                <tr
                   key={audit.id}
                   onClick={() => navigate(`/audits/${audit.id}`)}
-                  className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-4 transition-colors hover:border-indigo-100 hover:shadow-sm cursor-pointer"
+                  className="hover:bg-gray-50 cursor-pointer transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${audit.wcag_score ? getScoreBg(audit.wcag_score) : 'bg-gray-50'}`}>
-                      <span className={`text-lg font-bold ${audit.wcag_score ? getScoreColor(audit.wcag_score) : 'text-gray-500'}`}>
-                        {audit.wcag_score?.toFixed(0) || '—'}
-                      </span>
+                  <td className="px-4 py-3.5 max-w-[220px]">
+                    <span className="flex items-center gap-1.5 text-[#4F46E5] hover:underline truncate">
+                      <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      <span className="truncate">{audit.website_url}</span>
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5 text-gray-500 whitespace-nowrap">
+                    {new Date(audit.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <WcagBadge level={audit.wcag_level} />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <StatusBadge audit={audit} />
+                  </td>
+                  <td className="px-4 py-3.5 text-gray-500">
+                    {audit.pages_scanned}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                      <button
+                        onClick={() => navigate(`/audits/${audit.id}`)}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                        title="View"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      {audit.status === 'completed' && (
+                        <button
+                          onClick={(e) => handleDownload(e, audit)}
+                          disabled={downloading === audit.id}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                          title="Download PDF"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => handleDelete(e, audit.id)}
+                        disabled={deleting === audit.id}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">{audit.website_url}</p>
-                      <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatTimeAgo(new Date(audit.created_at))}
-                        </span>
-                        <span>{audit.pages_scanned} pages</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge
-                      variant="outline"
-                      className={`border-0 ${audit.wcag_score ? getScoreBg(audit.wcag_score) : 'bg-gray-50'} ${audit.wcag_score ? getScoreColor(audit.wcag_score) : 'text-gray-500'}`}
-                    >
-                      {audit.status === 'completed'
-                        ? audit.wcag_score && audit.wcag_score >= 80 ? 'Passing'
-                          : audit.wcag_score && audit.wcag_score >= 60 ? 'Needs Work' : 'Failing'
-                        : audit.status}
-                    </Badge>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                      View <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </tbody>
+          </table>
+        )}
+
+        {/* Footer */}
+        {filtered.length > 0 && (
+          <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-400">
+            Total {filtered.length} item{filtered.length !== 1 ? 's' : ''}
+          </div>
+        )}
+      </div>
     </div>
   )
-}
-
-function formatTimeAgo(date: Date): string {
-  const diff = Date.now() - date.getTime()
-  const hours = Math.floor(diff / (1000 * 60 * 60))
-  const days = Math.floor(hours / 24)
-  if (days > 0) return `${days}d ago`
-  if (hours > 0) return `${hours}h ago`
-  return 'Just now'
 }
