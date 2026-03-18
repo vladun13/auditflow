@@ -42,13 +42,13 @@ export function DashboardNew() {
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Monitor your accessibility audits and compliance status</p>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-500">Monitor your accessibility audits and compliance status</p>
       </div>
 
       {/* Stats */}
       <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -63,7 +63,7 @@ export function DashboardNew() {
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -78,7 +78,7 @@ export function DashboardNew() {
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -93,7 +93,7 @@ export function DashboardNew() {
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -111,7 +111,7 @@ export function DashboardNew() {
 
       {/* Quick Actions */}
       <div className="mb-8 grid gap-4 md:grid-cols-2">
-        <Card className="border-border bg-card transition-colors hover:border-primary/50 cursor-pointer">
+        <Card className="border-gray-100 bg-white shadow-sm transition-colors hover:border-indigo-200 hover:shadow-sm cursor-pointer">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary">
@@ -131,7 +131,7 @@ export function DashboardNew() {
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card transition-colors hover:border-primary/50 cursor-pointer">
+        <Card className="border-gray-100 bg-white shadow-sm transition-colors hover:border-indigo-200 hover:shadow-sm cursor-pointer">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-secondary">
@@ -153,7 +153,7 @@ export function DashboardNew() {
       </div>
 
       {/* Recent Audits */}
-      <Card className="border-border bg-card">
+      <Card className="border-gray-100 bg-white shadow-sm">
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-lg font-semibold text-foreground">Recent Audits</h2>
           <Button variant="ghost" size="sm" onClick={() => navigate('/reports')} className="text-muted-foreground hover:text-foreground">
@@ -172,7 +172,7 @@ export function DashboardNew() {
                 <div
                   key={audit.id}
                   onClick={() => navigate(`/audits/${audit.id}`)}
-                  className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 p-4 transition-colors hover:bg-secondary/50 cursor-pointer"
+                  className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-4 transition-colors hover:border-indigo-100 hover:shadow-sm cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${audit.wcag_score ? getScoreBg(audit.wcag_score) : 'bg-gray-50'}`}>

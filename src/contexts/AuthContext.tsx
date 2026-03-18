@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>
+  verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
@@ -49,6 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error }
   }
 
+  const verifyOtp = async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup',
+    })
+    return { error }
+  }
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -81,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     loading,
     signUp,
+    verifyOtp,
     signIn,
     signInWithGoogle,
     signOut,

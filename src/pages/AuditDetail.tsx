@@ -5,7 +5,7 @@ import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Download, ArrowLeft, AlertTriangle, AlertCircle, Info } from 'lucide-react'
+import { Download, ArrowLeft, AlertTriangle, AlertCircle, Info, ScanSearch } from 'lucide-react'
 
 const IMPACT_STYLES: Record<string, string> = {
   critical: 'bg-red-100 border-red-300 text-red-800',
@@ -92,8 +92,8 @@ export function AuditDetail() {
       <div className="flex items-center justify-center h-full bg-background">
         <Card className="p-12 text-center max-w-md">
           <div className="mb-6">
-            <div className="w-16 h-16 bg-primary rounded-full mx-auto flex items-center justify-center animate-pulse">
-              <span className="text-white text-2xl">🔍</span>
+            <div className="w-16 h-16 bg-[#4F46E5] rounded-full mx-auto flex items-center justify-center animate-pulse">
+              <ScanSearch className="h-7 w-7 text-white" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Scanning in Progress</h2>
@@ -134,7 +134,7 @@ export function AuditDetail() {
 
       {/* Score + stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6 flex flex-col items-center">
             {audit.wcag_score != null
               ? <ScoreRing score={audit.wcag_score} />
@@ -144,21 +144,21 @@ export function AuditDetail() {
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6 text-center">
             <p className="text-4xl font-bold text-foreground">{audit.pages_scanned}</p>
             <p className="text-sm text-muted-foreground mt-2">Pages Scanned</p>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6 text-center">
             <p className="text-4xl font-bold text-foreground">{audit.total_violations}</p>
             <p className="text-sm text-muted-foreground mt-2">Total Violations</p>
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="p-6 text-center">
             <p className="text-xl font-semibold text-foreground capitalize">{audit.status}</p>
             <p className="text-sm text-muted-foreground mt-2">Status</p>
@@ -205,7 +205,7 @@ export function AuditDetail() {
       <div className="space-y-4">
         {filteredViolations.length > 0 ? (
           filteredViolations.map((v) => (
-            <Card key={v.id} className="border-border bg-card">
+            <Card key={v.id} className="border-gray-100 bg-white shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="shrink-0 mt-0.5"><ImpactIcon impact={v.impact} /></div>
@@ -246,7 +246,7 @@ export function AuditDetail() {
             </Card>
           ))
         ) : (
-          <Card className="border-border bg-card">
+          <Card className="border-gray-100 bg-white shadow-sm">
             <CardContent className="py-12 text-center text-muted-foreground">
               No violations found in this category
             </CardContent>

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ChevronDown } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 
 function AuditFlowLogo() {
   return (
@@ -28,6 +29,8 @@ function NavItemDropdown({ label, href }: { label: string; href: string }) {
 }
 
 export function Navbar() {
+  const { user, signOut } = useAuth()
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-white/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-14 items-center justify-between px-6">
@@ -46,14 +49,33 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            Log In
-          </Link>
-          <Link to="/signup">
-            <Button size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-full px-5 text-sm">
-              Start Free Trial
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-[#4F46E5]">
+                {user.email?.slice(0, 2).toUpperCase()}
+              </div>
+              <Link to="/dashboard" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Dashboard
+              </Link>
+              <button
+                onClick={() => signOut()}
+                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Log In
+              </Link>
+              <Link to="/signup">
+                <Button size="sm" className="bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-full px-5 text-sm">
+                  Start Free Trial
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

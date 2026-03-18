@@ -16,7 +16,7 @@ export function SignUp() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signUp, signInWithGoogle } = useAuth()
+  const { signUp, verifyOtp, signInWithGoogle } = useAuth()
   const navigate = useNavigate()
   const otpRefs = useRef<(HTMLInputElement | null)[]>([])
 
@@ -40,6 +40,18 @@ export function SignUp() {
     }
   }
 
+  const handleVerify = async (token: string) => {
+    setLoading(true)
+    setError('')
+    const { error } = await verifyOtp(email, token)
+    setLoading(false)
+    if (error) {
+      setError(error.message)
+    } else {
+      navigate('/dashboard')
+    }
+  }
+
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return
     const newOtp = [...otp]
@@ -49,7 +61,7 @@ export function SignUp() {
       otpRefs.current[index + 1]?.focus()
     }
     if (newOtp.every((d) => d) && newOtp.join('').length === 6) {
-      navigate('/dashboard')
+      handleVerify(newOtp.join(''))
     }
   }
 
@@ -216,11 +228,11 @@ export function SignUp() {
             </div>
 
             <Button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => handleVerify(otp.join(''))}
               disabled={loading || otp.some((d) => !d)}
               className="w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg py-2.5 text-sm font-medium"
             >
-              Verify Email
+              {loading ? 'Verifying…' : 'Verify Email'}
             </Button>
 
             <p className="mt-4 text-center text-xs text-gray-500">

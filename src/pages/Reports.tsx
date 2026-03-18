@@ -60,8 +60,8 @@ export function Reports() {
     <div className="p-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">All Reports</h1>
-          <p className="text-muted-foreground">View and manage all your accessibility audits</p>
+          <h1 className="text-2xl font-bold text-gray-900">All Reports</h1>
+          <p className="text-gray-500">View and manage all your accessibility audits</p>
         </div>
         <Button onClick={() => navigate('/scan')}>
           <ScanSearch className="h-4 w-4 mr-2" />
@@ -85,7 +85,7 @@ export function Reports() {
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="border-border bg-card">
+        <Card className="border-gray-100 bg-white shadow-sm">
           <CardContent className="py-16 text-center">
             <p className="text-muted-foreground mb-4">No audits found</p>
             <Button onClick={() => navigate('/scan')}>Run Your First Scan</Button>
@@ -97,7 +97,7 @@ export function Reports() {
             <Card
               key={audit.id}
               onClick={() => navigate(`/audits/${audit.id}`)}
-              className="border-border bg-card hover:border-primary/50 cursor-pointer transition-colors"
+              className="border-gray-100 bg-white shadow-sm hover:border-indigo-200 hover:shadow cursor-pointer transition-colors"
             >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">

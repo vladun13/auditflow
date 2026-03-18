@@ -75,14 +75,14 @@ export function NewScan() {
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">New Accessibility Scan</h1>
-        <p className="text-muted-foreground">Enter a website URL to scan for WCAG violations</p>
+        <h1 className="text-2xl font-bold text-gray-900">New Accessibility Scan</h1>
+        <p className="text-gray-500">Enter a website URL to scan for WCAG violations</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Form */}
         <div className="space-y-6">
-          <Card className="border-border bg-card">
+          <Card className="border-gray-100 bg-white shadow-sm">
             <CardContent className="p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
@@ -194,7 +194,7 @@ export function NewScan() {
 
         {/* What we check */}
         <div>
-          <Card className="border-border bg-card">
+          <Card className="border-gray-100 bg-white shadow-sm">
             <CardContent className="p-6">
               <h3 className="font-semibold text-foreground mb-4">What we'll check</h3>
               <ul className="space-y-3">
@@ -208,7 +208,7 @@ export function NewScan() {
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card mt-4">
+          <Card className="border-gray-100 bg-white shadow-sm mt-4">
             <CardContent className="p-6">
               <h3 className="font-semibold text-foreground mb-2">Credit usage</h3>
               <p className="text-sm text-muted-foreground">
