@@ -5,10 +5,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, CheckCircle, Zap, Shield, Check } from 'lucide-react'
+import { AlertCircle, CheckCircle, Zap } from 'lucide-react'
 import { DEPTH_OPTIONS, STANDARDS, CHECKS } from '@/components/new-scan/constants'
 import { DepthSelector } from '@/components/new-scan/DepthSelector'
 import { UrlInput } from '@/components/new-scan/UrlInput'
+import { StandardsSelect } from '@/components/new-scan/StandardsSelect'
 
 function ScanIllustration() {
   return (
@@ -209,37 +210,7 @@ export function NewScan() {
 
             <DepthSelector value={crawlDepth} onChange={setCrawlDepth} />
 
-            {/* Accessibility standards */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Shield className="h-3.5 w-3.5 text-[#4F46E5]" />
-                <label className="block text-xs font-medium text-gray-700">Accessibility Standards</label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {STANDARDS.map(std => {
-                  const active = standards.includes(std.id)
-                  return (
-                    <button
-                      key={std.id}
-                      type="button"
-                      onClick={() => toggleStandard(std.id)}
-                      className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors cursor-pointer ${
-                        active
-                          ? 'border-[#4F46E5] bg-indigo-50 text-[#4F46E5]'
-                          : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${active ? 'border-[#4F46E5] bg-[#4F46E5]' : 'border-gray-300'}`}>
-                        {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold">{std.label}</p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            <StandardsSelect selected={standards} onToggle={toggleStandard} />
 
             {/* Credits info */}
             {credits === 1 ? (
