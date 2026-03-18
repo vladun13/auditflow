@@ -9,6 +9,7 @@ import { ScoreRing } from '@/components/audit-detail/ScoreRing'
 import { ScanningView } from '@/components/audit-detail/ScanningView'
 import { IMPACT_COLOR } from '@/components/audit-detail/constants'
 import { AuditHeader } from '@/components/audit-detail/AuditHeader'
+import { ViolationList } from '@/components/audit-detail/ViolationList'
 
 /* ── Main component ─────────────────────────────────────────────── */
 export function AuditDetail() {
@@ -139,60 +140,15 @@ export function AuditDetail() {
 
       {/* Issues + Details 3-panel */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Issue tabs */}
-        <div className="w-[200px] shrink-0 border-r border-gray-100 bg-white overflow-y-auto">
-          <div className="p-3">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2 px-1">
-              Issues {audit.total_violations}
-            </p>
-            <div className="space-y-0.5">
-              {TABS.map(tab => {
-                const col = IMPACT_COLOR[tab.key]
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setImpactFilter(tab.key); setSelectedViolation(null) }}
-                    className={cn(
-                      'w-full flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors',
-                      impactFilter === tab.key ? `${col.bg} ${col.text}` : 'text-gray-600 hover:bg-gray-50'
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${col.dot}`} />
-                      {tab.label}
-                    </div>
-                    <span className={cn('text-xs font-medium', impactFilter === tab.key ? col.text : 'text-gray-400')}>
-                      {tab.count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Violation list */}
-          <div className="border-t border-gray-100 mt-1 pt-1">
-            {violations.map((v, i) => (
-              <button
-                key={v.id}
-                onClick={() => setSelectedViolation(v)}
-                className={cn(
-                  'w-full text-left px-3 py-2.5 text-xs border-b border-gray-50 transition-colors',
-                  (active?.id === v.id) ? `${c.bg} ${c.text}` : 'text-gray-600 hover:bg-gray-50'
-                )}
-              >
-                <div className="font-medium truncate">Error type {i + 1}</div>
-                <div className="text-gray-400 truncate mt-0.5">{v.violation_type}</div>
-                <div className={cn('mt-1 text-xs font-medium', c.text)}>
-                  Total Failing Elements {v.affected_elements}
-                </div>
-              </button>
-            ))}
-            {violations.length === 0 && (
-              <p className="px-3 py-4 text-xs text-gray-400 text-center">No {impactFilter} issues</p>
-            )}
-          </div>
-        </div>
+        <ViolationList
+          tabs={TABS}
+          violations={violations}
+          totalViolations={audit.total_violations}
+          activeViolation={active}
+          impactFilter={impactFilter}
+          onFilterChange={(f) => { setImpactFilter(f); setSelectedViolation(null) }}
+          onSelectViolation={setSelectedViolation}
+        />
 
         {/* Middle: Details */}
         <div className="flex-1 overflow-y-auto bg-white border-r border-gray-100">
