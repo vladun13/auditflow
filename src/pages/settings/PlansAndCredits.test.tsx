@@ -11,8 +11,12 @@ vi.mock('@/hooks/useCredits', () => ({
 }))
 
 const mockCreateCheckout = vi.fn()
+const mockGetSubscription = vi.fn().mockResolvedValue({ data: null })
 vi.mock('@/lib/api', () => ({
-  paymentApi: { createCheckout: (...args: unknown[]) => mockCreateCheckout(...args) },
+  paymentApi: {
+    createCheckout: (...args: unknown[]) => mockCreateCheckout(...args),
+    getSubscription: () => mockGetSubscription(),
+  },
 }))
 
 vi.mock('sonner', () => ({

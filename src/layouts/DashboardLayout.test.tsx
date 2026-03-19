@@ -61,11 +61,12 @@ describe('DashboardLayout', () => {
     expect(screen.getByRole('button', { name: /buy credits/i })).toBeInTheDocument()
   })
 
-  it('navigates to /pricing when Buy Credits clicked', async () => {
+  it('opens BuyCreditsModal when Buy Credits clicked', async () => {
     const user = userEvent.setup()
     renderLayout()
     await user.click(screen.getByRole('button', { name: /buy credits/i }))
-    expect(mockNavigate).toHaveBeenCalledWith('/pricing')
+    // Modal opens — navigate is NOT called (modal replaced the /pricing redirect)
+    expect(mockNavigate).not.toHaveBeenCalledWith('/pricing')
   })
 
   it('calls signOut and navigates to / on log out', async () => {
