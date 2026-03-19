@@ -48,11 +48,11 @@ Exceptions: none
 | Role | Size | Weight | Line Height | Tailwind Classes |
 |------|------|--------|-------------|------------------|
 | Body | 14px | 400 (regular) | 1.5 | `text-sm font-normal leading-normal` |
-| Label | 12px | 500 (medium) | 1.33 | `text-xs font-medium` |
+| Label | 12px | 400 (regular) | 1.33 | `text-xs font-normal uppercase tracking-wide` |
 | Heading | 24px | 700 (bold) | 1.2 | `text-2xl font-bold` |
 | Stat Value | 28px | 700 (bold) | 1.2 | `text-[28px] font-bold` |
 
-Note: Font weights used in this phase are 400, 500, and 700. The 500 weight is restricted to labels and table headers only.
+Note: Font weights are 400 (regular) and 700 (bold) only. Labels use uppercase + tracking-wide to visually distinguish from body at the same weight.
 
 ---
 
@@ -106,7 +106,7 @@ Layout: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`
 Card structure: `rounded-xl border border-border bg-card p-5 shadow-sm`
 Icon container: `h-8 w-8 rounded-lg flex items-center justify-center`
 Value: `text-[28px] font-bold text-foreground`
-Label: `text-xs font-medium text-muted-foreground mb-2`
+Label: `text-xs font-normal uppercase tracking-wide text-muted-foreground mb-2`
 
 ### DASH-02: Loading Skeletons
 
