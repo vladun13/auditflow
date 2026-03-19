@@ -52,7 +52,7 @@
 
 ### Polish & Quality
 
-- [ ] **PLSH-01**: Loading skeletons shown on all data-fetching pages (Dashboard, Reports, AuditDetail)
+- [x] **PLSH-01**: Loading skeletons shown on all data-fetching pages (Dashboard, Reports, AuditDetail)
 - [ ] **PLSH-02**: Framer Motion animations on scan progress steps and page transitions
 - [ ] **PLSH-03**: Sidebar collapses to icon-only at 768-1279px; becomes hamburger drawer at <768px
 - [ ] **PLSH-04**: All interactive elements are keyboard navigable and have visible focus indicators
@@ -92,7 +92,7 @@
 | DASH-02 | Phase 1 | Complete |
 | DASH-03 | Phase 1 | Complete |
 | DASH-04 | Phase 1 | Complete |
-| PLSH-01 | Phase 1 | Pending |
+| PLSH-01 | Phase 1 | Complete |
 | SCAN-01 | Phase 2 | Pending |
 | SCAN-02 | Phase 2 | Pending |
 | SCAN-03 | Phase 2 | Pending |

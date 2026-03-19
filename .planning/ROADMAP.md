@@ -12,7 +12,7 @@ AuditFlow has a functional backend and working (but unstyled) frontend pages. Th
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Dashboard Redesign** - Redesign DashboardNew to Figma spec with stat cards, skeletons, empty state, and recent audits
+- [x] **Phase 1: Dashboard Redesign** - Redesign DashboardNew to Figma spec with stat cards, skeletons, empty state, and recent audits (completed 2026-03-19)
 - [ ] **Phase 2: Scan & Results Redesign** - Redesign NewScan and AuditDetail pages to Figma spec, fix auth URL param preservation
 - [ ] **Phase 3: Modals** - Build all 5 modal dialogs (BuyCredits, ShareReport, Upgrade, CancelSub, Reactivate)
 - [ ] **Phase 4: PDF Report** - Implement PDF generation, download flow, and error handling
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Dashboard Redesign | 1/2 | In Progress|  |
+| 1. Dashboard Redesign | 2/2 | Complete   | 2026-03-19 |
 | 2. Scan & Results Redesign | 0/3 | Not started | - |
 | 3. Modals | 0/1 | Not started | - |
 | 4. PDF Report | 0/1 | Not started | - |
