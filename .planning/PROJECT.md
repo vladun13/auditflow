@@ -29,15 +29,15 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 
 - ✓ Dashboard redesign — 4 stat cards, shimmer skeleton, empty state, last-5 audits table — Validated in Phase 1
 - ✓ Loading skeletons on Dashboard, Reports, AuditDetail — Validated in Phase 1
-- [ ] NewScan Figma redesign (node `105:16689`) — 2-column layout, What We'll Check panel
-- [ ] AuditDetail Figma redesign (nodes `105:15858`, `250:47714`) — score ring, severity tabs, violation cards
+- ✓ NewScan Figma redesign — 2-column layout, WCAG checklist panel, animated scan progress, zero-credits blocking — Validated in Phase 2
+- ✓ AuditDetail Figma redesign — circular SVG score ring, animated scanning state, collapsible violation cards with AI content, severity tab filter — Validated in Phase 2
 - [ ] BuyCreditsModal (node `185:35553`) — buy credits from within dashboard
 - [ ] CancelSubscriptionModal (node `185:36009`)
 - [ ] UpgradeModal (node `185:36220`)
 - [ ] ReactivateModal (node `185:36490`)
 - [ ] ShareReportModal (node `105:15673`)
 - [ ] PDF report generation — PdfReport component + pdf.ts lib (node `105:16115`)
-- [ ] Unauthenticated redirect preserving `?url=` param through login
+- ✓ Unauthenticated redirect preserving `?url=` param through login (AUTH-01 via sessionStorage) — Validated in Phase 2
 - [ ] Onboarding flow (node `210:58803`)
 - [ ] Tutorial flow (node `210:58819`)
 - ✓ Loading skeletons throughout dashboard — Validated in Phase 1
@@ -85,4 +85,4 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 | Client-side routing (SPA) | Simpler deployment on Vercel | ✓ Good |
 
 ---
-*Last updated: 2026-03-19 after brownfield initialization from PRD.md*
+*Last updated: 2026-03-19 after Phase 2 (Scan & Results Redesign) completion*
