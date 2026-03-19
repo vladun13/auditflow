@@ -22,6 +22,11 @@ vi.mock('@/lib/api', () => ({
   },
 }))
 
+// useOnboarding reads localStorage — stub it so WelcomeModal never shows in tests
+vi.mock('@/hooks/useOnboarding', () => ({
+  useOnboarding: () => ({ showWelcome: false, completeOnboarding: vi.fn(), completeTutorial: vi.fn(), saveProfile: vi.fn() }),
+}))
+
 beforeEach(() => vi.clearAllMocks())
 
 function renderDashboard() {

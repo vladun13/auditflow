@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAudits } from '@/hooks/useAudits'
+import { useOnboarding } from '@/hooks/useOnboarding'
+import { WelcomeModal } from '@/components/onboarding/WelcomeModal'
 import { auditApi } from '@/lib/api'
 import { getScoreColor } from '@/lib/format'
 import { cn } from '@/lib/utils'
@@ -14,6 +16,7 @@ import type { Audit } from '@/types'
 export function DashboardNew() {
   const navigate = useNavigate()
   const { audits, loading, refetch } = useAudits()
+  const { showWelcome, completeOnboarding } = useOnboarding()
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
@@ -52,6 +55,12 @@ export function DashboardNew() {
   }
 
   return (
+    <>
+      <WelcomeModal
+        open={showWelcome}
+        onStart={() => { completeOnboarding(); navigate('/onboarding') }}
+        onClose={completeOnboarding}
+      />
     <div className="p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6">
@@ -211,5 +220,6 @@ export function DashboardNew() {
         )}
       </div>
     </div>
+    </>
   )
 }

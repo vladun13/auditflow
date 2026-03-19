@@ -520,3 +520,43 @@ Refer to `PRD.md` for full details. Summary:
 | Frontend | Vercel — connect `vladun13/auditflow`, set env vars, auto-deploy on push to `main` |
 | Backend | Render.com or Railway — build: `cd backend && npm install && npm run build`, start: `cd backend && npm start` |
 | Database | Supabase (already hosted, production-ready) |
+
+---
+
+## gstack
+
+**Always use `/browse` from gstack for all web browsing tasks.** Never use `mcp__claude-in-chrome__*` tools.
+
+### Setup (one-time, per developer)
+
+```bash
+git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup
+```
+
+Requires [bun](https://bun.sh) — install with `curl -fsSL https://bun.sh/install | bash` if not present.
+
+### Available skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/browse` | Headless browser — fetch pages, screenshots, interact with web UIs |
+| `/office-hours` | Open-ended Q&A and consultation |
+| `/plan-ceo-review` | Review a plan from a CEO perspective |
+| `/plan-eng-review` | Review a plan from an engineering perspective |
+| `/plan-design-review` | Review a plan from a design perspective |
+| `/design-consultation` | Get design feedback and recommendations |
+| `/review` | Code review |
+| `/ship` | Ship a feature end-to-end |
+| `/qa` | Full QA pass |
+| `/qa-only` | QA without shipping |
+| `/design-review` | Visual/UX design review |
+| `/setup-browser-cookies` | Configure browser cookies for authenticated browsing |
+| `/retro` | Run a retrospective |
+| `/investigate` | Deep-dive investigation of a problem |
+| `/document-release` | Generate release documentation |
+| `/codex` | Codebase knowledge lookup |
+| `/careful` | Extra-careful mode for risky changes |
+| `/freeze` | Freeze a file or directory from edits |
+| `/guard` | Guard rails for a task |
+| `/unfreeze` | Unfreeze a frozen file or directory |
+| `/gstack-upgrade` | Upgrade gstack to the latest version |
