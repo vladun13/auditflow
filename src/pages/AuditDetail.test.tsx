@@ -32,10 +32,11 @@ function renderAuditDetail(id = 'audit-1') {
 }
 
 describe('AuditDetail', () => {
-  it('shows loading state', () => {
+  it('shows skeleton loading state', () => {
     mockUseAudit.mockReturnValue({ audit: null, loading: true })
     renderAuditDetail()
-    expect(screen.getByText(/loading audit/i)).toBeInTheDocument()
+    expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    expect(document.querySelector('.animate-spin')).not.toBeInTheDocument()
   })
 
   it('shows not found when audit is null and not loading', () => {

@@ -39,10 +39,11 @@ function renderReports() {
 }
 
 describe('Reports', () => {
-  it('shows loading spinner while fetching', () => {
+  it('shows skeleton loading while fetching', () => {
     mockUseAudits.mockReturnValue({ audits: [], loading: true, refetch: vi.fn() })
     renderReports()
-    expect(document.querySelector('.animate-spin')).toBeInTheDocument()
+    expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    expect(document.querySelector('.animate-spin')).not.toBeInTheDocument()
   })
 
   it('shows empty state when no audits', () => {
