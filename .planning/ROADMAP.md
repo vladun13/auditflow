@@ -47,12 +47,12 @@ Plans:
   3. Unauthenticated user who enters a URL on the landing hero is redirected to login, and after login lands on /scan with the URL pre-filled from the preserved ?url= param
   4. User sees a circular WCAG score ring (green/yellow/red) and can filter violations by severity on the audit results page
   5. User sees each violation card with "Why This Matters" (AI explanation) and "How to Fix" (AI fix steps) sections clearly presented
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md -- NewScan redesign: 2-column layout, WCAG checklist, scan progress, zero-credits block, AUTH-01 URL preservation
+- [ ] 02-02-PLAN.md -- AuditDetail redesign: score ring, scanning view, collapsible violation cards, severity tabs, PDF toast
+- [ ] 02-03-PLAN.md -- Wave 0 test rewrites: NewScan, AuditDetail, Login tests + fix sidebar/DashboardLayout failures
 
 ### Phase 3: Modals
 **Goal**: Users can manage credits, share reports, and handle subscription actions without leaving the current page
