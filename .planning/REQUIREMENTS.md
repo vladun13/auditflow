@@ -29,9 +29,9 @@
 
 ### Modals
 
-- [ ] **MODAL-01**: User can open a Buy Credits modal from the dashboard header or Plans & Credits page and select a credit pack
+- [x] **MODAL-01**: User can open a Buy Credits modal from the dashboard header or Plans & Credits page and select a credit pack
 - [ ] **MODAL-02**: User can open a Share Report modal from AuditDetail and copy a shareable link
-- [ ] **MODAL-03**: User can open an Upgrade modal when trying to perform an action requiring more credits
+- [x] **MODAL-03**: User can open an Upgrade modal when trying to perform an action requiring more credits
 - [ ] **MODAL-04**: User can open a Cancel Subscription modal from Plans & Credits
 - [ ] **MODAL-05**: User can open a Reactivate modal after cancellation
 
@@ -102,9 +102,9 @@
 | AUDIT-03 | Phase 2 | Complete |
 | AUDIT-04 | Phase 2 | Complete |
 | AUTH-01 | Phase 2 | Complete |
-| MODAL-01 | Phase 3 | Pending |
+| MODAL-01 | Phase 3 | Complete |
 | MODAL-02 | Phase 3 | Pending |
-| MODAL-03 | Phase 3 | Pending |
+| MODAL-03 | Phase 3 | Complete |
 | MODAL-04 | Phase 3 | Pending |
 | MODAL-05 | Phase 3 | Pending |
 | PDF-01 | Phase 4 | Pending |
