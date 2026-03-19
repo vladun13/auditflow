@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. User sees shimmer skeleton placeholders while dashboard data is loading, on Dashboard, Reports, and AuditDetail pages
   3. User with zero audits sees a meaningful empty state with a CTA button to start their first scan
   4. User sees their 5 most recent audits with score, URL, relative time, and status badge
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Dashboard redesign: shared utilities, extracted components, DashboardNew refactor, tests
+- [ ] 01-02-PLAN.md -- Skeleton loading for Reports and AuditDetail pages, test updates
 
 ### Phase 2: Scan & Results Redesign
 **Goal**: Users experience a polished scan initiation flow and rich audit results page that surfaces AI-generated fix instructions clearly
@@ -127,7 +127,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Dashboard Redesign | 0/2 | Not started | - |
+| 1. Dashboard Redesign | 0/2 | Planning complete | - |
 | 2. Scan & Results Redesign | 0/3 | Not started | - |
 | 3. Modals | 0/1 | Not started | - |
 | 4. PDF Report | 0/1 | Not started | - |
