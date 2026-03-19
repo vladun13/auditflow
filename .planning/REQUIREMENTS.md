@@ -14,10 +14,10 @@
 
 ### Scan Page Redesign
 
-- [ ] **SCAN-01**: User sees a 2-column layout -- URL form on left, "What We'll Check" checklist panel on right
-- [ ] **SCAN-02**: User sees scan progress animation in the right panel while scan is in flight
-- [ ] **SCAN-03**: User is blocked from initiating a scan when credits = 0, with upgrade prompt shown
-- [ ] **SCAN-04**: User's URL is pre-filled from `?url=` query param when navigating from the landing hero
+- [x] **SCAN-01**: User sees a 2-column layout -- URL form on left, "What We'll Check" checklist panel on right
+- [x] **SCAN-02**: User sees scan progress animation in the right panel while scan is in flight
+- [x] **SCAN-03**: User is blocked from initiating a scan when credits = 0, with upgrade prompt shown
+- [x] **SCAN-04**: User's URL is pre-filled from `?url=` query param when navigating from the landing hero
 
 ### Audit Results Redesign
 
@@ -43,7 +43,7 @@
 
 ### Auth Flow Fix
 
-- [ ] **AUTH-01**: Unauthenticated user who enters a URL in the hero and is redirected to /login has the `?url=` param preserved through to /scan after login
+- [x] **AUTH-01**: Unauthenticated user who enters a URL in the hero and is redirected to /login has the `?url=` param preserved through to /scan after login
 
 ### Onboarding
 
@@ -93,15 +93,15 @@
 | DASH-03 | Phase 1 | Complete |
 | DASH-04 | Phase 1 | Complete |
 | PLSH-01 | Phase 1 | Complete |
-| SCAN-01 | Phase 2 | Pending |
-| SCAN-02 | Phase 2 | Pending |
-| SCAN-03 | Phase 2 | Pending |
-| SCAN-04 | Phase 2 | Pending |
+| SCAN-01 | Phase 2 | Complete |
+| SCAN-02 | Phase 2 | Complete |
+| SCAN-03 | Phase 2 | Complete |
+| SCAN-04 | Phase 2 | Complete |
 | AUDIT-01 | Phase 2 | Pending |
 | AUDIT-02 | Phase 2 | Pending |
 | AUDIT-03 | Phase 2 | Pending |
 | AUDIT-04 | Phase 2 | Pending |
-| AUTH-01 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
 | MODAL-01 | Phase 3 | Pending |
 | MODAL-02 | Phase 3 | Pending |
 | MODAL-03 | Phase 3 | Pending |
