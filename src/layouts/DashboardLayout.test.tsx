@@ -48,13 +48,12 @@ describe('DashboardLayout', () => {
 
   it('renders credit balance in header', () => {
     renderLayout(7)
-    expect(screen.getByText('7')).toBeInTheDocument()
-    expect(screen.getByText('Credits:')).toBeInTheDocument()
+    expect(screen.getByText(/7 credits/i)).toBeInTheDocument()
   })
 
-  it('shows — when credits are null', () => {
+  it('shows dash when credits are null', () => {
     renderLayout(null)
-    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.getByText(/— credit/)).toBeInTheDocument()
   })
 
   it('renders Buy Credits button', () => {
@@ -69,12 +68,12 @@ describe('DashboardLayout', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/pricing')
   })
 
-  it('calls signOut and navigates to / on logout', async () => {
+  it('calls signOut and navigates to / on log out', async () => {
     const user = userEvent.setup()
     mockSignOut.mockResolvedValueOnce(undefined)
     renderLayout()
 
-    await user.click(screen.getByRole('button', { name: /logout/i }))
+    await user.click(screen.getByText(/log out/i))
     expect(mockSignOut).toHaveBeenCalled()
     expect(mockNavigate).toHaveBeenCalledWith('/')
   })

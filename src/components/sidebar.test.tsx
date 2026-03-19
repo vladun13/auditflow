@@ -29,19 +29,19 @@ describe('Sidebar', () => {
   it('highlights the active nav item based on current route', () => {
     renderSidebar('/reports')
     const reportsLink = screen.getByText('Reports').closest('a')
-    expect(reportsLink).toHaveClass('text-primary')
+    expect(reportsLink).toHaveClass('text-[#4F46E5]')
   })
 
   it('highlights Dashboard as active on /dashboard', () => {
     renderSidebar('/dashboard')
     const dashboardLink = screen.getByText('Dashboard').closest('a')
-    expect(dashboardLink).toHaveClass('text-primary')
+    expect(dashboardLink).toHaveClass('text-[#4F46E5]')
   })
 
   it('highlights Settings as active on /settings/* routes', () => {
     renderSidebar('/settings/account')
     const settingsLink = screen.getByText('Settings').closest('a')
-    expect(settingsLink).toHaveClass('text-primary')
+    expect(settingsLink).toHaveClass('text-[#4F46E5]')
   })
 
   it('collapses and hides labels when toggle is clicked', async () => {
