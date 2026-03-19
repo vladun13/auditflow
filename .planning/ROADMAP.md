@@ -63,10 +63,11 @@ Plans:
   2. User can open Share Report modal from an audit detail page and copy a shareable link
   3. User can open Upgrade modal when attempting an action that requires more credits
   4. User can open Cancel Subscription and Reactivate modals from Plans & Credits settings page
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md -- BuyCreditsModal component + wire into DashboardLayout header and NewScan zero-credits upgrade
+- [ ] 03-02-PLAN.md -- ShareReportModal, CancelSubscriptionModal, ReactivateModal + wire into AuditHeader and PlansAndCredits
 
 ### Phase 4: PDF Report
 **Goal**: Users can download a complete, professionally formatted PDF report from any completed audit
@@ -129,7 +130,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|----------------|--------|-----------|
 | 1. Dashboard Redesign | 2/2 | Complete    | 2026-03-19 |
 | 2. Scan & Results Redesign | 3/3 | Complete   | 2026-03-19 |
-| 3. Modals | 0/1 | Not started | - |
+| 3. Modals | 0/2 | Not started | - |
 | 4. PDF Report | 0/1 | Not started | - |
 | 5. Onboarding | 0/1 | Not started | - |
 | 6. Polish & Responsive | 0/2 | Not started | - |
