@@ -91,6 +91,15 @@ describe('AuditDetail', () => {
     expect(screen.getByText(/scanning in progress/i)).toBeInTheDocument()
   })
 
+  it('shows scan step indicators: Crawling pages, Running axe-core, Generating AI fixes', () => {
+    const audit = makeAudit({ status: 'scanning' })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+    expect(screen.getByText('Crawling pages')).toBeInTheDocument()
+    expect(screen.getByText('Running axe-core')).toBeInTheDocument()
+    expect(screen.getByText('Generating AI fixes')).toBeInTheDocument()
+  })
+
   it('does not render violation list during scanning', () => {
     const audit = makeAudit({ status: 'scanning' })
     mockUseAudit.mockReturnValue({ audit, loading: false })
