@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
 import { auditApi } from '@/lib/api'
@@ -10,37 +10,7 @@ import { DepthSelector } from '@/components/new-scan/DepthSelector'
 import { UrlInput } from '@/components/new-scan/UrlInput'
 import { StandardsSelect } from '@/components/new-scan/StandardsSelect'
 import { ChecksList } from '@/components/new-scan/ChecksList'
-
-function ScanIllustration() {
-  return (
-    <svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Browser window */}
-      <rect x="20" y="10" width="180" height="120" rx="10" fill="#F3F4F6" stroke="#E5E7EB" strokeWidth="1.5"/>
-      <rect x="20" y="10" width="180" height="28" rx="10" fill="#E5E7EB"/>
-      <rect x="20" y="28" width="180" height="10" fill="#E5E7EB"/>
-      {/* Traffic lights */}
-      <circle cx="36" cy="24" r="4" fill="#FC8181"/>
-      <circle cx="50" cy="24" r="4" fill="#F6AD55"/>
-      <circle cx="64" cy="24" r="4" fill="#68D391"/>
-      {/* URL bar */}
-      <rect x="78" y="17" width="100" height="14" rx="4" fill="#fff"/>
-      <rect x="83" y="21" width="60" height="6" rx="2" fill="#D1D5DB"/>
-      {/* Content lines */}
-      <rect x="35" y="52" width="80" height="8" rx="3" fill="#D1D5DB"/>
-      <rect x="35" y="66" width="120" height="6" rx="3" fill="#E5E7EB"/>
-      <rect x="35" y="78" width="100" height="6" rx="3" fill="#E5E7EB"/>
-      <rect x="35" y="90" width="60" height="6" rx="3" fill="#E5E7EB"/>
-      {/* Scan line */}
-      <line x1="20" y1="85" x2="200" y2="85" stroke="#4F46E5" strokeWidth="2" strokeDasharray="6 3" opacity="0.6"/>
-      {/* Magnifier */}
-      <circle cx="165" cy="105" r="22" fill="#EEF2FF" stroke="#4F46E5" strokeWidth="2"/>
-      <circle cx="165" cy="105" r="14" fill="white" stroke="#C7D2FE" strokeWidth="1.5"/>
-      <line x1="181" y1="121" x2="196" y2="136" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round"/>
-      {/* Check marks inside magnifier */}
-      <path d="M159 105 L163 109 L171 101" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
+import { ScanProgress } from '@/components/new-scan/ScanProgress'
 
 export function NewScan() {
   const { user } = useAuth()
@@ -48,11 +18,22 @@ export function NewScan() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  const [websiteUrl, setWebsiteUrl] = useState(searchParams.get('url') || '')
+  const [websiteUrl, setWebsiteUrl] = useState(() => {
+    const paramUrl = searchParams.get('url')
+    if (paramUrl) return paramUrl
+    const sessionUrl = sessionStorage.getItem('auditflow_pending_url')
+    if (sessionUrl) {
+      sessionStorage.removeItem('auditflow_pending_url')
+      return sessionUrl
+    }
+    return ''
+  })
+
   const [crawlDepth, setCrawlDepth] = useState(() => {
     const d = parseInt(searchParams.get('depth') || '3')
     return [1, 2, 3, 4, 5].includes(d) ? d : 3
   })
+
   const [standards, setStandards] = useState<string[]>(
     searchParams.get('standards')?.split(',').filter(Boolean) || ['wcag21']
   )
@@ -64,33 +45,21 @@ export function NewScan() {
         : [...prev, id]
     )
   }
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [scanningText, setScanningText] = useState('Initializing scan...')
-  const [progress, setProgress] = useState(0)
+  const [scanStep, setScanStep] = useState(0)
 
   useEffect(() => {
-    if (!loading) return
-    const messages = [
-      'Initializing scan...',
-      'Crawling website pages...',
-      'Running accessibility checks...',
-      'Analyzing WCAG violations...',
-      'Generating AI recommendations...',
-    ]
-    let i = 0
-    const msgInterval = setInterval(() => {
-      i = (i + 1) % messages.length
-      setScanningText(messages[i])
-    }, 2000)
-
-    const progInterval = setInterval(() => {
-      setProgress(p => Math.min(p + 2, 90))
-    }, 400)
-
+    if (!loading) {
+      setScanStep(0)
+      return
+    }
+    const timer1 = setTimeout(() => setScanStep(1), 5000)
+    const timer2 = setTimeout(() => setScanStep(2), 10000)
     return () => {
-      clearInterval(msgInterval)
-      clearInterval(progInterval)
+      clearTimeout(timer1)
+      clearTimeout(timer2)
     }
   }, [loading])
 
@@ -115,7 +84,6 @@ export function NewScan() {
     if (!user) { navigate('/login'); return }
 
     setLoading(true)
-    setProgress(0)
 
     const { data, error: createError } = await auditApi.create(websiteUrl, crawlDepth)
     if (createError || !data) {
@@ -138,71 +106,21 @@ export function NewScan() {
 
   const noCredits = credits !== null && credits === 0
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-120px)] p-6">
-        <div className="text-center max-w-md">
-          <div className="flex justify-center mb-6">
-            <ScanIllustration />
-          </div>
-
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">We are scanning your website</h2>
-          <p className="text-sm text-gray-500 mb-2">{websiteUrl}</p>
-
-          <div className="mb-6">
-            <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-              <span>{scanningText}</span>
-              <span className="font-medium text-gray-700">{progress}%</span>
-            </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#4F46E5] rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-400 mt-2">Estimated loading time: 2–5 min</p>
-          </div>
-
-          <p className="text-xs text-gray-400">
-            Scanning up to <strong className="text-gray-600">{crawlDepth} page{crawlDepth > 1 ? 's' : ''}</strong> for WCAG violations
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">New Scan</h1>
+        <h1 className="text-2xl font-bold text-gray-900">New Accessibility Scan</h1>
         <p className="text-sm text-gray-500">Enter a website URL to scan for WCAG accessibility violations</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        {/* Form */}
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Left column: Form */}
         <div className="rounded-xl border border-gray-100 bg-white shadow-sm p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 {error}
-              </div>
-            )}
-
-            {noCredits && (
-              <div className="flex items-start gap-2 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>
-                  You have no credits.{' '}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/pricing')}
-                    className="underline font-medium cursor-pointer"
-                  >
-                    Buy credits
-                  </button>{' '}
-                  to continue scanning.
-                </span>
               </div>
             )}
 
@@ -213,7 +131,22 @@ export function NewScan() {
             <StandardsSelect selected={standards} onToggle={toggleStandard} />
 
             {/* Credits info */}
-            {credits === 1 ? (
+            {noCredits ? (
+              <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <span className="text-sm text-amber-800">
+                    You have no credits left.{' '}
+                  </span>
+                </div>
+                <Link
+                  to="/settings/plans"
+                  className="text-sm font-medium text-[#4F46E5] hover:underline"
+                >
+                  Upgrade
+                </Link>
+              </div>
+            ) : credits === 1 ? (
               <div className="flex items-center justify-between rounded-lg bg-green-50 border border-green-200 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
@@ -230,7 +163,7 @@ export function NewScan() {
                   <span className="text-sm text-gray-700">This scan uses <strong>1 credit</strong></span>
                 </div>
                 <span className="text-sm font-medium text-gray-700">
-                  {credits ?? '—'} remaining
+                  {credits ?? '—'} credits remaining
                 </span>
               </div>
             )}
@@ -249,13 +182,20 @@ export function NewScan() {
                 className="flex-1 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg"
                 disabled={loading || !websiteUrl || noCredits}
               >
-                Start Scan
+                {loading ? 'Scanning...' : 'Start Scan'}
               </Button>
             </div>
           </form>
         </div>
 
-        <ChecksList crawlDepth={crawlDepth} websiteUrl={websiteUrl} />
+        {/* Right column: ChecksList (idle) or ScanProgress (scanning) */}
+        <div>
+          {loading ? (
+            <ScanProgress currentStep={scanStep} />
+          ) : (
+            <ChecksList />
+          )}
+        </div>
       </div>
     </div>
   )

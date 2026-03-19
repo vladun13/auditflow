@@ -31,6 +31,7 @@ vi.mock('react-router-dom', async () => {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  sessionStorage.clear()
   mockUseAuth.mockReturnValue({ user: { id: 'u-1' } })
   mockUseCredits.mockReturnValue({ credits: 5, loading: false })
 })
@@ -62,11 +63,23 @@ describe('NewScan', () => {
     expect(screen.getByLabelText(/website url/i)).toHaveValue('https://prefilled.com')
   })
 
+  it('pre-fills URL from sessionStorage', () => {
+    sessionStorage.setItem('auditflow_pending_url', 'https://session-url.com')
+    renderNewScan()
+    expect(screen.getByLabelText(/website url/i)).toHaveValue('https://session-url.com')
+    expect(sessionStorage.getItem('auditflow_pending_url')).toBeNull()
+  })
+
+  it('prefers query param over sessionStorage', () => {
+    sessionStorage.setItem('auditflow_pending_url', 'https://session-url.com')
+    renderNewScan('/scan?url=https://param-url.com')
+    expect(screen.getByLabelText(/website url/i)).toHaveValue('https://param-url.com')
+  })
+
   it('shows validation error for non-http/https URL', async () => {
     const user = userEvent.setup()
     renderNewScan()
 
-    // ftp:// passes HTML5 type="url" validation but fails our custom http/https check
     await user.type(screen.getByLabelText(/website url/i), 'ftp://example.com')
     await user.click(screen.getByRole('button', { name: /start scan/i }))
 
@@ -78,7 +91,7 @@ describe('NewScan', () => {
 
   it('shows credit balance', () => {
     renderNewScan()
-    expect(screen.getByText(/5 credits/i)).toBeInTheDocument()
+    expect(screen.getByText(/5 credits remaining/i)).toBeInTheDocument()
   })
 
   it('shows no-credit warning when credits are 0', () => {
@@ -93,10 +106,18 @@ describe('NewScan', () => {
     expect(screen.getByRole('button', { name: /start scan/i })).toBeDisabled()
   })
 
-  it('renders "what we check" list items', () => {
+  it('shows upgrade link when no credits', () => {
+    mockUseCredits.mockReturnValue({ credits: 0, loading: false })
     renderNewScan()
-    expect(screen.getByText(/wcag 2\.1/i)).toBeInTheDocument()
-    expect(screen.getByText(/color contrast/i)).toBeInTheDocument()
+    expect(screen.getByText('Upgrade')).toBeInTheDocument()
+  })
+
+  it('renders WCAG principles checklist', () => {
+    renderNewScan()
+    expect(screen.getByText('Perceivable')).toBeInTheDocument()
+    expect(screen.getByText('Operable')).toBeInTheDocument()
+    expect(screen.getByText('Understandable')).toBeInTheDocument()
+    expect(screen.getByText('Robust')).toBeInTheDocument()
   })
 
   it('submits form and navigates on success', async () => {
