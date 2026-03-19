@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { AuditDetail } from './AuditDetail'
@@ -20,12 +20,27 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
-// Mock sonner toast for PDF toast test
-const mockToast = vi.fn()
+// Hoist mock references so they can be used in vi.mock factories
+const { mockToast, mockToastError, mockGeneratePdf } = vi.hoisted(() => ({
+  mockToast: vi.fn(),
+  mockToastError: vi.fn(),
+  mockGeneratePdf: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('sonner', () => ({
   toast: Object.assign(
     (...args: unknown[]) => mockToast(...args),
-    { success: vi.fn(), error: vi.fn(), info: (...args: unknown[]) => mockToast(...args) },
+    { success: vi.fn(), error: mockToastError, info: (...args: unknown[]) => mockToast(...args) },
+  ),
+}))
+
+vi.mock('@/lib/pdf', () => ({
+  generatePdf: (...args: unknown[]) => mockGeneratePdf(...args),
+}))
+
+vi.mock('@/components/pdf/PdfReport', () => ({
+  PdfReport: ({ audit }: { audit: { id: string } }) => (
+    <div data-testid="pdf-report">{audit.id}</div>
   ),
 }))
 
@@ -229,7 +244,7 @@ describe('AuditDetail', () => {
 
   // -- AUDIT-05: Download PDF --
 
-  it('shows PDF report generation coming soon toast when Download PDF is clicked', async () => {
+  it('calls generatePdf when Download PDF is clicked on completed audit', async () => {
     const user = userEvent.setup()
     const audit = makeAudit({
       status: 'completed',
@@ -240,10 +255,60 @@ describe('AuditDetail', () => {
     renderAuditDetail()
 
     await user.click(screen.getByText('Download PDF'))
-    expect(mockToast).toHaveBeenCalledWith(
-      'PDF report generation coming soon',
-      expect.objectContaining({ description: expect.any(String) }),
-    )
+
+    await waitFor(() => {
+      expect(mockGeneratePdf).toHaveBeenCalledOnce()
+    })
+    expect(mockGeneratePdf.mock.calls[0][0]).toBeInstanceOf(HTMLElement)
+    expect(mockGeneratePdf.mock.calls[0][1]).toBe('auditflow-report-audit-1.pdf')
+  })
+
+  it('shows Generating... text while PDF is being generated', async () => {
+    const user = userEvent.setup()
+    // Never-resolving promise to keep loading state
+    mockGeneratePdf.mockReturnValue(new Promise(() => {}))
+    const audit = makeAudit({
+      status: 'completed',
+      violations: [criticalViolation],
+      critical_count: 1,
+    })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+
+    await user.click(screen.getByText('Download PDF'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Generating...')).toBeInTheDocument()
+    })
+  })
+
+  it('shows error toast when PDF generation fails', async () => {
+    const user = userEvent.setup()
+    mockGeneratePdf.mockRejectedValue(new Error('canvas error'))
+    const audit = makeAudit({
+      status: 'completed',
+      violations: [criticalViolation],
+      critical_count: 1,
+    })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+
+    await user.click(screen.getByText('Download PDF'))
+
+    await waitFor(() => {
+      expect(mockToastError).toHaveBeenCalledWith('Failed to generate PDF. Please try again.')
+    })
+  })
+
+  it('renders hidden PdfReport component for completed audit', () => {
+    const audit = makeAudit({
+      status: 'completed',
+      violations: [criticalViolation],
+      critical_count: 1,
+    })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+    expect(screen.getByTestId('pdf-report')).toBeInTheDocument()
   })
 
   it('renders Download PDF button in header', () => {
