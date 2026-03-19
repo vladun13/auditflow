@@ -10,6 +10,7 @@ import { ScanningView } from '@/components/audit-detail/ScanningView'
 import { IMPACT_COLOR } from '@/components/audit-detail/constants'
 import { AuditHeader } from '@/components/audit-detail/AuditHeader'
 import { ViolationList } from '@/components/audit-detail/ViolationList'
+import { AuditDetailSkeleton } from '@/components/skeletons/AuditDetailSkeleton'
 
 /* ── Main component ─────────────────────────────────────────────── */
 export function AuditDetail() {
@@ -28,11 +29,7 @@ export function AuditDetail() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4F46E5]" />
-      </div>
-    )
+    return <AuditDetailSkeleton />
   }
 
   if (!audit) {

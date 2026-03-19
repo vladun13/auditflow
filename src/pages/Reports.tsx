@@ -2,26 +2,16 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAudits } from '@/hooks/useAudits'
 import { auditApi } from '@/lib/api'
+import { getScoreColor, getScoreBg } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Trash2, ScanSearch } from 'lucide-react'
+import { ReportsSkeleton } from '@/components/skeletons/ReportsSkeleton'
 import type { Audit } from '@/types'
 
 const STATUS_FILTERS = ['all', 'completed', 'scanning', 'failed'] as const
 type StatusFilter = typeof STATUS_FILTERS[number]
-
-function getScoreColor(score: number) {
-  if (score >= 80) return 'text-green-600'
-  if (score >= 60) return 'text-yellow-600'
-  return 'text-red-600'
-}
-
-function getScoreBg(score: number) {
-  if (score >= 80) return 'bg-green-50'
-  if (score >= 60) return 'bg-yellow-50'
-  return 'bg-red-50'
-}
 
 function getStatusLabel(audit: Audit) {
   if (audit.status !== 'completed') return audit.status
@@ -49,11 +39,7 @@ export function Reports() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-      </div>
-    )
+    return <ReportsSkeleton />
   }
 
   return (
