@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useAudit } from '@/hooks/useAudit'
+import { generatePdf } from '@/lib/pdf'
+import { PdfReport } from '@/components/pdf/PdfReport'
 import { Button } from '@/components/ui/button'
 import { ScoreRing } from '@/components/audit-detail/ScoreRing'
 import { ScanningView } from '@/components/audit-detail/ScanningView'
@@ -14,6 +17,8 @@ export function AuditDetail() {
   const navigate = useNavigate()
   const { audit, loading } = useAudit(id)
   const [scanStep, setScanStep] = useState(0)
+  const pdfRef = useRef<HTMLDivElement>(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   // Simulated step advancement for scanning state
   useEffect(() => {
@@ -30,6 +35,18 @@ export function AuditDetail() {
       clearTimeout(timer2)
     }
   }, [audit?.status])
+
+  const handleDownloadPdf = async () => {
+    if (!pdfRef.current || !audit) return
+    setPdfLoading(true)
+    try {
+      await generatePdf(pdfRef.current, `auditflow-report-${audit.id}.pdf`)
+    } catch {
+      toast.error('Failed to generate PDF. Please try again.')
+    } finally {
+      setPdfLoading(false)
+    }
+  }
 
   if (loading) {
     return <AuditDetailSkeleton />
@@ -83,7 +100,28 @@ export function AuditDetail() {
       <AuditHeader
         audit={audit}
         onBack={() => navigate('/reports')}
+        onDownloadPdf={handleDownloadPdf}
+        pdfLoading={pdfLoading}
       />
+
+      {/* Hidden PDF report for html2pdf.js capture */}
+      <div
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: '210mm',
+          overflow: 'hidden',
+          height: 0,
+          zIndex: -1,
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
+      >
+        <div ref={pdfRef}>
+          <PdfReport audit={audit} />
+        </div>
+      </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Download, Share2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { ArrowLeft, Download, Share2, Loader2 } from 'lucide-react'
 import type { Audit } from '@/types'
 import { formatRelativeTime } from '@/lib/format'
 import { ShareReportModal } from '@/components/modals/ShareReportModal'
@@ -9,16 +8,12 @@ import { ShareReportModal } from '@/components/modals/ShareReportModal'
 interface AuditHeaderProps {
   audit: Audit
   onBack: () => void
+  onDownloadPdf: () => void
+  pdfLoading: boolean
 }
 
-export function AuditHeader({ audit, onBack }: AuditHeaderProps) {
+export function AuditHeader({ audit, onBack, onDownloadPdf, pdfLoading }: AuditHeaderProps) {
   const [shareOpen, setShareOpen] = useState(false)
-
-  const handleDownloadPdf = () => {
-    toast('PDF report generation coming soon', {
-      description: 'This feature will be available in a future update.',
-    })
-  }
 
   return (
     <>
@@ -51,9 +46,19 @@ export function AuditHeader({ audit, onBack }: AuditHeaderProps) {
             <Share2 className="h-3.5 w-3.5" />
             Share
           </Button>
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={handleDownloadPdf}>
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            onClick={onDownloadPdf}
+            disabled={pdfLoading}
+          >
+            {pdfLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {pdfLoading ? 'Generating...' : 'Download PDF'}
           </Button>
         </div>
       </div>
