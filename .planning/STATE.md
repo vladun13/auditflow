@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-19T12:58:27.238Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-19T13:06:52.853Z"
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -24,22 +24,22 @@ See: .planning/PROJECT.md (updated 2026-03-19)
 ## Current Position
 
 Phase: 02 (scan-results-redesign) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 4min
-- Total execution time: 0.2 hours
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-dashboard-redesign | 2/2 | 7min | 3.5min |
-| 02-scan-results-redesign | 1/3 | 5min | 5min |
+| 02-scan-results-redesign | 2/3 | 10min | 5min |
 
 **Recent Trend:**
 
@@ -66,6 +66,10 @@ Recent decisions affecting current work:
 - Simulated scan steps via setTimeout since backend has no step-level progress reporting
 - sessionStorage URL preservation pattern for AUTH-01 unauthenticated redirect flow
 - Hero converted from Link to button+navigate for sessionStorage write before navigation
+- ViolationCards collapsed by default, expand on click (not auto-selected first violation)
+- Single-column scrollable layout replaces 3-panel split for audit results
+- Back button navigates to /reports instead of /dashboard
+- Download PDF uses sonner toast placeholder; actual PDF in Phase 4
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T12:57:23Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-19T13:06:00Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
