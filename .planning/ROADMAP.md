@@ -77,10 +77,11 @@ Plans:
   1. User can click Download PDF on a completed audit and receive a PDF containing site URL, scan date, WCAG score, compliance level, and full violation list with AI fix steps
   2. Downloaded file is named `auditflow-report-{id}.pdf`
   3. User sees a clear error message if PDF generation fails
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md -- TypeScript shim, generatePdf utility, PdfReport component with TDD tests
+- [ ] 04-02-PLAN.md -- Wire PDF generation into AuditDetail/AuditHeader, update existing tests
 
 ### Phase 5: Onboarding
 **Goal**: New users understand how to run their first scan without external documentation
@@ -131,7 +132,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Dashboard Redesign | 2/2 | Complete    | 2026-03-19 |
 | 2. Scan & Results Redesign | 3/3 | Complete   | 2026-03-19 |
 | 3. Modals | 2/2 | Complete   | 2026-03-19 |
-| 4. PDF Report | 0/1 | Not started | - |
+| 4. PDF Report | 0/2 | Not started | - |
 | 5. Onboarding | 0/1 | Not started | - |
 | 6. Polish & Responsive | 0/2 | Not started | - |
 | 7. E2E Tests | 0/1 | Not started | - |
