@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
 import { auditApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, CheckCircle, Zap } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/modals/BuyCreditsModal'
 import { DepthSelector } from '@/components/new-scan/DepthSelector'
 import { UrlInput } from '@/components/new-scan/UrlInput'
 import { StandardsSelect } from '@/components/new-scan/StandardsSelect'
@@ -46,6 +47,7 @@ export function NewScan() {
     )
   }
 
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [scanStep, setScanStep] = useState(0)
@@ -139,12 +141,12 @@ export function NewScan() {
                     You have no credits left.{' '}
                   </span>
                 </div>
-                <Link
-                  to="/settings/plans"
+                <button
+                  onClick={() => setBuyCreditsOpen(true)}
                   className="text-sm font-medium text-[#4F46E5] hover:underline"
                 >
                   Upgrade
-                </Link>
+                </button>
               </div>
             ) : credits === 1 ? (
               <div className="flex items-center justify-between rounded-lg bg-green-50 border border-green-200 px-4 py-3">
@@ -197,6 +199,12 @@ export function NewScan() {
           )}
         </div>
       </div>
+
+      <BuyCreditsModal
+        open={buyCreditsOpen}
+        onOpenChange={setBuyCreditsOpen}
+        context="upgrade"
+      />
     </div>
   )
 }
