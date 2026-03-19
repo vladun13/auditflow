@@ -31,11 +31,12 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 - ✓ Loading skeletons on Dashboard, Reports, AuditDetail — Validated in Phase 1
 - ✓ NewScan Figma redesign — 2-column layout, WCAG checklist panel, animated scan progress, zero-credits blocking — Validated in Phase 2
 - ✓ AuditDetail Figma redesign — circular SVG score ring, animated scanning state, collapsible violation cards with AI content, severity tab filter — Validated in Phase 2
-- [ ] BuyCreditsModal (node `185:35553`) — buy credits from within dashboard
+- ✓ BuyCreditsModal + UpgradeModal — 3-pack selection, LemonSqueezy checkout, wired to DashboardLayout + NewScan — Validated in Phase 3
 - [ ] CancelSubscriptionModal (node `185:36009`)
 - [ ] UpgradeModal (node `185:36220`)
 - [ ] ReactivateModal (node `185:36490`)
-- [ ] ShareReportModal (node `105:15673`)
+- ✓ ShareReportModal — clipboard copy, Sonner toast, wired to AuditHeader — Validated in Phase 3
+- ✓ CancelSubscriptionModal + ReactivateModal — single-step flows, wired to PlansAndCredits — Validated in Phase 3
 - [ ] PDF report generation — PdfReport component + pdf.ts lib (node `105:16115`)
 - ✓ Unauthenticated redirect preserving `?url=` param through login (AUTH-01 via sessionStorage) — Validated in Phase 2
 - [ ] Onboarding flow (node `210:58803`)
@@ -85,4 +86,4 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 | Client-side routing (SPA) | Simpler deployment on Vercel | ✓ Good |
 
 ---
-*Last updated: 2026-03-19 after Phase 2 (Scan & Results Redesign) completion*
+*Last updated: 2026-03-19 after Phase 3 (Modals) completion*
