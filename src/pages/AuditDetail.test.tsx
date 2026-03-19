@@ -82,6 +82,13 @@ describe('AuditDetail', () => {
     expect(screen.getByText(/audit not found/i)).toBeInTheDocument()
   })
 
+  it('shows failed state when audit status is failed', () => {
+    const audit = makeAudit({ status: 'failed', website_url: 'https://fail.com' })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+    expect(screen.getByText(/scan failed/i)).toBeInTheDocument()
+  })
+
   // -- AUDIT-02: Scanning state --
 
   it('shows scanning view when status is scanning', () => {
@@ -221,6 +228,23 @@ describe('AuditDetail', () => {
   })
 
   // -- AUDIT-05: Download PDF --
+
+  it('shows PDF report generation coming soon toast when Download PDF is clicked', async () => {
+    const user = userEvent.setup()
+    const audit = makeAudit({
+      status: 'completed',
+      violations: [criticalViolation],
+      critical_count: 1,
+    })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+
+    await user.click(screen.getByText('Download PDF'))
+    expect(mockToast).toHaveBeenCalledWith(
+      'PDF report generation coming soon',
+      expect.objectContaining({ description: expect.any(String) }),
+    )
+  })
 
   it('renders Download PDF button in header', () => {
     const audit = makeAudit({
