@@ -1,7 +1,7 @@
 # Requirements: AuditFlow
 
 **Defined:** 2026-03-19
-**Core Value:** Every developer who runs a scan gets actionable, code-level fix instructions for every violation — eliminating hours wasted on WCAG docs.
+**Core Value:** Every developer who runs a scan gets actionable, code-level fix instructions for every violation -- eliminating hours wasted on WCAG docs.
 
 ## v1 Requirements
 
@@ -14,14 +14,14 @@
 
 ### Scan Page Redesign
 
-- [ ] **SCAN-01**: User sees a 2-column layout — URL form on left, "What We'll Check" checklist panel on right
+- [ ] **SCAN-01**: User sees a 2-column layout -- URL form on left, "What We'll Check" checklist panel on right
 - [ ] **SCAN-02**: User sees scan progress animation in the right panel while scan is in flight
 - [ ] **SCAN-03**: User is blocked from initiating a scan when credits = 0, with upgrade prompt shown
 - [ ] **SCAN-04**: User's URL is pre-filled from `?url=` query param when navigating from the landing hero
 
 ### Audit Results Redesign
 
-- [ ] **AUDIT-01**: User sees a circular WCAG score ring with color coding (green ≥80, yellow ≥60, red <60)
+- [ ] **AUDIT-01**: User sees a circular WCAG score ring with color coding (green >=80, yellow >=60, red <60)
 - [ ] **AUDIT-02**: User sees an animated scanning state while audit status is 'scanning'
 - [ ] **AUDIT-03**: User sees violation cards with AI explanation ("Why This Matters") and AI fix steps ("How to Fix")
 - [ ] **AUDIT-04**: User can filter violations by severity (critical, serious, moderate, minor)
@@ -54,9 +54,9 @@
 
 - [ ] **PLSH-01**: Loading skeletons shown on all data-fetching pages (Dashboard, Reports, AuditDetail)
 - [ ] **PLSH-02**: Framer Motion animations on scan progress steps and page transitions
-- [ ] **PLSH-03**: Sidebar collapses to icon-only at 768–1279px; becomes hamburger drawer at <768px
+- [ ] **PLSH-03**: Sidebar collapses to icon-only at 768-1279px; becomes hamburger drawer at <768px
 - [ ] **PLSH-04**: All interactive elements are keyboard navigable and have visible focus indicators
-- [ ] **PLSH-05**: E2E tests cover critical flows: signup → scan → view results → download PDF → buy credits
+- [ ] **PLSH-05**: E2E tests cover critical flows: signup -> scan -> view results -> download PDF -> buy credits
 
 ## v2 Requirements
 
@@ -76,13 +76,13 @@
 
 | Feature | Reason |
 |---------|--------|
-| Custom branding / white-label reports | Complexity — v2+ feature |
+| Custom branding / white-label reports | Complexity -- v2+ feature |
 | CI/CD integrations (GitHub Actions) | Not core to MVP |
 | Scheduled / recurring scans | Infrastructure cost, v2 |
 | Browser extension | Out of scope entirely |
-| Stripe payment integration | Using LemonSqueezy — do not add Stripe |
+| Stripe payment integration | Using LemonSqueezy -- do not add Stripe |
 | Multi-user organization accounts | Requires significant schema changes |
-| Dropdown menus in Navbar (Product ▾, Solutions ▾) | Nice-to-have, not blocking launch |
+| Dropdown menus in Navbar (Product, Solutions) | Nice-to-have, not blocking launch |
 
 ## Traceability
 
@@ -92,27 +92,27 @@
 | DASH-02 | Phase 1 | Pending |
 | DASH-03 | Phase 1 | Pending |
 | DASH-04 | Phase 1 | Pending |
+| PLSH-01 | Phase 1 | Pending |
 | SCAN-01 | Phase 2 | Pending |
 | SCAN-02 | Phase 2 | Pending |
 | SCAN-03 | Phase 2 | Pending |
 | SCAN-04 | Phase 2 | Pending |
-| AUDIT-01 | Phase 3 | Pending |
-| AUDIT-02 | Phase 3 | Pending |
-| AUDIT-03 | Phase 3 | Pending |
-| AUDIT-04 | Phase 3 | Pending |
-| AUDIT-05 | Phase 3 | Pending |
-| MODAL-01 | Phase 4 | Pending |
-| MODAL-02 | Phase 4 | Pending |
-| MODAL-03 | Phase 4 | Pending |
-| MODAL-04 | Phase 4 | Pending |
-| MODAL-05 | Phase 4 | Pending |
-| PDF-01 | Phase 5 | Pending |
-| PDF-02 | Phase 5 | Pending |
-| PDF-03 | Phase 5 | Pending |
+| AUDIT-01 | Phase 2 | Pending |
+| AUDIT-02 | Phase 2 | Pending |
+| AUDIT-03 | Phase 2 | Pending |
+| AUDIT-04 | Phase 2 | Pending |
 | AUTH-01 | Phase 2 | Pending |
-| ONBD-01 | Phase 6 | Pending |
-| ONBD-02 | Phase 6 | Pending |
-| PLSH-01 | Phase 1 | Pending |
+| MODAL-01 | Phase 3 | Pending |
+| MODAL-02 | Phase 3 | Pending |
+| MODAL-03 | Phase 3 | Pending |
+| MODAL-04 | Phase 3 | Pending |
+| MODAL-05 | Phase 3 | Pending |
+| PDF-01 | Phase 4 | Pending |
+| PDF-02 | Phase 4 | Pending |
+| PDF-03 | Phase 4 | Pending |
+| AUDIT-05 | Phase 4 | Pending |
+| ONBD-01 | Phase 5 | Pending |
+| ONBD-02 | Phase 5 | Pending |
 | PLSH-02 | Phase 6 | Pending |
 | PLSH-03 | Phase 6 | Pending |
 | PLSH-04 | Phase 6 | Pending |
@@ -121,8 +121,8 @@
 **Coverage:**
 - v1 requirements: 29 total
 - Mapped to phases: 29
-- Unmapped: 0 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition from PRD.md*
+*Last updated: 2026-03-19 -- traceability updated to match ROADMAP.md phase assignments*
