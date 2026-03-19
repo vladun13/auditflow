@@ -4,59 +4,51 @@ export function AuditDetailSkeleton() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header skeleton */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-card">
-        <Skeleton className="h-8 w-36 rounded-md" />
-        <Skeleton className="h-8 w-32 rounded-md" />
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card shrink-0">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-4 w-px" />
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-20 rounded-md" />
+          <Skeleton className="h-8 w-28 rounded-md" />
+        </div>
       </div>
 
-      {/* Overview section skeleton */}
-      <div className="px-6 py-5 border-b border-border bg-card shrink-0">
-        <div className="flex items-center gap-2 mb-5">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-border p-4">
-              <Skeleton className="h-4 w-20 mb-3" />
-              <Skeleton className="h-16 w-16 mx-auto rounded-full mb-2" />
-              <Skeleton className="h-3 w-24 mx-auto" />
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+          {/* Summary row: score ring + stat cards */}
+          <div className="flex items-start gap-8">
+            <Skeleton className="h-40 w-40 rounded-full shrink-0" />
+            <div className="flex-1 grid grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-border p-4">
+                  <Skeleton className="h-3 w-20 mb-2" />
+                  <Skeleton className="h-7 w-12" />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Issues panel skeleton */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Issue list */}
-        <div className="w-[280px] shrink-0 border-r border-border bg-card p-4">
-          <div className="flex gap-2 mb-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-16 rounded-md" />
+          {/* Tab row skeleton */}
+          <div className="flex gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-24 rounded-lg" />
             ))}
           </div>
+
+          {/* Violation card skeletons */}
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="mb-3">
-              <Skeleton className="h-5 w-full mb-1" />
-              <Skeleton className="h-3 w-3/4" />
+            <div key={i} className="rounded-lg border border-border p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
             </div>
           ))}
-        </div>
-        {/* Middle: Details */}
-        <div className="flex-1 bg-card p-5">
-          <Skeleton className="h-6 w-20 mb-4" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4 mb-4" />
-          <Skeleton className="h-24 w-full rounded-lg mb-4" />
-          <Skeleton className="h-16 w-full rounded-lg" />
-        </div>
-        {/* Right: How to Fix */}
-        <div className="w-[340px] shrink-0 bg-card p-5">
-          <Skeleton className="h-6 w-28 mb-4" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-1/2" />
         </div>
       </div>
     </div>
