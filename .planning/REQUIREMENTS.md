@@ -7,10 +7,10 @@
 
 ### Dashboard Redesign
 
-- [ ] **DASH-01**: User sees 4 stat cards (Total Audits, Avg WCAG Score, Critical Issues, Compliant Sites) populated from real API data
-- [ ] **DASH-02**: User sees loading skeletons while dashboard data is fetching
-- [ ] **DASH-03**: User sees a meaningful empty state with CTA when no audits exist
-- [ ] **DASH-04**: User sees recent audits list (last 5) with score, URL, time ago, status badge
+- [x] **DASH-01**: User sees 4 stat cards (Total Audits, Avg WCAG Score, Critical Issues, Compliant Sites) populated from real API data
+- [x] **DASH-02**: User sees loading skeletons while dashboard data is fetching
+- [x] **DASH-03**: User sees a meaningful empty state with CTA when no audits exist
+- [x] **DASH-04**: User sees recent audits list (last 5) with score, URL, time ago, status badge
 
 ### Scan Page Redesign
 
@@ -88,10 +88,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-01 | Phase 1 | Pending |
-| DASH-02 | Phase 1 | Pending |
-| DASH-03 | Phase 1 | Pending |
-| DASH-04 | Phase 1 | Pending |
+| DASH-01 | Phase 1 | Complete |
+| DASH-02 | Phase 1 | Complete |
+| DASH-03 | Phase 1 | Complete |
+| DASH-04 | Phase 1 | Complete |
 | PLSH-01 | Phase 1 | Pending |
 | SCAN-01 | Phase 2 | Pending |
 | SCAN-02 | Phase 2 | Pending |
