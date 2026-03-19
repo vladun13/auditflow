@@ -23,3 +23,36 @@ export const CHECKS = [
   'Form labels and input accessibility',
   'Heading structure and landmarks',
 ]
+
+export const WCAG_PRINCIPLES = [
+  {
+    id: 'perceivable',
+    label: 'Perceivable',
+    icon: 'Eye' as const,
+    items: ['Image alt text', 'Color contrast ratios', 'Video captions'],
+  },
+  {
+    id: 'operable',
+    label: 'Operable',
+    icon: 'MousePointer' as const,
+    items: ['Keyboard navigation', 'Focus indicators', 'Time limits'],
+  },
+  {
+    id: 'understandable',
+    label: 'Understandable',
+    icon: 'Brain' as const,
+    items: ['Form labels', 'Error messages', 'Consistent navigation'],
+  },
+  {
+    id: 'robust',
+    label: 'Robust',
+    icon: 'Shield' as const,
+    items: ['Valid HTML', 'ARIA attributes', 'Assistive tech compatibility'],
+  },
+]
+
+export const SCAN_STEPS = [
+  { id: 'crawl', label: 'Crawling pages', description: 'Discovering linked pages' },
+  { id: 'analyze', label: 'Running axe-core', description: 'Testing WCAG compliance' },
+  { id: 'ai', label: 'Generating AI fixes', description: 'Creating fix recommendations' },
+]
