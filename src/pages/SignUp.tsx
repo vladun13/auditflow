@@ -56,7 +56,13 @@ export function SignUp() {
     if (error) {
       setError(error.message)
     } else {
-      navigate('/onboarding')
+      const pendingUrl = sessionStorage.getItem('auditflow_pending_url')
+      if (pendingUrl) {
+        sessionStorage.removeItem('auditflow_pending_url')
+        navigate(`/scan?url=${encodeURIComponent(pendingUrl)}`)
+      } else {
+        navigate('/onboarding')
+      }
     }
   }
 
@@ -68,7 +74,13 @@ export function SignUp() {
     if (error) {
       setError(error.message)
     } else {
-      navigate('/onboarding')
+      const pendingUrl = sessionStorage.getItem('auditflow_pending_url')
+      if (pendingUrl) {
+        sessionStorage.removeItem('auditflow_pending_url')
+        navigate(`/scan?url=${encodeURIComponent(pendingUrl)}`)
+      } else {
+        navigate('/onboarding')
+      }
     }
   }
 

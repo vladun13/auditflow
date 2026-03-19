@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Globe, Link2, X, Eye } from "lucide-react"
 
 const DEPTH_OPTIONS = [
@@ -115,7 +115,13 @@ function HeroCard({ src, alt }: { src: string; alt: string }) {
 export function Hero() {
   const [url, setUrl] = useState("")
   const [crawlDepth, setCrawlDepth] = useState(3)
+  const navigate = useNavigate()
   const hasUrl = url.trim().length > 0
+
+  const handleStartScanning = () => {
+    sessionStorage.setItem('auditflow_pending_url', url)
+    navigate(`/scan?url=${encodeURIComponent(url)}&depth=${crawlDepth}`)
+  }
 
   return (
     <section className="relative bg-white flex flex-col items-center pt-20" style={{ overflow: 'visible' }}>
@@ -182,12 +188,13 @@ export function Hero() {
 
               {/* Start Scanning */}
               {hasUrl ? (
-                <Link
-                  to={`/scan?url=${encodeURIComponent(url)}&depth=${crawlDepth}`}
-                  className="inline-flex items-center justify-center rounded-full bg-[#4F46E5] hover:bg-[#4338CA] h-10 px-6 text-sm font-medium text-white transition-colors shadow-sm"
+                <button
+                  type="button"
+                  onClick={handleStartScanning}
+                  className="inline-flex items-center justify-center rounded-full bg-[#4F46E5] hover:bg-[#4338CA] h-10 px-6 text-sm font-medium text-white transition-colors shadow-sm cursor-pointer"
                 >
                   Start Scanning
-                </Link>
+                </button>
               ) : (
                 <button
                   disabled
