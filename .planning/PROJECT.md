@@ -27,7 +27,8 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 
 ### Active
 
-- [ ] Dashboard Figma redesign (node `172:20570`) — loading skeletons, stats cards, empty state
+- ✓ Dashboard redesign — 4 stat cards, shimmer skeleton, empty state, last-5 audits table — Validated in Phase 1
+- ✓ Loading skeletons on Dashboard, Reports, AuditDetail — Validated in Phase 1
 - [ ] NewScan Figma redesign (node `105:16689`) — 2-column layout, What We'll Check panel
 - [ ] AuditDetail Figma redesign (nodes `105:15858`, `250:47714`) — score ring, severity tabs, violation cards
 - [ ] BuyCreditsModal (node `185:35553`) — buy credits from within dashboard
@@ -39,7 +40,7 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 - [ ] Unauthenticated redirect preserving `?url=` param through login
 - [ ] Onboarding flow (node `210:58803`)
 - [ ] Tutorial flow (node `210:58819`)
-- [ ] Loading skeletons throughout dashboard
+- ✓ Loading skeletons throughout dashboard — Validated in Phase 1
 - [ ] Animations (Framer Motion) on scan progress, page transitions
 - [ ] Responsive polish: sidebar hamburger drawer on mobile
 - [ ] E2E tests for critical flows (Playwright)
