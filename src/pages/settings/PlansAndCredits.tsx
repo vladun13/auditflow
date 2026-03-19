@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Zap } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import type { Subscription } from '@/types'
+import { CancelSubscriptionModal } from '@/components/modals/CancelSubscriptionModal'
+import { ReactivateModal } from '@/components/modals/ReactivateModal'
 
 const PACKS = [
   { id: 'basic',      name: 'Basic',      price: 149, credits: 1,  pages: 5,           popular: false },
@@ -18,6 +21,31 @@ export function PlansAndCredits() {
   const navigate = useNavigate()
   const { credits, loading } = useCredits()
   const [purchasing, setPurchasing] = useState<string | null>(null)
+  const [subscription, setSubscription] = useState<Subscription | null>(null)
+  const [cancelOpen, setCancelOpen] = useState(false)
+  const [reactivateOpen, setReactivateOpen] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(false)
+  const [reactivateLoading, setReactivateLoading] = useState(false)
+
+  useEffect(() => {
+    paymentApi.getSubscription().then(({ data }) => {
+      if (data) setSubscription(data as Subscription)
+    })
+  }, [])
+
+  const handleCancelSubscription = () => {
+    setCancelLoading(true)
+    toast.info('Subscription cancellation is not yet connected to backend')
+    setCancelLoading(false)
+    setCancelOpen(false)
+  }
+
+  const handleReactivate = () => {
+    setReactivateLoading(true)
+    toast.info('Subscription reactivation is not yet connected to backend')
+    setReactivateLoading(false)
+    setReactivateOpen(false)
+  }
 
   const handleBuy = async (planId: string) => {
     setPurchasing(planId)
@@ -87,6 +115,54 @@ export function PlansAndCredits() {
           </Card>
         ))}
       </div>
+
+      {/* Subscription management */}
+      {subscription && (
+        <Card className="border-border bg-card">
+          <CardContent className="p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-1">Subscription</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {subscription.status === 'active' && !subscription.cancel_at_period_end
+                ? `Active ${subscription.plan} plan`
+                : subscription.cancel_at_period_end
+                ? `${subscription.plan} plan cancels at end of billing period`
+                : `${subscription.plan} plan (${subscription.status})`}
+            </p>
+            {subscription.status === 'active' && !subscription.cancel_at_period_end ? (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive/30 hover:bg-destructive/10"
+                onClick={() => setCancelOpen(true)}
+              >
+                Cancel Subscription
+              </Button>
+            ) : (subscription.status === 'cancelled' || subscription.cancel_at_period_end) ? (
+              <Button
+                size="sm"
+                className="bg-[#4F46E5] hover:bg-[#4338CA]"
+                onClick={() => setReactivateOpen(true)}
+              >
+                Reactivate
+              </Button>
+            ) : null}
+          </CardContent>
+        </Card>
+      )}
+
+      <CancelSubscriptionModal
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        onConfirm={handleCancelSubscription}
+        loading={cancelLoading}
+      />
+      <ReactivateModal
+        open={reactivateOpen}
+        onOpenChange={setReactivateOpen}
+        planName={subscription?.plan ?? 'your'}
+        onConfirm={handleReactivate}
+        loading={reactivateLoading}
+      />
     </div>
   )
 }
