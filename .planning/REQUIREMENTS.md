@@ -37,9 +37,9 @@
 
 ### PDF Report
 
-- [ ] **PDF-01**: User can download a fully rendered PDF from a completed audit containing: site URL, scan date, WCAG score, compliance level, and full violation list with AI fix steps
-- [ ] **PDF-02**: Downloaded PDF is named `auditflow-report-{id}.pdf`
-- [ ] **PDF-03**: User sees an error state if PDF generation fails
+- [x] **PDF-01**: User can download a fully rendered PDF from a completed audit containing: site URL, scan date, WCAG score, compliance level, and full violation list with AI fix steps
+- [x] **PDF-02**: Downloaded PDF is named `auditflow-report-{id}.pdf`
+- [x] **PDF-03**: User sees an error state if PDF generation fails
 
 ### Auth Flow Fix
 
@@ -107,9 +107,9 @@
 | MODAL-03 | Phase 3 | Complete |
 | MODAL-04 | Phase 3 | Complete |
 | MODAL-05 | Phase 3 | Complete |
-| PDF-01 | Phase 4 | Pending |
-| PDF-02 | Phase 4 | Pending |
-| PDF-03 | Phase 4 | Pending |
+| PDF-01 | Phase 4 | Complete |
+| PDF-02 | Phase 4 | Complete |
+| PDF-03 | Phase 4 | Complete |
 | AUDIT-05 | Phase 4 | Complete |
 | ONBD-01 | Phase 5 | Pending |
 | ONBD-02 | Phase 5 | Pending |

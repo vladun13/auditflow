@@ -132,7 +132,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Dashboard Redesign | 2/2 | Complete    | 2026-03-19 |
 | 2. Scan & Results Redesign | 3/3 | Complete   | 2026-03-19 |
 | 3. Modals | 2/2 | Complete   | 2026-03-19 |
-| 4. PDF Report | 0/2 | Not started | - |
+| 4. PDF Report | 1/2 | In Progress|  |
 | 5. Onboarding | 0/1 | Not started | - |
 | 6. Polish & Responsive | 0/2 | Not started | - |
 | 7. E2E Tests | 0/1 | Not started | - |
