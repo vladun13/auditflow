@@ -134,5 +134,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Modals | 2/2 | Complete   | 2026-03-19 |
 | 4. PDF Report | 2/2 | Complete   | 2026-03-19 |
 | 5. Onboarding | 1/1 | Complete   | 2026-03-20 |
-| 6. Polish & Responsive | 0/2 | Not started | - |
+| 6. Polish & Responsive | 1/2 | In progress | - |
 | 7. E2E Tests | 0/1 | Not started | - |

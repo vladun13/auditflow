@@ -53,8 +53,8 @@
 ### Polish & Quality
 
 - [x] **PLSH-01**: Loading skeletons shown on all data-fetching pages (Dashboard, Reports, AuditDetail)
-- [ ] **PLSH-02**: Framer Motion animations on scan progress steps and page transitions
-- [ ] **PLSH-03**: Sidebar collapses to icon-only at 768-1279px; becomes hamburger drawer at <768px
+- [x] **PLSH-02**: Framer Motion animations on scan progress steps and page transitions
+- [x] **PLSH-03**: Sidebar collapses to icon-only at 768-1279px; becomes hamburger drawer at <768px
 - [ ] **PLSH-04**: All interactive elements are keyboard navigable and have visible focus indicators
 - [ ] **PLSH-05**: E2E tests cover critical flows: signup -> scan -> view results -> download PDF -> buy credits
 
@@ -113,8 +113,8 @@
 | AUDIT-05 | Phase 4 | Complete |
 | ONBD-01 | Phase 5 | Complete |
 | ONBD-02 | Phase 5 | Complete |
-| PLSH-02 | Phase 6 | Pending |
-| PLSH-03 | Phase 6 | Pending |
+| PLSH-02 | Phase 6 | Complete |
+| PLSH-03 | Phase 6 | Complete |
 | PLSH-04 | Phase 6 | Pending |
 | PLSH-05 | Phase 7 | Pending |
 
