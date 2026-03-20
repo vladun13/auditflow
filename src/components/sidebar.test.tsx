@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { Sidebar } from './sidebar'
 
-function renderSidebar(path = '/dashboard') {
+function renderSidebar(path = '/dashboard', props: { forceCollapsed?: boolean } = {}) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <Sidebar />
+      <Sidebar {...props} />
     </MemoryRouter>,
   )
 }
@@ -65,5 +65,30 @@ describe('Sidebar', () => {
     await user.click(toggleBtn)
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
+  })
+
+  describe('forceCollapsed', () => {
+    it('forceCollapsed hides nav labels', () => {
+      renderSidebar('/dashboard', { forceCollapsed: true })
+      expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
+      expect(screen.queryByText('New Scan')).not.toBeInTheDocument()
+      expect(screen.queryByText('Reports')).not.toBeInTheDocument()
+      expect(screen.queryByText('Settings')).not.toBeInTheDocument()
+    })
+
+    it('forceCollapsed hides toggle button', () => {
+      renderSidebar('/dashboard', { forceCollapsed: true })
+      expect(screen.queryByRole('button')).toBeNull()
+    })
+
+    it('forceCollapsed=false preserves existing toggle behavior', async () => {
+      const user = userEvent.setup()
+      renderSidebar('/dashboard', { forceCollapsed: false })
+
+      expect(screen.getByText('Dashboard')).toBeInTheDocument()
+      const toggleBtn = screen.getByRole('button')
+      await user.click(toggleBtn)
+      expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
+    })
   })
 })

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils"
 import { LayoutDashboard, ScanSearch, FileText, Settings, HelpCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -22,92 +23,108 @@ function AuditFlowLogo() {
   )
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  forceCollapsed?: boolean
+}
+
+export function Sidebar({ forceCollapsed = false }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
+
+  const isCollapsed = forceCollapsed || collapsed
 
   const isActive = (path: string) =>
     path === "/settings"
       ? location.pathname.startsWith("/settings")
       : location.pathname === path
 
+  function NavLink({ item }: { item: typeof navItems[number] }) {
+    const link = (
+      <Link
+        to={item.path}
+        className={cn(
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+          isActive(item.path)
+            ? "bg-indigo-50 text-[#4F46E5]"
+            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+        )}
+      >
+        <item.icon className="h-4 w-4 shrink-0" />
+        {!isCollapsed && <span>{item.label}</span>}
+      </Link>
+    )
+
+    if (isCollapsed) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>{link}</TooltipTrigger>
+          <TooltipContent side="right">{item.label}</TooltipContent>
+        </Tooltip>
+      )
+    }
+
+    return link
+  }
+
   return (
-    <aside
-      className={cn(
-        "hidden md:flex flex-col border-r border-gray-100 bg-white transition-all duration-300",
-        collapsed ? "w-16" : "w-64",
-      )}
-    >
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-gray-100 px-4">
-        {!collapsed && (
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#4F46E5] text-white">
-              <AuditFlowLogo />
-            </div>
-            <span className="text-sm font-semibold text-gray-900">AuditFlow</span>
-          </Link>
+    <TooltipProvider delayDuration={0}>
+      <aside
+        className={cn(
+          "hidden md:flex flex-col border-r border-gray-100 bg-white transition-all duration-300",
+          isCollapsed ? "w-16" : "w-64",
         )}
-        {collapsed && (
-          <Link to="/" className="flex h-7 w-7 items-center justify-center rounded-md bg-[#4F46E5] text-white mx-auto">
-            <AuditFlowLogo />
-          </Link>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors",
-            collapsed && "hidden"
+      >
+        {/* Logo */}
+        <div className="flex h-16 items-center justify-between border-b border-gray-100 px-4">
+          {!isCollapsed && (
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#4F46E5] text-white">
+                <AuditFlowLogo />
+              </div>
+              <span className="text-sm font-semibold text-gray-900">AuditFlow</span>
+            </Link>
           )}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </button>
-      </div>
+          {isCollapsed && (
+            <Link to="/" className="flex h-7 w-7 items-center justify-center rounded-md bg-[#4F46E5] text-white mx-auto">
+              <AuditFlowLogo />
+            </Link>
+          )}
+          {!forceCollapsed && (
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors",
+                isCollapsed && "hidden"
+              )}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          )}
+        </div>
 
-      {/* Main nav */}
-      <nav className="flex-1 p-2">
-        <ul className="space-y-0.5">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <Link
-                to={item.path}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive(item.path)
-                    ? "bg-indigo-50 text-[#4F46E5]"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+        {/* Main nav */}
+        <nav className="flex-1 p-2">
+          <ul className="space-y-0.5">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <NavLink item={item} />
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      {/* Footer nav */}
-      <div className="border-t border-gray-100 p-2">
-        <ul className="space-y-0.5">
-          {footerItems.map((item) => (
-            <li key={item.path}>
-              <Link
-                to={item.path}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  isActive(item.path)
-                    ? "bg-indigo-50 text-[#4F46E5]"
-                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </aside>
+        {/* Footer nav */}
+        <div className="border-t border-gray-100 p-2">
+          <ul className="space-y-0.5">
+            {footerItems.map((item) => (
+              <li key={item.path}>
+                <NavLink item={item} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+    </TooltipProvider>
   )
 }
