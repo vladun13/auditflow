@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import React from 'react'
 import { DashboardLayout } from './DashboardLayout'
 
 const mockSignOut = vi.fn()
@@ -16,7 +17,24 @@ vi.mock('@/hooks/useCredits', () => ({
 
 // Sidebar uses useLocation — stub it out
 vi.mock('@/components/sidebar', () => ({
-  Sidebar: () => <nav data-testid="sidebar">Sidebar</nav>,
+  Sidebar: ({ forceCollapsed }: { forceCollapsed?: boolean }) => (
+    <nav data-testid="sidebar" data-force-collapsed={forceCollapsed}>Sidebar</nav>
+  ),
+}))
+
+vi.mock('@/hooks/use-tablet', () => ({
+  useIsTablet: () => false,
+}))
+
+vi.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="animate-presence">{children}</div>
+  ),
+  motion: {
+    div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
+      <div data-testid="motion-div" {...props}>{children}</div>
+    ),
+  },
 }))
 
 const mockNavigate = vi.fn()
@@ -82,5 +100,19 @@ describe('DashboardLayout', () => {
   it('renders outlet content', () => {
     renderLayout()
     expect(screen.getByText('Page Content')).toBeInTheDocument()
+  })
+
+  it('wraps outlet content in AnimatePresence', () => {
+    renderLayout()
+    const animatePresence = screen.getByTestId('animate-presence')
+    expect(animatePresence).toBeInTheDocument()
+    expect(animatePresence).toHaveTextContent('Page Content')
+  })
+
+  it('wraps outlet content in motion.div', () => {
+    renderLayout()
+    const motionDiv = screen.getByTestId('motion-div')
+    expect(motionDiv).toBeInTheDocument()
+    expect(motionDiv).toHaveTextContent('Page Content')
   })
 })

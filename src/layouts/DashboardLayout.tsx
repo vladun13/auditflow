@@ -1,7 +1,9 @@
-import { Component, type ReactNode } from 'react'
+import { Component, type ReactNode, useRef, useEffect } from 'react'
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCredits } from '@/hooks/useCredits'
+import { useIsTablet } from '@/hooks/use-tablet'
 import { Sidebar } from '@/components/sidebar'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
@@ -57,8 +59,14 @@ export function DashboardLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { credits } = useCredits()
+  const isTablet = useIsTablet()
+  const mainRef = useRef<HTMLDivElement>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
+
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0)
+  }, [location.pathname])
 
   const handleLogout = async () => {
     await signOut()
@@ -76,7 +84,7 @@ export function DashboardLayout() {
   return (
     <div className="flex h-screen bg-white">
       {/* Desktop sidebar */}
-      <Sidebar />
+      <Sidebar forceCollapsed={isTablet} />
 
       {/* Mobile sidebar drawer */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -198,9 +206,19 @@ export function DashboardLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50/40">
+        <main ref={mainRef} className="flex-1 overflow-y-auto bg-gray-50/40">
           <ErrorBoundary>
-            <Outlet />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </ErrorBoundary>
         </main>
       </div>
