@@ -85,9 +85,7 @@ describe('NewScan', () => {
     await user.click(screen.getByRole('button', { name: /start scan/i }))
 
     await waitFor(() => {
-      expect(screen.getByText('Crawling pages')).toBeInTheDocument()
-      expect(screen.getByText('Running axe-core')).toBeInTheDocument()
-      expect(screen.getByText('Generating AI fixes')).toBeInTheDocument()
+      expect(screen.getByText(/we are scanning your website/i)).toBeInTheDocument()
     })
   })
 
@@ -162,7 +160,12 @@ describe('NewScan', () => {
     await user.type(screen.getByLabelText(/website url/i), 'https://example.com')
     await user.click(screen.getByRole('button', { name: /start scan/i }))
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/audits/new-audit-1'))
+    // After success, shows Audit Complete screen
+    await waitFor(() => expect(screen.getByText('Audit Complete')).toBeInTheDocument())
+
+    // Click "View Full Report" to navigate to audit detail
+    await user.click(screen.getByText('View Full Report'))
+    expect(mockNavigate).toHaveBeenCalledWith('/audits/new-audit-1')
   })
 
   it('shows API error when create fails', async () => {

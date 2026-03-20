@@ -5,6 +5,8 @@ import { User, Lock, Bell, CreditCard, Receipt, Coins } from 'lucide-react'
 const settingsNav = [
   { path: '/settings/account',       label: 'Account',          icon: User },
   { path: '/settings/plans',         label: 'Plans & Credits',  icon: CreditCard },
+  { path: '/settings/payments',      label: 'Payment History',  icon: Receipt },
+  { path: '/settings/credits',       label: 'Credit History',   icon: Coins },
   { path: '/settings/notifications', label: 'Notifications',    icon: Bell },
   { path: '/settings/security',      label: 'Security',         icon: Lock },
 ]

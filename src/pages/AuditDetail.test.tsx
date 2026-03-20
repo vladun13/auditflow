@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuditDetail } from './AuditDetail'
 import { makeAudit, makeViolation } from '@/test/helpers'
 
@@ -48,11 +49,13 @@ beforeEach(() => vi.clearAllMocks())
 
 function renderAuditDetail(id = 'audit-1') {
   return render(
-    <MemoryRouter initialEntries={[`/audits/${id}`]}>
-      <Routes>
-        <Route path="/audits/:id" element={<AuditDetail />} />
-      </Routes>
-    </MemoryRouter>,
+    <TooltipProvider>
+      <MemoryRouter initialEntries={[`/audits/${id}`]}>
+        <Routes>
+          <Route path="/audits/:id" element={<AuditDetail />} />
+        </Routes>
+      </MemoryRouter>
+    </TooltipProvider>,
   )
 }
 
@@ -140,10 +143,10 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-    expect(screen.getByText('85')).toBeInTheDocument()
+    expect(screen.getByText('85%')).toBeInTheDocument()
   })
 
-  it('renders WCAG level label below score', () => {
+  it('renders WCAG compliance label based on score', () => {
     const audit = makeAudit({
       status: 'completed',
       wcag_score: 85,
@@ -152,12 +155,12 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-    expect(screen.getByText('WCAG AA')).toBeInTheDocument()
+    expect(screen.getByText(/WCAG AA/i)).toBeInTheDocument()
   })
 
-  // -- AUDIT-03: Violation cards with AI content --
+  // -- AUDIT-03: Violation cards --
 
-  it('renders violation type in the list', () => {
+  it('renders violation description in the issues list', () => {
     const audit = makeAudit({
       status: 'completed',
       violations: [criticalViolation],
@@ -165,11 +168,10 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-    expect(screen.getByText('missing-alt')).toBeInTheDocument()
+    expect(screen.getByText(criticalViolation.description)).toBeInTheDocument()
   })
 
-  it('shows Why This Matters section when violation card is expanded', async () => {
-    const user = userEvent.setup()
+  it('shows AI explanation in violation details panel', () => {
     const audit = makeAudit({
       status: 'completed',
       violations: [criticalViolation],
@@ -177,15 +179,10 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-
-    // Cards are collapsed by default; click to expand
-    await user.click(screen.getByText('missing-alt'))
-    expect(screen.getByText('Why This Matters')).toBeInTheDocument()
-    expect(screen.getByText(criticalViolation.ai_explanation!)).toBeInTheDocument()
+    expect(screen.getByText(/Screen readers cannot interpret images/)).toBeInTheDocument()
   })
 
-  it('shows How to Fix section when violation card is expanded', async () => {
-    const user = userEvent.setup()
+  it('shows How to Fix panel with first violation auto-selected', () => {
     const audit = makeAudit({
       status: 'completed',
       violations: [criticalViolation],
@@ -193,16 +190,13 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-
-    await user.click(screen.getByText('missing-alt'))
-    expect(screen.getByText('How to Fix')).toBeInTheDocument()
-    // ai_fix_steps has newlines rendered with whitespace-pre-line; check partial content
+    expect(screen.getByText('How to Fix it')).toBeInTheDocument()
     expect(screen.getByText(/Add alt attribute to all img elements/)).toBeInTheDocument()
   })
 
   // -- AUDIT-04: Severity filter tabs --
 
-  it('renders severity filter tabs', () => {
+  it('renders severity filter buttons for non-empty impact groups', () => {
     const audit = makeAudit({
       status: 'completed',
       violations: [criticalViolation, seriousViolation],
@@ -212,14 +206,11 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    expect(screen.getByRole('tab', { name: /all/i })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /critical/i })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /serious/i })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /moderate/i })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: /minor/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /critical/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /serious/i })).toBeInTheDocument()
   })
 
-  it('filters violations when severity tab is clicked', async () => {
+  it('filters violations when severity button is clicked', async () => {
     const user = userEvent.setup()
     const audit = makeAudit({
       status: 'completed',
@@ -230,21 +221,34 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    // Default tab is 'all' -- both violations visible
-    expect(screen.getByText('missing-alt')).toBeInTheDocument()
-    expect(screen.getByText('low-contrast')).toBeInTheDocument()
+    // Critical tab active by default — critical violation description shown in sidebar
+    expect(screen.getByText(criticalViolation.description)).toBeInTheDocument()
 
-    // Click Critical tab
-    await user.click(screen.getByRole('tab', { name: /critical/i }))
+    // Click Serious tab
+    await user.click(screen.getByRole('button', { name: /serious/i }))
 
-    // Now should show only critical violation
-    expect(screen.getByText('missing-alt')).toBeInTheDocument()
-    expect(screen.queryByText('low-contrast')).not.toBeInTheDocument()
+    // Now serious violation is in sidebar, critical is filtered out
+    await waitFor(() => {
+      expect(screen.getByText(seriousViolation.description)).toBeInTheDocument()
+      expect(screen.queryByText(criticalViolation.description)).not.toBeInTheDocument()
+    })
   })
 
   // -- AUDIT-05: Download PDF --
 
-  it('calls generatePdf when Download PDF is clicked on completed audit', async () => {
+  it('renders PDF icon button in overview header', () => {
+    const audit = makeAudit({
+      status: 'completed',
+      violations: [criticalViolation],
+      critical_count: 1,
+    })
+    mockUseAudit.mockReturnValue({ audit, loading: false })
+    renderAuditDetail()
+    // The PDF button has accessible text "PDF"
+    expect(screen.getByRole('button', { name: 'PDF' })).toBeInTheDocument()
+  })
+
+  it('calls generatePdf when PDF button is clicked on completed audit', async () => {
     const user = userEvent.setup()
     const audit = makeAudit({
       status: 'completed',
@@ -254,7 +258,7 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    await user.click(screen.getByText('Download PDF'))
+    await user.click(screen.getByRole('button', { name: 'PDF' }))
 
     await waitFor(() => {
       expect(mockGeneratePdf).toHaveBeenCalledOnce()
@@ -263,7 +267,7 @@ describe('AuditDetail', () => {
     expect(mockGeneratePdf.mock.calls[0][1]).toBe('auditflow-report-audit-1.pdf')
   })
 
-  it('shows Generating... text while PDF is being generated', async () => {
+  it('disables PDF button while PDF is being generated', async () => {
     const user = userEvent.setup()
     // Never-resolving promise to keep loading state
     mockGeneratePdf.mockReturnValue(new Promise(() => {}))
@@ -275,10 +279,10 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    await user.click(screen.getByText('Download PDF'))
+    await user.click(screen.getByRole('button', { name: 'PDF' }))
 
     await waitFor(() => {
-      expect(screen.getByText('Generating...')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'PDF' })).toBeDisabled()
     })
   })
 
@@ -293,7 +297,7 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    await user.click(screen.getByText('Download PDF'))
+    await user.click(screen.getByRole('button', { name: 'PDF' }))
 
     await waitFor(() => {
       expect(mockToastError).toHaveBeenCalledWith('Failed to generate PDF. Please try again.')
@@ -311,17 +315,6 @@ describe('AuditDetail', () => {
     expect(screen.getByTestId('pdf-report')).toBeInTheDocument()
   })
 
-  it('renders Download PDF button in header', () => {
-    const audit = makeAudit({
-      status: 'completed',
-      violations: [criticalViolation],
-      critical_count: 1,
-    })
-    mockUseAudit.mockReturnValue({ audit, loading: false })
-    renderAuditDetail()
-    expect(screen.getByText('Download PDF')).toBeInTheDocument()
-  })
-
   // -- Overview section --
 
   it('renders website URL as link in header', () => {
@@ -336,7 +329,7 @@ describe('AuditDetail', () => {
     expect(screen.getByText('https://test.com')).toBeInTheDocument()
   })
 
-  it('renders stat cards with violation counts', () => {
+  it('renders violation severity labels in criteria card', () => {
     const audit = makeAudit({
       status: 'completed',
       wcag_score: 75,
@@ -350,8 +343,8 @@ describe('AuditDetail', () => {
     })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-    expect(screen.getByText('Pages Scanned')).toBeInTheDocument()
-    expect(screen.getByText('Total Violations')).toBeInTheDocument()
+    expect(screen.getByText('Critical Issues')).toBeInTheDocument()
+    expect(screen.getByText('Serious Issues')).toBeInTheDocument()
   })
 
   // -- Navigation --
@@ -366,16 +359,16 @@ describe('AuditDetail', () => {
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
 
-    await user.click(screen.getByText('Back to Reports'))
+    await user.click(screen.getByText('Back to Home'))
     expect(mockNavigate).toHaveBeenCalledWith('/reports')
   })
 
   // -- No violations --
 
-  it('shows no violations message when violations array is empty', () => {
+  it('shows no issues message when violations array is empty', () => {
     const audit = makeAudit({ status: 'completed', violations: [], total_violations: 0 })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
-    expect(screen.getByText(/no violations found/i)).toBeInTheDocument()
+    expect(screen.getByText(/No Issues Found/i)).toBeInTheDocument()
   })
 })

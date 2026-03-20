@@ -44,7 +44,7 @@ describe('DashboardNew', () => {
     expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
   })
 
-  it('renders 4 stat cards with correct labels', () => {
+  it('renders 3 stat cards with correct labels', () => {
     mockUseAudits.mockReturnValue({
       audits: [
         makeAudit({ wcag_score: 90 }),
@@ -56,9 +56,8 @@ describe('DashboardNew', () => {
     renderDashboard()
 
     expect(screen.getByText('Total Audits')).toBeInTheDocument()
-    expect(screen.getByText('Avg WCAG Score')).toBeInTheDocument()
-    expect(screen.getByText('Critical Issues')).toBeInTheDocument()
-    expect(screen.getByText('Compliant Sites')).toBeInTheDocument()
+    expect(screen.getByText('Average Score')).toBeInTheDocument()
+    expect(screen.getByText('Credits Used')).toBeInTheDocument()
   })
 
   it('computes correct stat values', () => {
@@ -73,12 +72,9 @@ describe('DashboardNew', () => {
     })
     renderDashboard()
 
-    // Avg WCAG Score = Math.round((90+70+50)/3) = 70
+    // Average Score = Math.round((90+70+50)/3) = 70
     expect(screen.getByText('70%')).toBeInTheDocument()
-    // Critical Issues = 2+1+3 = 6
-    expect(screen.getByText('6')).toBeInTheDocument()
-    // Compliant Sites = only score >= 80, so 1 (but '1' might appear elsewhere)
-    // Total Audits = 3 (use getAllByText since pages_scanned may also show numbers)
+    // Total Audits = 3
     const threeElements = screen.getAllByText('3')
     expect(threeElements.length).toBeGreaterThanOrEqual(1)
   })
@@ -92,7 +88,7 @@ describe('DashboardNew', () => {
     expect(screen.getByText('Run Your First Scan')).toBeInTheDocument()
   })
 
-  it('shows max 5 audits in recent list', () => {
+  it('shows all audits in table (default page size 10)', () => {
     const audits = Array.from({ length: 8 }, (_, i) =>
       makeAudit({ id: `audit-${i}`, website_url: `https://site${i}.com` }),
     )
@@ -100,28 +96,18 @@ describe('DashboardNew', () => {
     renderDashboard()
 
     expect(screen.getByText('https://site0.com')).toBeInTheDocument()
-    expect(screen.getByText('https://site4.com')).toBeInTheDocument()
-    expect(screen.queryByText('https://site5.com')).not.toBeInTheDocument()
+    expect(screen.getByText('https://site7.com')).toBeInTheDocument()
   })
 
-  it('shows View all reports link when more than 5 audits', () => {
-    const audits = Array.from({ length: 8 }, (_, i) =>
-      makeAudit({ id: `audit-${i}`, website_url: `https://site${i}.com` }),
-    )
-    mockUseAudits.mockReturnValue({ audits, loading: false, refetch: vi.fn() })
-    renderDashboard()
-
-    expect(screen.getByText('View all reports')).toBeInTheDocument()
-  })
-
-  it('does not show View all reports when 5 or fewer audits', () => {
+  it('renders audit table with correct columns', () => {
     const audits = Array.from({ length: 3 }, (_, i) =>
       makeAudit({ id: `audit-${i}`, website_url: `https://site${i}.com` }),
     )
     mockUseAudits.mockReturnValue({ audits, loading: false, refetch: vi.fn() })
     renderDashboard()
 
-    expect(screen.queryByText('View all reports')).not.toBeInTheDocument()
+    expect(screen.getByText('https://site0.com')).toBeInTheDocument()
+    expect(screen.getByText('https://site2.com')).toBeInTheDocument()
   })
 
   it('shows stat cards with zero/dash values when no completed audits', () => {
