@@ -58,3 +58,8 @@ coverage/
 .cache/
 tmp/
 .gstack/
+
+# Playwright
+e2e/auth.json
+test-results/
+playwright-report/

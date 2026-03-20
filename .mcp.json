@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "figma-bridge": {
+      "command": "npx",
+      "args": ["-y", "@gethopp/figma-mcp-bridge"]
+    },
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp"
