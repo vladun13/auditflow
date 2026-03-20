@@ -25,10 +25,10 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
-// Global rate limiter — 200 requests per 15 min per IP
+// Global rate limiter — 1000 requests per 15 min per IP
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later' },
