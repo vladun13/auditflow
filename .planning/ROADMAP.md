@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Modals** - Build all 5 modal dialogs (BuyCredits, ShareReport, Upgrade, CancelSub, Reactivate) (completed 2026-03-19)
 - [x] **Phase 4: PDF Report** - Implement PDF generation, download flow, and error handling (completed 2026-03-19)
 - [x] **Phase 5: Onboarding** - First-run onboarding flow with skip capability (completed 2026-03-20)
-- [ ] **Phase 6: Polish & Responsive** - Animations, responsive sidebar, keyboard accessibility
+- [x] **Phase 6: Polish & Responsive** - Animations, responsive sidebar, keyboard accessibility (completed 2026-03-20)
 - [ ] **Phase 7: E2E Tests** - Playwright E2E coverage for critical user flows
 
 ## Phase Details
@@ -134,5 +134,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Modals | 2/2 | Complete   | 2026-03-19 |
 | 4. PDF Report | 2/2 | Complete   | 2026-03-19 |
 | 5. Onboarding | 1/1 | Complete   | 2026-03-20 |
-| 6. Polish & Responsive | 1/2 | In progress | - |
+| 6. Polish & Responsive | 2/2 | Complete | 2026-03-20 |
 | 7. E2E Tests | 0/1 | Not started | - |
