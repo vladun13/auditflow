@@ -103,11 +103,11 @@ Plans:
   1. Scan progress steps and page transitions have Framer Motion animations that feel responsive (not janky or delayed)
   2. Sidebar collapses to icon-only between 768-1279px and becomes a hamburger drawer below 768px
   3. All interactive elements (buttons, links, inputs, modals, dropdowns) are keyboard navigable with visible focus indicators
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md -- Page transitions (AnimatePresence) + responsive sidebar (useIsTablet, forceCollapsed, tooltips)
+- [ ] 06-02-PLAN.md -- Global keyboard focus indicators (:focus-visible CSS rule) + visual verification
 
 ### Phase 7: E2E Tests
 **Goal**: Critical user flows are verified end-to-end with automated Playwright tests, providing confidence for launch
