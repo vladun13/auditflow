@@ -109,7 +109,7 @@ export function ResetPassword() {
                   onClick={() => setShowNew(!showNew)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
-                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showNew ? <Eye className="h-4 w-4 text-[#4F46E5]" /> : <EyeOff className="h-4 w-4" />}
                 </button>
               </div>
             </div>
@@ -134,7 +134,7 @@ export function ResetPassword() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
-                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirm ? <Eye className="h-4 w-4 text-[#4F46E5]" /> : <EyeOff className="h-4 w-4" />}
                 </button>
               </div>
             </div>

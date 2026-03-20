@@ -1,8 +1,8 @@
 # AuditFlow — Product Requirements Document
 
-**Version:** 1.0
-**Date:** 2026-03-17
-**Status:** Active
+**Version:** 1.3
+**Date:** 2026-03-20
+**Status:** Active — Phase 4A/4B complete
 
 ---
 
@@ -24,14 +24,17 @@ AuditFlow is an AI-powered web accessibility audit platform. Users enter a URL, 
 | Churn rate (credits unused 60 days) | < 20% |
 
 ### Timeline
-| Milestone | Target Date |
-|-----------|------------|
-| Phase 1 — Core redesign complete | 2026-04-07 |
-| Phase 2 — Settings & Billing pages | 2026-04-21 |
-| Phase 3 — Data hooks & API wiring | 2026-04-28 |
-| Phase 4 — Modals, PDF, Onboarding | 2026-05-12 |
-| Phase 5 — Cleanup & Testing | 2026-05-19 |
-| Public launch | 2026-06-01 |
+| Milestone | Target Date | Status |
+|-----------|------------|--------|
+| Phase 1 — Core redesign complete | 2026-04-07 | **Done** ✓ |
+| Phase 2 — Settings & Billing pages | 2026-04-21 | **Done** ✓ |
+| Phase 3 — Data hooks & API wiring | 2026-04-28 | **Done** ✓ |
+| Phase 4A — Modals (Buy Credits, Cancel Sub, Reactivate, Share, Rescan) | 2026-05-12 | **Done** ✓ |
+| Phase 4B — PDF report (PdfReport + pdf.ts) | 2026-05-12 | **Done** ✓ |
+| Phase 4C — Onboarding + Tutorial flows | 2026-05-12 | Pending |
+| Phase 4D — Animations, skeletons, micro-interactions | 2026-05-12 | Pending |
+| Phase 5 — Cleanup & E2E Testing | 2026-05-19 | Pending |
+| Public launch | 2026-06-01 | — |
 
 ---
 
@@ -45,8 +48,8 @@ AuditFlow is a SaaS web application built on:
 - **Payments:** LemonSqueezy (credit packs, no subscriptions)
 - **Reports:** jsPDF + html2pdf.js
 
-### Current State
-Auth pages (Login, SignUp, ForgotPassword) and the Landing page (Navbar, Hero, Features) have been redesigned to match Figma wireframes using a light theme with indigo `#4F46E5` primary. The core authenticated experience (Dashboard, Scan, Audit Results, Pricing) retains old basic styling and several components contain broken imports (`@/app/page`) and mock data.
+### Current State (as of 2026-03-20)
+All major screens and modals are implemented. Landing page, auth pages, dashboard, audit detail, pricing, all settings pages, and all billing modals (Buy Credits, Cancel Subscription, Reactivate, Share Report, Rescan, PDF Report) match the Figma designs. Payment History and Credit History tabs have full table UIs with search/filter/pagination and Invoice Details modals. Cancel → Reactivate subscription flow is fully wired with post-cancellation state changes. Remaining work: NewScan Figma redesign, Onboarding/Tutorial flows, animations/skeletons, and E2E tests.
 
 ### Business Model
 Pay-as-you-go credit packs. Each scan consumes 1 credit. No monthly subscription.
@@ -442,7 +445,7 @@ Acceptance Criteria:
 - Then I see a log of: date, event (purchase/usage), credit amount, running balance
 ```
 
-**US-062 — Buy Additional Credits**
+**US-062 — Buy Additional Credits** ✓ Done
 ```
 As an authenticated user with low credits,
 I want to buy more credits from within the app,
@@ -451,9 +454,44 @@ So that I don't have to navigate away to the pricing page.
 Acceptance Criteria:
 - Given I visit /settings/plans or see the credit balance in the header
 - When I click "Buy Credits"
-- Then a modal opens showing credit pack options
-- When I select a pack and confirm
-- Then I'm redirected to LemonSqueezy checkout
+- Then BuyCreditsModal opens — Step 1: preset amounts ($10/$25/$100/$500) + custom input
+- When I click Continue
+- Then Step 2 shows purchase confirmation with card info + amount
+- When I click Purchase Credits
+- Then checkout is initiated; on success Step 3 shows "Thank you for your purchase!"
+
+Definition of Done:
+- [x] 3-step modal: amount selection → confirmation → success
+- [x] Preset amount pills + custom amount input with $ prefix
+- [x] VISA card row shown (placeholder)
+- [x] "Continue" disabled until amount selected
+- [x] Success step "Go to Homepage" navigates to /dashboard
+```
+
+**US-063 — Cancel Subscription** ✓ Done
+```
+As an authenticated user,
+I want to cancel my subscription with a clear offboarding flow,
+So that I understand what happens to my credits.
+
+Definition of Done:
+- [x] CancelSubscriptionModal: 6 radio reason options + "Other comments" textarea (0/100 chars)
+- [x] "Cancel Subscription" button disabled until reason selected
+- [x] Step 2: "Subscription Cancelled" screen + success toast
+- [x] Post-cancellation: "Restore Plan" button, credits expiry warning banner, "Reactivate Subscription" link
+```
+
+**US-064 — Reactivate Subscription** ✓ Done
+```
+As a user who cancelled their subscription,
+I want to reactivate it from the Plans & Credits page,
+So that I can resume billing and keep my credits.
+
+Definition of Done:
+- [x] ReactivateModal: shows next billing amount ($149) + date (30 days out)
+- [x] "Confirm Reactivation" triggers reactivation + success toast "Your membership is now active"
+- [x] Page returns to normal: "Upgrade to Advanced", "Cancel subscription", no credits warning
+- [x] Both "Restore Plan" button and "Reactivate Subscription" link open the modal
 ```
 
 ---

@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Globe, Link2, Eye, X } from "lucide-react"
+import { Globe, Link2, Eye, X, XCircle, Zap } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { useCredits } from "@/hooks/useCredits"
+import { BuyCreditsModal } from "@/components/modals/BuyCreditsModal"
+import { PreviewModal } from "@/components/modals/PreviewModal"
 
 // ── Crawl Depth button (authenticated: depth picker / unauthenticated: unlock popup) ──
 
@@ -20,7 +23,13 @@ function CrawlDepthButton({ depth, onDepthChange }: { depth: number; onDepthChan
 
   const navigate = useNavigate()
 
-  const DEPTH_OPTIONS = [1, 2, 3, 4, 5]
+  const DEPTH_OPTIONS = [
+    { value: 1, label: "1 page", description: "Quick check" },
+    { value: 2, label: "2 pages", description: "Light Scan" },
+    { value: 3, label: "3 pages", description: "Standard Scan" },
+    { value: 4, label: "4 pages", description: "Deep Scan" },
+    { value: 5, label: "5 pages", description: "Full Scan" },
+  ]
 
   return (
     <div className="relative" ref={ref}>
@@ -54,24 +63,36 @@ function CrawlDepthButton({ depth, onDepthChange }: { depth: number; onDepthChan
 
       {open && user && (
         /* Authenticated: depth picker */
-        <div className="absolute top-full left-0 mt-2 w-[260px] rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-50">
+        <div className="absolute top-full left-0 mt-2 w-[280px] rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <span className="text-sm font-bold text-gray-900">Crawl Depth</span>
             <button type="button" onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="p-2 flex flex-col gap-1">
-            {DEPTH_OPTIONS.map((v) => (
+          <div className="p-2.5 flex flex-col gap-1.5">
+            {DEPTH_OPTIONS.map((opt) => (
               <button
-                key={v}
+                key={opt.value}
                 type="button"
-                onClick={() => { onDepthChange(v); setOpen(false) }}
-                className={`flex items-center gap-2 w-full rounded-xl px-3 py-2 text-sm text-left transition-colors cursor-pointer ${
-                  depth === v ? "bg-indigo-50 text-[#4F46E5] font-semibold" : "text-gray-700 hover:bg-gray-50"
+                onClick={() => { onDepthChange(opt.value); setOpen(false) }}
+                className={`flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                  depth === opt.value
+                    ? "border-2 border-[#4F46E5] bg-indigo-50/50"
+                    : "border border-gray-100 bg-white hover:bg-gray-50"
                 }`}
               >
-                {v} {v === 1 ? "page" : "pages"}
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-[#4F46E5]">
+                    <rect x="4" y="6" width="13" height="16" rx="2" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="1.5"/>
+                    <rect x="7" y="3" width="13" height="16" rx="2" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M8 11h7M8 14h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-900">{opt.label}</p>
+                  <p className="text-xs text-gray-400">{opt.description}</p>
+                </div>
               </button>
             ))}
           </div>
@@ -145,6 +166,47 @@ function SignupModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+// ── No-credits modal ──────────────────────────────────────────────────────────
+
+function NoCreditModal({ onClose, onGetCredits }: { onClose: () => void; onGetCredits: () => void }) {
+  return (
+    <div className="fixed top-5 right-5 z-[300] w-[320px] rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden">
+      <div className="flex items-start gap-3 px-4 pt-4 pb-3">
+        <XCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900">Not enough credits</p>
+          <p className="mt-1 text-xs text-gray-500 leading-relaxed">
+            You cannot start scanning because you do not have enough credits in your account.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="flex items-center gap-2 px-4 pb-4">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex-1 rounded-full border border-gray-200 h-9 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onGetCredits}
+          className="flex-1 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] h-9 text-sm font-medium text-white transition-colors cursor-pointer"
+        >
+          Get credits
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Gradient placeholder cards ────────────────────────────────────────────────
 
 const CARD_GRADIENTS = [
@@ -158,15 +220,24 @@ const CARD_GRADIENTS = [
 
 export function Hero() {
   const { user } = useAuth()
+  const { credits } = useCredits()
   const [url, setUrl] = useState("")
   const [crawlDepth, setCrawlDepth] = useState(3)
   const [showModal, setShowModal] = useState(false)
+  const [showNoCreditModal, setShowNoCreditModal] = useState(false)
+  const [showBuyCredits, setShowBuyCredits] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
   const navigate = useNavigate()
   const hasUrl = url.trim().length > 0
+  const noCredits = user !== null && credits !== null && credits === 0
 
   const handleStartScanning = () => {
     if (!user) {
       setShowModal(true)
+      return
+    }
+    if (noCredits) {
+      setShowNoCreditModal(true)
       return
     }
     sessionStorage.setItem("auditflow_pending_url", url)
@@ -176,6 +247,20 @@ export function Hero() {
   return (
     <>
       {showModal && <SignupModal onClose={() => setShowModal(false)} />}
+      {showNoCreditModal && (
+        <NoCreditModal
+          onClose={() => setShowNoCreditModal(false)}
+          onGetCredits={() => { setShowNoCreditModal(false); setShowBuyCredits(true) }}
+        />
+      )}
+      <BuyCreditsModal open={showBuyCredits} onOpenChange={setShowBuyCredits} />
+      <PreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        url={url}
+        depth={crawlDepth}
+        onSave={(count) => console.log("Preview: selected", count, "pages")}
+      />
 
       <section className="relative flex flex-col items-center pt-20 overflow-hidden min-h-screen">
 
@@ -234,7 +319,9 @@ export function Hero() {
           {/* URL Input Card */}
           <div
             className={`mx-auto max-w-[720px] rounded-3xl bg-white shadow-sm transition-all duration-200 ${
-              hasUrl
+              hasUrl && noCredits
+                ? "border border-red-300 shadow-[0_0_0_4px_rgba(239,68,68,0.08)]"
+                : hasUrl
                 ? "border border-indigo-200 shadow-[0_0_0_4px_rgba(99,102,241,0.08)]"
                 : "border border-gray-100"
             }`}
@@ -260,6 +347,7 @@ export function Hero() {
                 <button
                   type="button"
                   disabled={!hasUrl}
+                  onClick={hasUrl ? () => setShowPreview(true) : undefined}
                   className={`inline-flex items-center gap-2 rounded-full border h-9 px-4 text-sm transition-colors ${
                     hasUrl
                       ? "border-gray-200 bg-white text-gray-700 hover:bg-gray-50 cursor-pointer"
@@ -274,9 +362,10 @@ export function Hero() {
                 <button
                   type="button"
                   onClick={hasUrl ? handleStartScanning : undefined}
-                  disabled={!hasUrl}
+                  disabled={!hasUrl || (noCredits && hasUrl)}
+                  title={noCredits && hasUrl ? "You cannot start scanning because you do not have enough credits in your account." : undefined}
                   className={`inline-flex items-center justify-center rounded-full h-9 px-5 text-sm font-medium transition-colors ${
-                    hasUrl
+                    hasUrl && !noCredits
                       ? "bg-[#4F46E5] hover:bg-[#4338CA] text-white shadow-sm cursor-pointer"
                       : "bg-transparent border border-gray-100 text-gray-300 cursor-not-allowed"
                   }`}
@@ -288,12 +377,34 @@ export function Hero() {
 
             {/* Service cost row — only visible when URL entered */}
             {hasUrl && (
-              <div className="border-t border-indigo-50 px-5 py-3 flex items-center justify-center gap-1.5">
+              <div className={`border-t px-5 py-3 flex items-center justify-center gap-1.5 ${noCredits ? "border-red-100" : "border-indigo-50"}`}>
                 <span className="text-sm font-semibold text-gray-700">Service cost:</span>
-                <span className="inline-flex items-center gap-1 text-sm text-gray-600">
-                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#4F46E5] text-[10px] text-white font-bold">₿</span>
-                  First scan is free
-                </span>
+                {user ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 text-sm text-gray-600">
+                      <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-white ${noCredits ? "bg-red-500" : "bg-[#4F46E5]"}`}>
+                        <Zap className="h-3 w-3 fill-white" />
+                      </span>
+                      {credits !== null ? `${credits} credits` : "— credits"}
+                    </span>
+                    {noCredits && (
+                      <button
+                        type="button"
+                        onClick={() => setShowNoCreditModal(true)}
+                        className="ml-2 text-sm font-medium text-red-500 hover:text-red-600 transition-colors cursor-pointer"
+                      >
+                        Not enough credits
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-sm text-gray-600">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#4F46E5] text-[10px] text-white font-bold">
+                      <Zap className="h-3 w-3 fill-white" />
+                    </span>
+                    First scan is free
+                  </span>
+                )}
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 // Layouts
 import { DashboardLayout } from '@/layouts/DashboardLayout'
@@ -16,8 +17,10 @@ import { Login } from '@/pages/Login'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { Pricing } from '@/pages/Pricing'
+import { PaymentSuccess } from '@/pages/PaymentSuccess'
 import { Privacy } from '@/pages/Privacy'
 import { Terms } from '@/pages/Terms'
+import { NotFound } from '@/pages/NotFound'
 
 // Onboarding
 import { Onboarding } from '@/pages/Onboarding'
@@ -71,16 +74,18 @@ function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <BrowserRouter>
+      <TooltipProvider delayDuration={300}>
       <AuthProvider>
         <Routes>
           {/* Public */}
-          <Route path="/" element={<PublicOnlyRoute><Landing /></PublicOnlyRoute>} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
           <Route path="/signup" element={<PublicOnlyRoute><SignUp /></PublicOnlyRoute>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
 
@@ -116,9 +121,10 @@ function App() {
             </Route>
           </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
+      </TooltipProvider>
     </BrowserRouter>
   )
 }

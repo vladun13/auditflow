@@ -116,7 +116,7 @@ export function ForgotPassword() {
                 disabled={loading || !email}
                 className="w-full rounded-full h-10 text-sm font-medium bg-[#4F46E5] hover:bg-[#4338CA] text-white disabled:bg-gray-100 disabled:text-gray-400 disabled:border disabled:border-gray-200"
               >
-                {loading ? 'Sending…' : 'Send Reset Link'}
+                {loading ? 'Sending…' : 'Verify Email'}
               </Button>
             </form>
           </>

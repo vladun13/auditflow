@@ -20,24 +20,25 @@ This file is the authoritative context document for Claude Code working on this 
 
 ---
 
-## Current State (as of 2026-03-18)
+## Current State (as of 2026-03-20)
 
 ### What is DONE (built and styled)
 - Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme ✓
 - Landing page new sections: `SocialProof`, `StatsBar`, `ComplianceBadges`, `Testimonials`, `CtaBanner` — added based on accessibilitycloud.com reference ✓
 - Auth pages: `Login`, `SignUp`, `ForgotPassword` — redesigned and working ✓
 - Google Sign-In button on `Login` and `SignUp` via Supabase OAuth (`signInWithGoogle()` in AuthContext) ✓
-- `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout` ✓
-- `NewScan.tsx` — functional, basic styling (not yet redesigned to Figma)
-- `AuditDetail.tsx` — functional with polling, basic styling (not yet redesigned to Figma)
+- `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout`; dashboard redesigned to Figma with interactive elements ✓
+- `NewScan.tsx` — functional, Crawl Depth dropdown redesigned to card-row layout ✓
+- `AuditDetail.tsx` — redesigned to Figma: compliant state, issues sidebar, overview section, violation details, how-to-fix panel ✓
 - `Pricing.tsx` — functional with LemonSqueezy, redesigned to light theme ✓
 - `Reports.tsx` — extracted reports route with status filtering and delete ✓
 - `src/types/index.ts` — centralized type definitions ✓
 - `src/layouts/DashboardLayout.tsx` — shared sidebar + header + `<Outlet/>` for all auth pages ✓
 - `src/layouts/SettingsLayout.tsx` — left nav tabs for settings sub-pages ✓
 - `src/hooks/useAudits.ts`, `useAudit.ts`, `useCredits.ts`, `usePayments.ts` — all created ✓
-- `src/pages/settings/Account.tsx`, `Security.tsx`, `Notifications.tsx` ✓
-- `src/pages/settings/PlansAndCredits.tsx`, `PaymentHistory.tsx`, `CreditHistory.tsx` ✓
+- `src/pages/settings/Account.tsx` — profile info + danger zone (deactivate/delete account) ✓
+- `src/pages/settings/Security.tsx`, `Notifications.tsx` ✓
+- `src/pages/settings/PlansAndCredits.tsx` — full redesign: Plan Management tab, Payment History tab, Credit History tab ✓
 - `App.tsx` — restructured with nested routes under `DashboardLayout` and `SettingsLayout` ✓
 - `src/lib/api.ts` — expanded with `userApi.getProfile/updateProfile/updatePassword/getCreditHistory`, `paymentApi.getHistory/getSubscription` ✓
 - Full backend: scanning service, AI service, payment routes, auth middleware ✓
@@ -50,23 +51,38 @@ This file is the authoritative context document for Claude Code working on this 
 - `tsconfig.app.json` — test files excluded from `tsc -b` (prevents Vercel build failures) ✓
 - Frontend deployed to Vercel ✓
 - Supabase database schema deployed ✓
-- PRD.md created and updated with landing page sections ✓
-- `Login.tsx` — redesigned: Google OAuth button restored, icon-only logo, new right-panel illustration (blue→pink gradient, floating cards, cursor arrows, squiggly line, progress pill, Crawl Depth pill, Service cost row) ✓
+- `Login.tsx` — redesigned: Google OAuth button restored, icon-only logo, new right-panel illustration ✓
 - `SignUp.tsx` — same illustration as Login (shared design), `h-screen overflow-hidden` full-height layout ✓
-- `Hero.tsx` — Crawl Depth dropdown redesigned: card-row list (1–5 pages with icon + label + description), `z-20` stacking context fix so dropdown renders above page preview section ✓
-- `NewScan.tsx` — Crawl Depth dropdown redesigned to match Hero style (1–5 pages, same card-row layout) ✓
+- `Hero.tsx` — Crawl Depth dropdown redesigned: card-row list (1–5 pages with icon + label + description) ✓
 - `DashboardLayout.tsx` — FREE badge + Upgrade button shown for free-tier users (`credits <= 1`) ✓
-- `DashboardNew.tsx` — enhanced empty state with ScanSearch icon, heading, subtext, pill CTA ✓
+- `src/pages/PaymentSuccess.tsx` — payment success page ✓
+- `src/pages/NotFound.tsx` — 404 page ✓
+- **Modals — all implemented ✓**
+  - `BuyCreditsModal.tsx` — 3-step: amount selection (presets + custom) → purchase confirmation → success screen ✓
+  - `CancelSubscriptionModal.tsx` — 2-step: radio reason list + comments textarea → cancellation confirmed screen ✓
+  - `ReactivateModal.tsx` — confirm reactivation with next billing date + success toast ✓
+  - `ShareReportModal.tsx` — share report link flow ✓
+  - `RescanModal.tsx` — rescan confirmation flow ✓
+  - `PreviewModal.tsx` — report preview ✓
+- **PDF report** — `PdfReport.tsx` component + `pdf.ts` lib redesigned to Figma ✓
+- **Payment History tab** — full redesign: searchable/filterable table (Date, Invoice number, Amount, Status, Actions), status badges (Pending/Succeeded/Completed), Eye + Download icons with tooltips, Invoice Details modal, pagination with page-size selector ✓
+- **Credit History tab** — full redesign: same table pattern with Amount (+N green / −N red) and Balance columns, always-active action icons, shared Invoice Details modal, pagination ✓
+- **Cancel Subscription flow** — reasons modal → success screen → post-cancellation state: "Restore Plan" button, credits expiry warning banner, "Reactivate Subscription" link ✓
+- **Reactivate Subscription flow** — confirmation modal with billing amount + date → success toast → page returns to active state ✓
+- `DashboardNew.tsx` — dashboard redesigned with status badges, filters, scan cards, interactive elements ✓
+- `StatusBadge` component in `src/components/dashboard/StatusBadge.tsx` ✓
 
 ### What is NOT YET DONE (pending implementation)
-- Figma redesigns: `NewScan`, `AuditDetail`, `DashboardNew` (Figma designs not yet fetched)
-- All modals: `BuyCreditsModal`, `CancelSubscriptionModal`, `UpgradeModal`, `ReactivateModal`, `ShareReportModal`
-- PDF report generation (`PdfReport` component + `pdf.ts` lib)
+- Figma redesigns: `NewScan` (needs Figma fetch for `105:16689`)
 - Unauthenticated redirect preserving `?url=` param through login flow
 - Replace placeholder stats in `StatsBar.tsx` with real API data when available
 - Replace placeholder company names in `SocialProof.tsx` with real customer logos
 - Enable Google OAuth provider in Supabase dashboard (Authentication → Providers → Google)
 - Set Vercel environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
+- Backend endpoints for rescan and share: `POST /api/audits/:id/rescan`, `POST /api/audits/:id/share`
+- Onboarding + Tutorial flows (Figma `210:58803`, `210:58819`)
+- Animations, loading skeletons, micro-interactions (Phase 4D)
+- E2E testing suite (Phase 5)
 
 ---
 
@@ -126,12 +142,13 @@ This file is the authoritative context document for Claude Code working on this 
 │   │   ├── Testimonials.tsx          # 3 testimonial cards (Dev/QA/PM personas) ✓
 │   │   ├── CtaBanner.tsx             # Indigo full-width CTA banner above footer ✓
 │   │   ├── sidebar.tsx               # Dashboard sidebar
-│   │   ├── modals/                   # (pending — Phase 4A)
-│   │   │   ├── BuyCreditsModal.tsx
-│   │   │   ├── CancelSubscriptionModal.tsx
-│   │   │   ├── UpgradeModal.tsx
-│   │   │   ├── ReactivateModal.tsx
-│   │   │   └── ShareReportModal.tsx
+│   │   ├── modals/                   # All implemented ✓
+│   │   │   ├── BuyCreditsModal.tsx       # 3-step: amount → confirm → success ✓
+│   │   │   ├── CancelSubscriptionModal.tsx  # reasons → cancelled screen ✓
+│   │   │   ├── ReactivateModal.tsx       # confirm reactivation ✓
+│   │   │   ├── ShareReportModal.tsx      # share report link ✓
+│   │   │   ├── RescanModal.tsx           # rescan confirmation ✓
+│   │   │   └── PreviewModal.tsx          # report preview ✓
 │   │   └── ui/                       # shadcn/ui components (Radix UI based)
 │   │       └── [65+ components]
 │
@@ -447,27 +464,27 @@ All screens are in the same Figma file. Node IDs for screens not yet implemented
 
 | Screen | Node ID | Status |
 |--------|---------|--------|
-| Audit Dashboard | `172:20570` | Pending fetch |
-| Pricing | `263:59336` | Pending fetch |
+| Audit Dashboard | `172:20570` | **Implemented** ✓ |
+| Pricing | `263:59336` | **Implemented** ✓ |
 | Scanning website | `105:16689` | Pending fetch |
-| Landing (HowItWorks+Footer) | `220:44843` | Pending fetch |
-| Audit results | `105:15858` | Pending fetch |
-| Issues | `250:47714` | Pending fetch |
-| Settings | `185:35236` | Pending fetch |
-| Account | `263:63544` | Pending fetch |
-| Notifications | `263:65079` | Pending fetch |
-| Security | `263:65080` | Pending fetch |
-| Plans & Credits | `185:35493` | Pending fetch |
-| Payment History | `185:35736` | Pending fetch |
-| Credit History | `185:35958` | Pending fetch |
-| Buy Credits modal | `185:35553` | Pending fetch |
-| Cancel Sub modal | `185:36009` | Pending fetch |
-| Upgrade modal | `185:36220` | Pending fetch |
-| Reactivate modal | `185:36490` | Pending fetch |
-| Share Report modal | `105:15673` | Pending fetch |
-| PDF Report | `105:16115` | Pending fetch |
-| Onboarding | `210:58803` | Pending fetch |
-| Tutorial | `210:58819` | Pending fetch |
+| Landing (HowItWorks+Footer) | `220:44843` | **Implemented** ✓ |
+| Audit results | `105:15858` | **Implemented** ✓ |
+| Issues | `250:47714` | **Implemented** ✓ |
+| Settings | `185:35236` | **Implemented** ✓ |
+| Account | `263:63544` | **Implemented** ✓ |
+| Notifications | `263:65079` | **Implemented** ✓ |
+| Security | `263:65080` | **Implemented** ✓ |
+| Plans & Credits | `185:35493` | **Implemented** ✓ |
+| Payment History | `185:35736` | **Implemented** ✓ |
+| Credit History | `185:35958` | **Implemented** ✓ |
+| Buy Credits modal | `185:35553` | **Implemented** ✓ |
+| Cancel Sub modal | `185:36009` | **Implemented** ✓ |
+| Upgrade modal | `185:36220` | **Implemented** ✓ |
+| Reactivate modal | `185:36490` | **Implemented** ✓ |
+| Share Report modal | `105:15673` | **Implemented** ✓ |
+| PDF Report | `105:16115` | **Implemented** ✓ |
+| Onboarding | `210:58803` | Pending |
+| Tutorial | `210:58819` | Pending |
 
 **Important:** The Figma MCP has a daily call limit on the starter plan. Spread fetches across sessions (max ~4 screens per session). Always check which screens have already been fetched before requesting new ones.
 
@@ -480,14 +497,14 @@ Refer to `PRD.md` for full details. Summary:
 | Phase | What | Status |
 |-------|------|--------|
 | 1A | Shared types, DashboardLayout, fix sidebar, restructure App.tsx routes | **Done** ✓ |
-| 1B | Dashboard redesign (Figma `172:20570`) | Pending |
-| 1C | NewScan redesign (Figma `105:16689`) | Pending |
-| 1D | AuditDetail redesign (Figma `105:15858`, `250:47714`) | Pending |
-| 1E | Pricing redesign (Figma `263:59336`) | **Done** ✓ (light theme, no Figma fetch needed) |
+| 1B | Dashboard redesign (Figma `172:20570`) | **Done** ✓ |
+| 1C | NewScan redesign (Figma `105:16689`) | Pending — Figma not yet fetched |
+| 1D | AuditDetail redesign (Figma `105:15858`, `250:47714`) | **Done** ✓ |
+| 1E | Pricing redesign (Figma `263:59336`) | **Done** ✓ |
 | 1F | HowItWorks + Footer redesign (Figma `220:44843`) | **Done** ✓ |
 | Landing+ | SocialProof, StatsBar, ComplianceBadges, Testimonials, CtaBanner | **Done** ✓ |
 | 2A | Settings pages (Account, Security, Notifications) | **Done** ✓ |
-| 2B | Billing pages (PlansAndCredits, PaymentHistory, CreditHistory) | **Done** ✓ |
+| 2B | Billing pages (PlansAndCredits, PaymentHistory, CreditHistory) — full table redesign | **Done** ✓ |
 | 2C | API expansion — backend routes for profile, password, history | **Done** ✓ |
 | 3A | Custom hooks (useAudits, useAudit, useCredits, usePayments) | **Done** ✓ |
 | 3B | Remove mock data components | **Done** ✓ |
@@ -495,8 +512,8 @@ Refer to `PRD.md` for full details. Summary:
 | Tests | 18 test files, 133 tests — all pages, hooks, layouts | **Done** ✓ |
 | Deploy | Vercel frontend deploy + vercel.json + tsconfig build fix | **Done** ✓ |
 | Auth+ | Google OAuth on Login/SignUp | **Done** ✓ (requires Supabase dashboard config) |
-| 4A | Modals (BuyCredits, CancelSub, Upgrade, Reactivate, ShareReport) | Pending |
-| 4B | PDF report (PdfReport component + pdf.ts lib) | Pending |
+| 4A | Modals (BuyCredits, CancelSub, Reactivate, ShareReport, Rescan, Preview) | **Done** ✓ |
+| 4B | PDF report (PdfReport component + pdf.ts lib) | **Done** ✓ |
 | 4C | Onboarding + Tutorial flows | Pending |
 | 4D | Animations, skeletons, toasts | Pending |
 | 5 | Cleanup: design consistency, responsive polish, E2E testing | Pending |
