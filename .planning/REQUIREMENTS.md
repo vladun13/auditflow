@@ -56,7 +56,7 @@
 - [x] **PLSH-02**: Framer Motion animations on scan progress steps and page transitions
 - [x] **PLSH-03**: Sidebar collapses to icon-only at 768-1279px; becomes hamburger drawer at <768px
 - [x] **PLSH-04**: All interactive elements are keyboard navigable and have visible focus indicators
-- [ ] **PLSH-05**: E2E tests cover critical flows: signup -> scan -> view results -> download PDF -> buy credits
+- [x] **PLSH-05**: E2E tests cover critical flows: signup -> scan -> view results -> download PDF -> buy credits
 
 ## v2 Requirements
 
@@ -116,7 +116,7 @@
 | PLSH-02 | Phase 6 | Complete |
 | PLSH-03 | Phase 6 | Complete |
 | PLSH-04 | Phase 6 | Complete |
-| PLSH-05 | Phase 7 | Pending |
+| PLSH-05 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 29 total
