@@ -66,6 +66,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Keyboard focus indicators — indigo ring matching design system primary */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #4F46E5;
+  }
+
   /* Respect user motion preferences */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
