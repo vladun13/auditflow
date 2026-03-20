@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 
@@ -86,8 +86,6 @@ function ErrorIllustration() {
 }
 
 export function NotFound() {
-  const navigate = useNavigate()
-
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

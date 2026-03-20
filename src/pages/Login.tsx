@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Eye, EyeOff } from 'lucide-react'
 import { AuthIllustration } from '@/components/AuthIllustration'
-import { toast } from 'sonner'
 
 export function Login() {
   const [email, setEmail] = useState('')

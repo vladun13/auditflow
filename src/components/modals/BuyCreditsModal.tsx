@@ -58,7 +58,6 @@ function AmountStep({
   onCancel: () => void
   onContinue: () => void
 }) {
-  const isCustomActive = customAmount !== '' && selectedAmount === null
 
   return (
     <>

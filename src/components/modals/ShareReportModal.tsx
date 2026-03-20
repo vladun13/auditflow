@@ -1,4 +1,5 @@
-import { useState, KeyboardEvent } from 'react'
+import { useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Link2, X, Trash2, Share2, Timer } from 'lucide-react'
 import { toast } from 'sonner'

@@ -114,24 +114,6 @@ function CodeBox({ label, code }: { label?: string; code: string }) {
   )
 }
 
-function SelectorBox({ selector }: { selector: string }) {
-  return (
-    <div style={{
-      backgroundColor: '#fff1f2',
-      border: '1px solid #fecaca',
-      borderRadius: '6px',
-      padding: '8px 12px',
-      marginBottom: '6px',
-      fontSize: '12px',
-      fontFamily: 'monospace',
-      color: '#374151',
-    }}>
-      <span style={{ color: '#dc2626', fontWeight: 600 }}>Selector: </span>
-      {selector}
-    </div>
-  )
-}
-
 function TimePill({ hours }: { hours: number | null }) {
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid #c7d2fe', borderRadius: '20px', padding: '4px 12px', backgroundColor: '#eef2ff', marginTop: '4px' }}>
