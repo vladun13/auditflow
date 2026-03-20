@@ -76,25 +76,31 @@ export class AIService {
   }
 
   private async generateRecommendation(violationType: string, violationExample: any): Promise<AIRecommendation> {
-    const prompt = `I found this accessibility violation in a website:
-- Type: ${violationType}
-- Impact: ${violationExample.impact}
-- WCAG: ${violationExample.wcag_criterion}
-- Description: ${violationExample.description}
-- Affected elements: ${violationExample.affected_elements} instances
+    const prompt = `You are an accessibility engineer. A WCAG audit found this violation on a real website:
 
-Please provide:
-1. A plain English explanation (1-2 sentences) of what this issue is and why it matters for accessibility
-2. Step-by-step fix instructions (be specific and actionable)
-3. Estimated hours to fix (be realistic: 0.5 - 8 hours range)
-4. Tools/libraries that can help (optional)
+Violation ID: ${violationType}
+Impact: ${violationExample.impact}
+WCAG criterion: ${violationExample.wcag_criterion}
+Page: ${violationExample.page_url}
+Axe-core description: ${violationExample.description}
+Number of affected elements: ${violationExample.affected_elements}
 
-Format your response as JSON with keys: explanation, fix_steps, estimated_hours, tools`
+Respond with a JSON object containing exactly these keys:
+
+"explanation" — 1-2 plain-English sentences: what the problem is and why it matters for real users (screen reader users, keyboard users, low-vision users, etc.).
+
+"fix_steps" — A numbered list of concrete steps a developer must take to fix this. Each step must be specific to the violation type "${violationType}". Include the exact HTML attribute, CSS property, or code change required. Show a before/after code snippet where it makes the fix clearer. Do NOT say "review WCAG guidelines" or give vague advice — tell the developer exactly what to change in their code.
+
+"estimated_hours" — Realistic float (0.5–8) for a developer to fix all instances.
+
+"tools" — Optional: specific tools or libraries that help (e.g. "axe DevTools browser extension", "eslint-plugin-jsx-a11y").
+
+Return only valid JSON, no prose outside the JSON object.`
 
     try {
       const message = await anthropic.messages.create({
         model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
+        max_tokens: 1500,
         messages: [{
           role: 'user',
           content: prompt
@@ -106,7 +112,6 @@ Format your response as JSON with keys: explanation, fix_steps, estimated_hours,
         throw new Error('Unexpected response type from Claude')
       }
 
-      // Parse JSON response
       const jsonMatch = response.text.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
         throw new Error('Could not parse JSON from Claude response')
@@ -122,13 +127,49 @@ Format your response as JSON with keys: explanation, fix_steps, estimated_hours,
       }
     } catch (error) {
       console.error('Claude API error:', error)
+      return this.getFallback(violationType, violationExample)
+    }
+  }
 
-      // Return fallback
-      return {
-        explanation: 'This accessibility issue may prevent some users from accessing content.',
-        fix_steps: 'Please review the WCAG guidelines for this criterion and update your code accordingly.',
-        estimated_hours: 1.0
-      }
+  private getFallback(violationType: string, violation: any): AIRecommendation {
+    const fallbacks: Record<string, Omit<AIRecommendation, 'estimated_hours'>> = {
+      'color-contrast': {
+        explanation: 'Text does not have enough contrast against its background, making it hard to read for low-vision users.',
+        fix_steps: '1. Open browser DevTools and inspect the failing element.\n2. Check the computed color and background-color values.\n3. Use the WebAIM Contrast Checker (webaim.org/resources/contrastchecker) to find a passing color pair.\n4. Update your CSS: for body text, aim for at least 4.5:1 ratio; for large text (18px+ or 14px bold), at least 3:1.\nExample fix:\n  Before: color: #999999; background: #ffffff; (ratio 2.85:1 — FAIL)\n  After:  color: #767676; background: #ffffff; (ratio 4.54:1 — PASS)',
+        tools: 'WebAIM Contrast Checker, axe DevTools, Colour Contrast Analyser'
+      },
+      'image-alt': {
+        explanation: 'Images are missing alt text, so screen reader users receive no information about what the image shows.',
+        fix_steps: '1. Find every <img> tag that is missing an alt attribute.\n2. For informative images, add a descriptive alt that conveys the meaning: <img src="chart.png" alt="Bar chart showing 40% increase in Q3 revenue">\n3. For purely decorative images, add an empty alt: <img src="divider.png" alt="">\n4. Never use the filename or "image of" as the alt value.',
+        tools: 'eslint-plugin-jsx-a11y (rule: alt-text)'
+      },
+      'button-name': {
+        explanation: 'Buttons have no accessible name, so screen reader users cannot tell what the button does.',
+        fix_steps: '1. Add visible text inside the button: <button>Submit form</button>\n2. For icon-only buttons, add aria-label: <button aria-label="Close dialog"><svg ...></svg></button>\n3. Alternatively use aria-labelledby pointing to a visible label element.\n4. Never leave a button with only a generic icon and no text or aria-label.',
+        tools: 'eslint-plugin-jsx-a11y (rule: interactive-supports-focus)'
+      },
+      'link-name': {
+        explanation: 'Links have no accessible name, meaning screen reader users cannot determine where the link goes.',
+        fix_steps: '1. Add descriptive visible text inside the link: <a href="/report">Download report</a>\n2. For icon-only links, add aria-label: <a href="/home" aria-label="Go to homepage"><svg ...></svg></a>\n3. Avoid generic text like "click here" or "read more" — be specific about the destination.',
+        tools: 'eslint-plugin-jsx-a11y (rule: anchor-has-content)'
+      },
+      'label': {
+        explanation: 'Form inputs are missing labels, so screen reader users cannot identify what data to enter.',
+        fix_steps: '1. Add a <label> element and associate it with the input using htmlFor/for:\n  <label for="email">Email address</label>\n  <input type="email" id="email">\n2. Or wrap the input in the label:\n  <label>Email address <input type="email"></label>\n3. As a last resort for visually hidden labels, use aria-label on the input directly.',
+        tools: 'eslint-plugin-jsx-a11y (rule: label-has-associated-control)'
+      },
+    }
+
+    const specific = fallbacks[violationType]
+    if (specific) {
+      return { ...specific, estimated_hours: 1.0 }
+    }
+
+    // Generic fallback with at least the violation description
+    return {
+      explanation: `This ${violation.impact}-impact accessibility issue (${violationType}) may prevent some users from accessing content on your page.`,
+      fix_steps: `1. Search your codebase for elements matching the violation type: "${violationType}".\n2. Axe-core description: ${violation.description}\n3. Look up the fix for WCAG criterion ${violation.wcag_criterion} at https://www.w3.org/WAI/WCAG21/quickref/ for exact code requirements.\n4. Apply the fix to all ${violation.affected_elements} affected element(s) on this page.`,
+      estimated_hours: 1.0
     }
   }
 
