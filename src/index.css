@@ -68,8 +68,8 @@
 
   /* Keyboard focus indicators — indigo ring matching design system primary */
   :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px white, 0 0 0 4px #4F46E5;
+    outline: 2px solid #4F46E5;
+    outline-offset: 2px;
   }
 
   /* Respect user motion preferences */
