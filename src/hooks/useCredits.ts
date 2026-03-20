@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export function useCredits() {
   const { user } = useAuth()
   const [credits, setCredits] = useState<number | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -22,10 +23,12 @@ export function useCredits() {
     if (error) {
       setError(error)
     } else if (data) {
-      setCredits((data as { credits: number }).credits)
+      const d = data as { credits: number | null; isAdmin?: boolean }
+      setCredits(d.credits)
+      setIsAdmin(d.isAdmin === true)
     }
     setLoading(false)
   }
 
-  return { credits, loading, error, refetch: fetchCredits }
+  return { credits, isAdmin, loading, error, refetch: fetchCredits }
 }

@@ -15,7 +15,7 @@ import { ScanProgress } from '@/components/new-scan/ScanProgress'
 
 export function NewScan() {
   const { user } = useAuth()
-  const { credits } = useCredits()
+  const { credits, isAdmin } = useCredits()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -106,7 +106,7 @@ export function NewScan() {
     }
   }
 
-  const noCredits = credits !== null && credits === 0
+  const noCredits = !isAdmin && credits !== null && credits === 0
 
   return (
     <div className="p-6 lg:p-8">
@@ -133,7 +133,15 @@ export function NewScan() {
             <StandardsSelect selected={standards} onToggle={toggleStandard} />
 
             {/* Credits info */}
-            {noCredits ? (
+            {isAdmin ? (
+              <div className="flex items-center justify-between rounded-lg bg-indigo-50 border border-indigo-100 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-[#4F46E5]" />
+                  <span className="text-sm text-gray-700">This scan uses <strong>1 credit</strong></span>
+                </div>
+                <span className="text-sm font-medium text-[#4F46E5]">Unlimited credits</span>
+              </div>
+            ) : noCredits ? (
               <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-600" />

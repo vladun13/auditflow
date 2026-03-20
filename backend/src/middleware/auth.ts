@@ -5,6 +5,7 @@ export interface AuthRequest extends Request {
   user?: {
     id: string
     email: string
+    isAdmin: boolean
   }
 }
 
@@ -26,7 +27,8 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
 
     req.user = {
       id: user.id,
-      email: user.email!
+      email: user.email!,
+      isAdmin: user.user_metadata?.role === 'admin',
     }
 
     next()

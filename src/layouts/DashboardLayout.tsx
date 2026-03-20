@@ -58,7 +58,7 @@ export function DashboardLayout() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const { credits } = useCredits()
+  const { credits, isAdmin } = useCredits()
   const isTablet = useIsTablet()
   const mainRef = useRef<HTMLDivElement>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -79,7 +79,7 @@ export function DashboardLayout() {
       : location.pathname === path
 
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? '?'
-  const isFree = credits !== null && credits <= 1
+  const isFree = !isAdmin && credits !== null && credits <= 1
 
   return (
     <div className="flex h-screen bg-white">
@@ -169,26 +169,32 @@ export function DashboardLayout() {
 
             {/* Credits badge */}
             <button
-              onClick={() => setBuyCreditsOpen(true)}
+              onClick={() => !isAdmin && setBuyCreditsOpen(true)}
               className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:bg-gray-50 transition-colors"
             >
               <Zap className="h-3.5 w-3.5 text-[#4F46E5]" />
-              <span>{credits ?? '—'} credit{credits !== 1 ? 's' : ''}</span>
+              {isAdmin ? (
+                <span>Unlimited</span>
+              ) : (
+                <span>{credits ?? '—'} credit{credits !== 1 ? 's' : ''}</span>
+              )}
             </button>
 
-            {/* Upgrade / Buy Credits */}
-            <Button
-              size="sm"
-              onClick={() => setBuyCreditsOpen(true)}
-              className="rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4 gap-1"
-            >
-              {isFree ? (
-                <>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                  Upgrade
-                </>
-              ) : 'Buy Credits'}
-            </Button>
+            {/* Upgrade / Buy Credits — hidden for admins */}
+            {!isAdmin && (
+              <Button
+                size="sm"
+                onClick={() => setBuyCreditsOpen(true)}
+                className="rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4 gap-1"
+              >
+                {isFree ? (
+                  <>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    Upgrade
+                  </>
+                ) : 'Buy Credits'}
+              </Button>
+            )}
 
             {/* Avatar + logout */}
             <div className="flex items-center gap-2">

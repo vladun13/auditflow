@@ -18,7 +18,11 @@ router.get('/credits', authenticate, async (req: AuthRequest, res) => {
       return res.status(500).json({ error: 'Failed to fetch credits' })
     }
 
-    res.json({ credits: data.credits })
+    if (req.user!.isAdmin) {
+      return res.json({ credits: null, isAdmin: true })
+    }
+
+    res.json({ credits: data.credits, isAdmin: false })
   } catch (error) {
     console.error('Error fetching credits:', error)
     res.status(500).json({ error: 'Failed to fetch credits' })

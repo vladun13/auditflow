@@ -37,7 +37,7 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
       return res.status(500).json({ error: 'Failed to check credits' })
     }
 
-    if (user.credits < 1) {
+    if (!req.user!.isAdmin && user.credits < 1) {
       return res.status(402).json({ error: 'Insufficient credits' })
     }
 
@@ -89,31 +89,33 @@ router.post('/:id/scan', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Audit already started or completed' })
     }
 
-    // Atomically deduct 1 credit using optimistic locking:
-    // Read the current credit count, then UPDATE only if it hasn't changed.
-    // This prevents a TOCTOU race condition where two concurrent scan requests
-    // could both pass the credit check and both deduct a credit.
-    const { data: userCredits } = await supabase
-      .from('users')
-      .select('credits')
-      .eq('id', req.user!.id)
-      .single()
+    if (!req.user!.isAdmin) {
+      // Atomically deduct 1 credit using optimistic locking:
+      // Read the current credit count, then UPDATE only if it hasn't changed.
+      // This prevents a TOCTOU race condition where two concurrent scan requests
+      // could both pass the credit check and both deduct a credit.
+      const { data: userCredits } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', req.user!.id)
+        .single()
 
-    if (!userCredits || userCredits.credits < 1) {
-      return res.status(402).json({ error: 'Insufficient credits' })
-    }
+      if (!userCredits || userCredits.credits < 1) {
+        return res.status(402).json({ error: 'Insufficient credits' })
+      }
 
-    // Conditional update: only succeeds if credits still equals the value we read
-    const { data: deducted } = await supabase
-      .from('users')
-      .update({ credits: userCredits.credits - 1 })
-      .eq('id', req.user!.id)
-      .eq('credits', userCredits.credits)  // optimistic lock
-      .select('credits')
+      // Conditional update: only succeeds if credits still equals the value we read
+      const { data: deducted } = await supabase
+        .from('users')
+        .update({ credits: userCredits.credits - 1 })
+        .eq('id', req.user!.id)
+        .eq('credits', userCredits.credits)  // optimistic lock
+        .select('credits')
 
-    if (!deducted || deducted.length === 0) {
-      // Another concurrent request already used this credit
-      return res.status(402).json({ error: 'Insufficient credits' })
+      if (!deducted || deducted.length === 0) {
+        // Another concurrent request already used this credit
+        return res.status(402).json({ error: 'Insufficient credits' })
+      }
     }
 
     // Start scan in background (don't await)
