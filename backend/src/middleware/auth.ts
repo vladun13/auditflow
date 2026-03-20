@@ -25,10 +25,11 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
       return res.status(401).json({ error: 'Invalid token' })
     }
 
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
     req.user = {
       id: user.id,
       email: user.email!,
-      isAdmin: user.user_metadata?.role === 'admin',
+      isAdmin: adminEmails.includes(user.email!.toLowerCase()) || user.user_metadata?.role === 'admin',
     }
 
     next()
