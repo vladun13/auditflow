@@ -42,8 +42,7 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 - ✓ WelcomeModal (first-login popup, Figma node `210:58803`) — Validated in Phase 5
 - ✓ Onboarding profile questions + Tutorial flow (5 steps) — Validated in Phase 5
 - ✓ Loading skeletons throughout dashboard — Validated in Phase 1
-- [ ] Animations (Framer Motion) on scan progress, page transitions
-- [ ] Responsive polish: sidebar hamburger drawer on mobile
+- ✓ Framer Motion page transitions (AnimatePresence on Outlet, opacity fade 200ms) + responsive sidebar (useIsTablet, forceCollapsed, Radix tooltips) + global :focus-visible keyboard indicators — Validated in Phase 6
 - [ ] E2E tests for critical flows (Playwright)
 
 ### Out of Scope
@@ -86,4 +85,4 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 | Client-side routing (SPA) | Simpler deployment on Vercel | ✓ Good |
 
 ---
-*Last updated: 2026-03-19 after Phase 3 (Modals) completion*
+*Last updated: 2026-03-20 after Phase 6 (Polish & Responsive) completion*
