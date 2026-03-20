@@ -47,8 +47,8 @@
 
 ### Onboarding
 
-- [ ] **ONBD-01**: New user after first login sees an onboarding flow explaining how to run their first scan
-- [ ] **ONBD-02**: User can skip onboarding at any step
+- [x] **ONBD-01**: New user after first login sees an onboarding flow explaining how to run their first scan
+- [x] **ONBD-02**: User can skip onboarding at any step
 
 ### Polish & Quality
 
@@ -111,8 +111,8 @@
 | PDF-02 | Phase 4 | Complete |
 | PDF-03 | Phase 4 | Complete |
 | AUDIT-05 | Phase 4 | Complete |
-| ONBD-01 | Phase 5 | Pending |
-| ONBD-02 | Phase 5 | Pending |
+| ONBD-01 | Phase 5 | Complete |
+| ONBD-02 | Phase 5 | Complete |
 | PLSH-02 | Phase 6 | Pending |
 | PLSH-03 | Phase 6 | Pending |
 | PLSH-04 | Phase 6 | Pending |

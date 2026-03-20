@@ -37,10 +37,10 @@ Every developer who runs a scan gets actionable, code-level fix instructions for
 - [ ] ReactivateModal (node `185:36490`)
 - ✓ ShareReportModal — clipboard copy, Sonner toast, wired to AuditHeader — Validated in Phase 3
 - ✓ CancelSubscriptionModal + ReactivateModal — single-step flows, wired to PlansAndCredits — Validated in Phase 3
-- [ ] PDF report generation — PdfReport component + pdf.ts lib (node `105:16115`)
+- ✓ PDF report generation — PdfReport component + pdf.ts lib — Validated in Phase 4
 - ✓ Unauthenticated redirect preserving `?url=` param through login (AUTH-01 via sessionStorage) — Validated in Phase 2
-- [ ] Onboarding flow (node `210:58803`)
-- [ ] Tutorial flow (node `210:58819`)
+- ✓ WelcomeModal (first-login popup, Figma node `210:58803`) — Validated in Phase 5
+- ✓ Onboarding profile questions + Tutorial flow (5 steps) — Validated in Phase 5
 - ✓ Loading skeletons throughout dashboard — Validated in Phase 1
 - [ ] Animations (Framer Motion) on scan progress, page transitions
 - [ ] Responsive polish: sidebar hamburger drawer on mobile
