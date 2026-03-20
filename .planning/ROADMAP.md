@@ -90,7 +90,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. New user after first login sees an onboarding flow explaining the scan process (enter URL, review results, download report)
   2. User can skip the onboarding at any step and proceed directly to the dashboard
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
 - [ ] 05-01: TBD
@@ -116,10 +116,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Playwright E2E tests cover: signup, run a scan, view results, download PDF, and buy credits flows
   2. All E2E tests pass in CI-compatible headless mode
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md -- Playwright setup + 5 E2E test files (auth, scan, results, pdf, credits)
 
 ## Progress
 
