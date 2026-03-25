@@ -307,7 +307,7 @@ export function Hero() {
         {/* Main content */}
         <div className="relative z-10 mx-auto w-full max-w-[760px] px-6 text-center pt-20 pb-16">
           {/* Headline */}
-          <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-950 leading-tight">
+          <h1 className="mb-4 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-950 leading-tight">
             Fix Accessibility Issues{" "}
             <span className="text-[#4F46E5]">Before They Reach Production</span>
           </h1>
@@ -411,7 +411,7 @@ export function Hero() {
         </div>
 
         {/* Bottom white card */}
-        <div className="relative z-10 mx-4 sm:mx-6 w-full max-w-[1360px] rounded-t-3xl bg-white px-8 pt-8 pb-0 shadow-[0px_-4px_32px_0px_rgba(0,0,0,0.07)]">
+        <div className="relative z-10 mx-4 sm:mx-6 w-full max-w-[1360px] rounded-t-3xl bg-white px-4 sm:px-8 pt-8 pb-0 shadow-[0px_-4px_32px_0px_rgba(0,0,0,0.07)]">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-950 mb-2">See what your report looks like</h2>
             <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
