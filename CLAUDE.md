@@ -20,7 +20,7 @@ This file is the authoritative context document for Claude Code working on this 
 
 ---
 
-## Current State (as of 2026-03-20)
+## Current State (as of 2026-03-25)
 
 ### What is DONE (built and styled)
 - Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme ✓
@@ -71,6 +71,12 @@ This file is the authoritative context document for Claude Code working on this 
 - **Reactivate Subscription flow** — confirmation modal with billing amount + date → success toast → page returns to active state ✓
 - `DashboardNew.tsx` — dashboard redesigned with status badges, filters, scan cards, interactive elements ✓
 - `StatusBadge` component in `src/components/dashboard/StatusBadge.tsx` ✓
+- `render.yaml` — Render.com Blueprint config for backend deployment ✓
+- Backend deployed to Render.com at `https://auditflow-zi2m.onrender.com` ✓
+- `backend/tsconfig.json` — added `"dom"` to `lib` so Puppeteer `page.evaluate()` DOM types compile ✓
+- `backend/src/server.ts` — `app.set('trust proxy', 1)` added for Render's reverse proxy (fixes rate-limiter X-Forwarded-For warning) ✓
+- `VITE_API_URL` set on Vercel → `https://auditflow-zi2m.onrender.com` ✓
+- Vercel env vars all set: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` ✓
 
 ### What is NOT YET DONE (pending implementation)
 - Figma redesigns: `NewScan` (needs Figma fetch for `105:16689`)
@@ -78,7 +84,7 @@ This file is the authoritative context document for Claude Code working on this 
 - Replace placeholder stats in `StatsBar.tsx` with real API data when available
 - Replace placeholder company names in `SocialProof.tsx` with real customer logos
 - Enable Google OAuth provider in Supabase dashboard (Authentication → Providers → Google)
-- Set Vercel environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
+- Puppeteer Chrome cache on Render: must set `PUPPETEER_CACHE_DIR=/opt/render/project/src/backend/.cache/puppeteer` as Render env var, and Render build command must be `cd backend && npm install && npx puppeteer browsers install chrome && npm run build`
 - Backend endpoints for rescan and share: `POST /api/audits/:id/rescan`, `POST /api/audits/:id/share`
 - Onboarding + Tutorial flows (Figma `210:58803`, `210:58819`)
 - Animations, loading skeletons, micro-interactions (Phase 4D)
@@ -221,8 +227,8 @@ This file is the authoritative context document for Claude Code working on this 
 | Supabase | PostgreSQL database + auth + RLS |
 | LemonSqueezy | Payment processing + webhooks |
 | Anthropic Claude API | AI-generated fix recommendations |
-| Vercel | Frontend hosting (deploy target) |
-| Render.com / Railway | Backend hosting (deploy target) |
+| Vercel | Frontend hosting — deployed at `https://auditflow-two.vercel.app` |
+| Render.com | Backend hosting — deployed at `https://auditflow-zi2m.onrender.com` (free tier, spins down after 15min inactivity) |
 
 ---
 
@@ -425,6 +431,13 @@ Both must be running for scanning to work. The frontend calls the backend API; t
 ---
 
 ## Known Issues & Gotchas
+
+### Render.com backend deployment
+Render build command: `cd backend && npm install && npx puppeteer browsers install chrome && npm run build`
+Start command: `cd backend && npm start`
+Root Directory: leave blank (use `cd backend &&` in commands instead — the Root Directory field has a space-injection bug in Render's UI).
+Required env var: `PUPPETEER_CACHE_DIR=/opt/render/project/src/backend/.cache/puppeteer` — without this, Chrome installs during build but can't be found at runtime (different filesystem context on free tier).
+`FRONTEND_URL` must have no trailing slash or CORS preflight will fail.
 
 ### Pre-existing TypeScript errors in scanService.ts
 `backend/src/services/scanService.ts` has 3 pre-existing TS errors (missing `baseDomain` type annotation and `document`/`HTMLAnchorElement` DOM types in a Node.js context). These don't affect runtime since Puppeteer provides DOM APIs. Do not fix unless refactoring the scan service.
