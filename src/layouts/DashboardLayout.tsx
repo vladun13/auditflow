@@ -180,12 +180,12 @@ export function DashboardLayout() {
               )}
             </button>
 
-            {/* Upgrade / Buy Credits — hidden for admins */}
+            {/* Upgrade / Buy Credits — hidden for admins and on mobile */}
             {!isAdmin && (
               <Button
                 size="sm"
                 onClick={() => setBuyCreditsOpen(true)}
-                className="rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4 gap-1"
+                className="hidden sm:flex rounded-full bg-[#4F46E5] text-white hover:bg-[#4338CA] text-xs px-4 gap-1"
               >
                 {isFree ? (
                   <>
@@ -205,7 +205,7 @@ export function DashboardLayout() {
                 onClick={handleLogout}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
               >
-                Log out
+                <span className="hidden sm:inline">Log out</span>
               </button>
             </div>
           </div>

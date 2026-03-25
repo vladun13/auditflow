@@ -144,9 +144,9 @@ export function AuditDetail() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-1 overflow-hidden min-h-0">
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden min-h-0">
           {/* Left: Issues list */}
-          <div className={`shrink-0 overflow-hidden flex flex-col transition-all duration-200 ${sidebarCollapsed ? 'w-14' : 'w-[270px]'}`}>
+          <div className={`overflow-hidden flex flex-col transition-all duration-200 ${sidebarCollapsed ? 'w-full lg:w-14 h-14 lg:h-full' : 'w-full lg:w-[270px] h-48 lg:h-full'}`}>
             <IssuesSidebar
               violations={violations}
               selectedId={firstViolation?.id ?? null}
@@ -162,7 +162,7 @@ export function AuditDetail() {
           </div>
 
           {/* Right: How to Fix */}
-          <div className="w-[340px] shrink-0 overflow-hidden">
+          <div className="hidden lg:block w-[340px] shrink-0 overflow-hidden">
             <HowToFix violation={firstViolation} />
           </div>
         </div>

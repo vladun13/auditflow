@@ -339,7 +339,7 @@ export function Hero() {
             </div>
 
             {/* Controls row */}
-            <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-y-2 px-4 py-3">
               <CrawlDepthButton depth={crawlDepth} onDepthChange={setCrawlDepth} />
 
               <div className="flex items-center gap-2">
@@ -420,9 +420,9 @@ export function Hero() {
           </div>
 
           {/* 4 report preview cards */}
-          <div className="flex gap-4 overflow-hidden pb-0" style={{ height: 200 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-0">
             {REPORT_CARDS.map((card, i) => (
-              <div key={i} className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+              <div key={i} className="aspect-[3/2] rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <img
                   src={card.src}
                   alt={card.alt}

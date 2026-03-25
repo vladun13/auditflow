@@ -457,7 +457,7 @@ export function DashboardNew() {
             { label: 'Average Score',  value: avgScore ? `${avgScore}%` : '--', Icon: BarChart2, iconColor: 'text-orange-500' },
             { label: 'Credits Used',   value: creditsUsed,   Icon: Zap,       iconColor: 'text-purple-600' },
           ].map(({ label, value, Icon, iconColor }, i, arr) => (
-            <div key={label} className={`px-6 py-5 ${i < arr.length - 1 ? 'border-r border-gray-100' : ''}`}>
+            <div key={label} className={`px-3 sm:px-6 py-5 ${i < arr.length - 1 ? 'border-r border-gray-100' : ''}`}>
               <p className="text-xs text-gray-400 mb-2">{label}</p>
               <div className="flex items-center gap-2">
                 <Icon className={`h-5 w-5 ${iconColor}`} />
@@ -470,8 +470,8 @@ export function DashboardNew() {
         {/* Table card */}
         <div className="rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
           {/* Toolbar */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-            <div className="relative w-48 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-4 py-3 border-b border-gray-100">
+            <div className="relative w-full sm:w-48 shrink-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
               <input
                 type="text"
@@ -506,7 +506,8 @@ export function DashboardNew() {
             </div>
           ) : (
             <>
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px] text-sm">
                 <thead>
                   <tr className="border-b border-gray-100">
                     {[
@@ -580,6 +581,7 @@ export function DashboardNew() {
                   ))}
                 </tbody>
               </table>
+              </div>
 
               <Pagination
                 total={total}
