@@ -82,7 +82,7 @@ export class ScanService {
 
         // Extract same-domain links
         if (visited.size < maxPages) {
-          const links = await page.evaluate((baseDomain) => {
+          const links = await page.evaluate((baseDomain: string) => {
             const anchors = Array.from(document.querySelectorAll('a[href]'))
             return anchors
               .map(a => (a as HTMLAnchorElement).href)
