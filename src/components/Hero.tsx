@@ -207,13 +207,13 @@ function NoCreditModal({ onClose, onGetCredits }: { onClose: () => void; onGetCr
   )
 }
 
-// ── Gradient placeholder cards ────────────────────────────────────────────────
+// ── Report preview cards ───────────────────────────────────────────────────────
 
-const CARD_GRADIENTS = [
-  "from-[#3730a3] via-[#4f46e5] to-[#7c3aed]",
-  "from-[#1e40af] via-[#3b82f6] to-[#6366f1]",
-  "from-[#4338ca] via-[#6366f1] to-[#8b5cf6]",
-  "from-[#1d4ed8] via-[#2563eb] to-[#4f46e5]",
+const REPORT_CARDS = [
+  { src: "/images/report-accessible.png", alt: "Accessible site audit report showing WCAG score 94/100 with AA certification" },
+  { src: "/images/report-failing.png",    alt: "Failing site audit report showing WCAG score 31/100 with 41 violations" },
+  { src: "/images/report-violations.png", alt: "Violations list showing critical and serious accessibility issues with WCAG criteria" },
+  { src: "/images/report-ai-fix.png",     alt: "AI-generated fix instructions for missing alt text violation with code examples" },
 ]
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
@@ -419,23 +419,14 @@ export function Hero() {
             </p>
           </div>
 
-          {/* 4 gradient cards */}
+          {/* 4 report preview cards */}
           <div className="flex gap-4 overflow-hidden pb-0" style={{ height: 200 }}>
-            {CARD_GRADIENTS.map((gradient, i) => (
-              <div
-                key={i}
-                className={`flex-1 min-w-0 rounded-2xl bg-gradient-to-br ${gradient} overflow-hidden`}
-                style={{
-                  backgroundImage: `radial-gradient(ellipse at 30% 40%, rgba(255,255,255,0.12) 0%, transparent 60%), linear-gradient(135deg, var(--tw-gradient-stops))`,
-                }}
-              >
-                {/* Grain texture overlay */}
-                <div
-                  className="w-full h-full opacity-30"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-                    backgroundSize: "180px 180px",
-                  }}
+            {REPORT_CARDS.map((card, i) => (
+              <div key={i} className="flex-1 min-w-0 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                <img
+                  src={card.src}
+                  alt={card.alt}
+                  className="w-full h-full object-cover object-top"
                 />
               </div>
             ))}
