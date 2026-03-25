@@ -103,6 +103,12 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260325-k98 | Remove auth debug log | 2026-03-25 | 5d82de9 | [260325-k98-remove-auth-debug-log](./quick/260325-k98-remove-auth-debug-log/) |
+
 ### Blockers/Concerns
 
 - Figma starter plan limits screen fetches to ~4 per session -- phase planning must account for this
