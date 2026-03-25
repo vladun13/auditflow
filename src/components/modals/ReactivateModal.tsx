@@ -15,7 +15,7 @@ interface ReactivateModalProps {
 export function ReactivateModal({
   open,
   onOpenChange,
-  planName = 'Starter',
+  
   planPrice = 149,
   nextBillingDate,
   onConfirm,

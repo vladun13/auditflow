@@ -104,10 +104,10 @@ export function Account() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const [fullName, setFullName]       = useState('')
-  const [origName, setOrigName]       = useState('')
+  const [, setOrigName]       = useState('')
   const [email, setEmail]             = useState('')
   const [companyName, setCompanyName] = useState('')
-  const [origCompany, setOrigCompany] = useState('')
+  const [, setOrigCompany] = useState('')
   const [avatarUrl, setAvatarUrl]     = useState<string | null>(null)
 
   const [savingName,    setSavingName]    = useState(false)

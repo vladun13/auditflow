@@ -459,7 +459,6 @@ export function NewScan() {
       <BuyCreditsModal
         open={buyCreditsOpen}
         onOpenChange={setBuyCreditsOpen}
-        context="upgrade"
       />
     </div>
   )

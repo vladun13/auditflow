@@ -232,7 +232,6 @@ export function DashboardLayout() {
       <BuyCreditsModal
         open={buyCreditsOpen}
         onOpenChange={setBuyCreditsOpen}
-        context={isFree ? 'upgrade' : undefined}
       />
     </div>
   )
