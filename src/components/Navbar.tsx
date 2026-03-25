@@ -335,7 +335,7 @@ function LoggedInNavbar({ credits }: { credits: number | null }) {
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 text-[#4F46E5] fill-[#4F46E5]" />
-                {credits !== null ? `${credits} credits` : "— credits"}
+                {credits !== null ? `${credits} credits` : "0 credits"}
               </button>
               {openPanel === "credits" && (
                 <div className="absolute top-full right-0 mt-3">
@@ -420,17 +420,14 @@ export function Navbar() {
         <LogoMark />
 
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#features" className="flex items-center gap-1 text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
-            Product <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-          </a>
-          <a href="#solutions" className="flex items-center gap-1 text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
-            Solutions <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+          <a href="#demo" className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
+            Demo
           </a>
           <Link to="/pricing" className="text-sm text-gray-700 hover:text-gray-900 transition-colors">
             Pricing
           </Link>
-          <a href="#resources" className="flex items-center gap-1 text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
-            Resources <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+          <a href="#blog" className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
+            Blog
           </a>
         </div>
 

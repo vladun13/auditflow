@@ -108,6 +108,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260325-k98 | Remove auth debug log | 2026-03-25 | 5d82de9 | [260325-k98-remove-auth-debug-log](./quick/260325-k98-remove-auth-debug-log/) |
+| 260325-khj | Fix Navbar credits fallback, rewrite Footer links and add newsletter signup | 2026-03-25 | — | [260325-khj-fix-navbar-imports-and-credits-fallback-](./quick/260325-khj-fix-navbar-imports-and-credits-fallback-/) |
 
 ### Blockers/Concerns
 

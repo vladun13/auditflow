@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 function AuditFlowLogo() {
@@ -8,21 +9,62 @@ function AuditFlowLogo() {
   )
 }
 
-const footerLinks = {
+type FooterLink = { label: string; href: string; comingSoon?: boolean }
+
+const footerLinks: Record<string, FooterLink[]> = {
   Product: [
-    { label: 'Features', href: '#features' },
+    { label: 'Demo', href: '#demo' },
     { label: 'Pricing', href: '/pricing' },
-    { label: 'API', href: '#' },
+    { label: 'API', href: '#', comingSoon: true },
   ],
   Resources: [
-    { label: 'Documentation', href: '#' },
     { label: 'Blog', href: '#' },
     { label: 'Community', href: '#' },
   ],
   Legal: [
     { label: 'Privacy', href: '/privacy' },
     { label: 'Terms', href: '/terms' },
+    { label: 'Accessibility Statement', href: '#' },
+    { label: 'Font Statement', href: '#' },
   ],
+}
+
+function NewsletterSignup() {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (email.trim()) {
+      setSubmitted(true)
+    }
+  }
+
+  return (
+    <div className="mt-4">
+      <p className="text-xs font-medium text-gray-700 mb-2">Get notified when API launches</p>
+      {submitted ? (
+        <p className="text-xs text-[#4F46E5]">You're on the list!</p>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@company.com"
+            required
+            className="flex-1 min-w-0 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-lg bg-[#4F46E5] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#4338CA] transition-colors"
+          >
+            Notify me
+          </button>
+        </form>
+      )}
+    </div>
+  )
 }
 
 export function Footer() {
@@ -41,6 +83,7 @@ export function Footer() {
             <p className="text-sm leading-relaxed text-gray-500">
               Automated accessibility audits and AI-powered fix recommendations for modern web applications.
             </p>
+            <NewsletterSignup />
           </div>
 
           {/* Links */}
@@ -52,12 +95,21 @@ export function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-gray-500 transition-colors duration-200 hover:text-gray-900"
-                    >
-                      {link.label}
-                    </a>
+                    {link.comingSoon ? (
+                      <span className="inline-flex items-center gap-1.5 text-sm text-gray-400 cursor-default select-none">
+                        {link.label}
+                        <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 leading-none">
+                          Soon
+                        </span>
+                      </span>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-sm text-gray-500 transition-colors duration-200 hover:text-gray-900"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
