@@ -131,19 +131,20 @@ const MOCK_NOTIFICATIONS = [
   { id: 4, title: "Welcome to AuditFlow", body: "You received 1 free credit. Run your first accessibility scan now.", time: "Mar 18", unread: false },
 ]
 
-function NotificationsPanel() {
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
-
-  const markAllRead = () =>
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })))
-
+function NotificationsPanel({
+  notifications,
+  onMarkAllRead,
+}: {
+  notifications: typeof MOCK_NOTIFICATIONS
+  onMarkAllRead: () => void
+}) {
   return (
     <div className="w-[380px] rounded-2xl bg-white shadow-xl border border-gray-100 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <h3 className="text-base font-bold text-gray-900">Notifications</h3>
         <button
           type="button"
-          onClick={markAllRead}
+          onClick={onMarkAllRead}
           className="text-sm font-medium text-[#4F46E5] hover:text-[#4338CA] transition-colors cursor-pointer"
         >
           Mark all as read
@@ -280,11 +281,13 @@ function LoggedInNavbar({ credits }: { credits: number | null }) {
   const [showBuyCredits, setShowBuyCredits] = useState(false)
   const navRef = useRef<HTMLDivElement>(null)
 
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
+
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
   const initials = user?.email?.slice(0, 2).toUpperCase() ?? "?"
   const displayName = (user?.user_metadata?.full_name as string | undefined) || user?.email?.split("@")[0] || "User"
   const email = user?.email ?? ""
-  const unreadCount = MOCK_NOTIFICATIONS.filter(n => n.unread).length
+  const unreadCount = notifications.filter(n => n.unread).length
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -365,7 +368,10 @@ function LoggedInNavbar({ credits }: { credits: number | null }) {
               </button>
               {openPanel === "notifications" && (
                 <div className="absolute top-full right-0 mt-3">
-                  <NotificationsPanel />
+                  <NotificationsPanel
+                    notifications={notifications}
+                    onMarkAllRead={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
+                  />
                 </div>
               )}
             </div>
