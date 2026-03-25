@@ -22,7 +22,6 @@ export async function authenticate(req: AuthRequest, res: Response, next: NextFu
     const { data: { user }, error } = await supabase.auth.getUser(token)
 
     if (error || !user) {
-      console.error('Auth getUser error:', error?.message, error?.status)
       return res.status(401).json({ error: 'Invalid token' })
     }
 
