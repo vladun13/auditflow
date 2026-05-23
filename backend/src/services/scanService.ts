@@ -20,7 +20,12 @@ export class ScanService {
 
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+        ]
       })
 
       const pagesToScan = await this.crawlWebsite(browser, websiteUrl, crawlDepth)
@@ -33,6 +38,10 @@ export class ScanService {
         } catch (error) {
           console.error(`Error scanning ${pageUrl}:`, error)
         }
+      }
+
+      if (scanResults.length === 0) {
+        throw new Error('No pages could be scanned — all pages failed to load or timed out')
       }
 
       // Process and save results
@@ -78,7 +87,17 @@ export class ScanService {
 
       try {
         const page = await browser.newPage()
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 10000 })
+        await this.configurePage(page)
+        
+        try {
+          await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 })
+        } catch (gotoError: any) {
+          console.warn(`networkidle2 crawl timeout for ${url}, falling back to load:`, gotoError.message)
+          await page.goto(url, { waitUntil: 'load', timeout: 15000 })
+        }
+
+        // Validate the page content before extracting links
+        await this.validatePageContent(page, url)
 
         // Extract same-domain links
         if (visited.size < maxPages) {
@@ -117,7 +136,20 @@ export class ScanService {
     const page = await browser.newPage()
 
     try {
-      await page.goto(url, { waitUntil: 'networkidle2', timeout: 10000 })
+      await this.configurePage(page)
+      
+      try {
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 })
+      } catch (gotoError: any) {
+        console.warn(`networkidle2 scan timeout for ${url}, falling back to load:`, gotoError.message)
+        await page.goto(url, { waitUntil: 'load', timeout: 15000 })
+      }
+
+      // Wait briefly for JS-rendered content to settle
+      await new Promise(resolve => setTimeout(resolve, 2500))
+
+      // Validate page content before scanning
+      await this.validatePageContent(page, url)
 
       const results = await new AxePuppeteer(page)
         .withTags(['wcag2a', 'wcag2aa', 'wcag2aaa'])
@@ -142,12 +174,13 @@ export class ScanService {
     for (const result of scanResults) {
       for (const violation of result.violations) {
         const impact = violation.impact || 'minor'
+        const nodeCount = violation.nodes?.length || 1
 
-        // Count by impact
-        if (impact === 'critical') criticalCount++
-        else if (impact === 'serious') seriousCount++
-        else if (impact === 'moderate') moderateCount++
-        else minorCount++
+        // Count by impact per affected element (not just per violation type)
+        if (impact === 'critical') criticalCount += nodeCount
+        else if (impact === 'serious') seriousCount += nodeCount
+        else if (impact === 'moderate') moderateCount += nodeCount
+        else minorCount += nodeCount
 
         violations.push({
           audit_id: auditId,
@@ -193,6 +226,77 @@ export class ScanService {
         wcag_level: wcagLevel
       })
       .eq('id', auditId)
+  }
+
+  private async configurePage(page: any) {
+    // Evade bot detection with a realistic User-Agent
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
+    
+    // Set typical browser viewport size to prevent mobile-only/empty renders
+    await page.setViewport({ width: 1280, height: 800 })
+    
+    // Set extra HTTP headers to look like a standard browser request
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+      'Connection': 'keep-alive',
+      'sec-ch-ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"macOS"',
+      'Upgrade-Insecure-Requests': '1'
+    })
+  }
+
+  private async validatePageContent(page: any, url: string) {
+    try {
+      const pageInfo = await page.evaluate(() => {
+        const title = document.title;
+        const bodyText = document.body ? document.body.innerText : '';
+        const elementCount = document.body ? document.body.querySelectorAll('*').length : 0;
+        
+        return { title, bodyText, elementCount };
+      });
+      
+      const { title, bodyText, elementCount } = pageInfo;
+      
+      // Check for bot challenge or security check indicators
+      const challengeTerms = [
+        'cloudflare',
+        'checking your browser',
+        'security check',
+        'access denied',
+        'please enable js',
+        'please enable javascript',
+        'ddos protection',
+        'bot protection',
+        'captcha'
+      ];
+      
+      const lowerTitle = title.toLowerCase();
+      const lowerBody = bodyText.toLowerCase();
+      
+      const isChallenge = challengeTerms.some(term => 
+        lowerTitle.includes(term) || lowerBody.includes(term)
+      );
+      
+      if (isChallenge) {
+        throw new Error(`Bot challenge or security check detected on page: "${title}"`);
+      }
+      
+      // Ensure the page has reasonable structural elements
+      if (elementCount < 5) {
+        throw new Error(`Loaded page has virtually empty DOM (only ${elementCount} elements inside body)`);
+      }
+      
+      // Ensure we don't have a blank body with extremely low content
+      if (!bodyText.trim() && elementCount < 10) {
+        throw new Error(`Page body is empty and has very few elements (${elementCount})`);
+      }
+      
+    } catch (error: any) {
+      console.error(`Page validation failed for ${url}:`, error.message);
+      throw new Error(`Failed to load valid page content for ${url}: ${error.message}`);
+    }
   }
 
   private calculateWCAGScore(critical: number, serious: number, moderate: number, minor: number): number {
