@@ -255,7 +255,7 @@ type ScanPhase = 'form' | 'scanning' | 'complete'
 
 export function NewScan() {
   const { user } = useAuth()
-  const { credits, isAdmin } = useCredits()
+  const { credits, isAdmin, plan, maxPages, isUnlimited } = useCredits()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -353,6 +353,7 @@ export function NewScan() {
   }
 
   const noCredits = !isAdmin && credits !== null && credits === 0
+  const exceedsPageLimit = !isUnlimited && crawlDepth > maxPages
 
   // ── Scanning phase ──────────────────────────────────────────────────────────
   if (phase === 'scanning') {
@@ -403,6 +404,18 @@ export function NewScan() {
 
             <UrlInput value={websiteUrl} onChange={setWebsiteUrl} />
             <DepthSelector value={crawlDepth} onChange={setCrawlDepth} />
+            {exceedsPageLimit && (
+              <p className="text-sm text-red-600 -mt-4">
+                Your <strong>{plan}</strong> plan allows up to <strong>{maxPages}</strong> pages per scan.{' '}
+                <button
+                  type="button"
+                  onClick={() => setBuyCreditsOpen(true)}
+                  className="underline font-medium hover:text-red-800"
+                >
+                  Upgrade to scan more pages.
+                </button>
+              </p>
+            )}
             <StandardsSelect selected={standards} onToggle={toggleStandard} />
 
             {/* Credits info */}
@@ -461,7 +474,7 @@ export function NewScan() {
               <Button
                 type="submit"
                 className="flex-1 bg-[#4F46E5] hover:bg-[#4338CA] text-white rounded-lg"
-                disabled={!websiteUrl || noCredits}
+                disabled={!websiteUrl || noCredits || exceedsPageLimit}
               >
                 Start Scan
               </Button>

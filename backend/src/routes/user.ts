@@ -9,7 +9,7 @@ router.get('/credits', authenticate, async (req: AuthRequest, res) => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('credits')
+      .select('credits, plan, max_pages_per_scan')
       .eq('id', req.user!.id)
       .single()
 
@@ -19,10 +19,15 @@ router.get('/credits', authenticate, async (req: AuthRequest, res) => {
     }
 
     if (req.user!.isAdmin) {
-      return res.json({ credits: null, isAdmin: true })
+      return res.json({ credits: null, isAdmin: true, plan: 'enterprise', max_pages_per_scan: 0 })
     }
 
-    res.json({ credits: data.credits, isAdmin: false })
+    res.json({
+      credits: data.credits,
+      isAdmin: false,
+      plan: data.plan ?? 'free',
+      max_pages_per_scan: data.max_pages_per_scan ?? 5,
+    })
   } catch (error) {
     console.error('Error fetching credits:', error)
     res.status(500).json({ error: 'Failed to fetch credits' })

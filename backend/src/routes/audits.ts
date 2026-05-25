@@ -35,10 +35,10 @@ router.post('/create', scanLimiter, authenticate, async (req: AuthRequest, res) 
       return res.status(400).json({ error: urlCheck.reason || 'Invalid URL' })
     }
 
-    // Check user credits
+    // Check user credits and plan page limit
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('credits')
+      .select('credits, plan, max_pages_per_scan')
       .eq('id', req.user!.id)
       .single()
 
@@ -50,13 +50,25 @@ router.post('/create', scanLimiter, authenticate, async (req: AuthRequest, res) 
       return res.status(402).json({ error: 'Insufficient credits' })
     }
 
+    // Enforce plan page limit (0 = unlimited)
+    const maxPages: number = user.max_pages_per_scan ?? 5
+    const requestedPages = parseInt(String(crawl_depth)) || 3
+    if (!req.user!.isAdmin && maxPages > 0 && requestedPages > maxPages) {
+      const planName = user.plan ?? 'free'
+      return res.status(403).json({
+        error: `Your ${planName} plan allows up to ${maxPages} pages per scan. Upgrade to scan more pages.`,
+        max_pages: maxPages,
+      })
+    }
+
     // Create audit
     const { data: audit, error: auditError } = await supabase
       .from('audits')
       .insert({
         user_id: req.user!.id,
         website_url,
-        status: 'pending'
+        status: 'pending',
+        crawl_depth: requestedPages,
       })
       .select()
       .single()
@@ -128,9 +140,10 @@ router.post('/:id/scan', scanLimiter, authenticate, async (req: AuthRequest, res
     }
 
     // Start scan in background (don't await)
+    const crawlDepth = audit.crawl_depth ?? 3
     setImmediate(async () => {
       try {
-        await scanService.scanWebsite(id, audit.website_url, 3) // Default crawl depth
+        await scanService.scanWebsite(id, audit.website_url, crawlDepth)
         await aiService.generateRecommendations(id)
       } catch (error) {
         console.error('Background scan error:', error)

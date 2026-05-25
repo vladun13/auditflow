@@ -41,6 +41,7 @@ export interface UserProfile {
 export interface UserCredits {
   credits: number
   plan: string | null
+  max_pages_per_scan: number | null
 }
 
 export interface Payment {

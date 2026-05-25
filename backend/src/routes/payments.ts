@@ -17,19 +17,22 @@ const plans = {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_BASIC!,
     credits: 1,
     name: 'Basic',
-    price: 149
+    price: 149,
+    maxPages: 5,
   },
   pro: {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_PRO!,
     credits: 5,
     name: 'Pro',
-    price: 299
+    price: 299,
+    maxPages: 10,
   },
   enterprise: {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_ENTERPRISE!,
     credits: 15,
     name: 'Enterprise',
-    price: 499
+    price: 499,
+    maxPages: 0, // 0 = unlimited
   }
 }
 
@@ -139,7 +142,7 @@ router.get('/success/:order_id', authenticate, async (req: AuthRequest, res) => 
       .eq('stripe_session_id', order_id)
       .eq('user_id', req.user!.id)
 
-    // Add credits to user — read current value then update.
+    // Add credits and update plan — read current value then update.
     // Double-processing is prevented by the payment.status === 'pending' check above.
     const { data: currentUser } = await supabase
       .from('users')
@@ -147,9 +150,20 @@ router.get('/success/:order_id', authenticate, async (req: AuthRequest, res) => 
       .eq('id', req.user!.id)
       .single()
 
+    // Derive plan tier from the payment's credits_added amount
+    const grantedPlan = Object.entries(plans).find(
+      ([, p]) => p.credits === creditsToAdd
+    )
+    const planName = grantedPlan ? grantedPlan[0] : 'basic'
+    const maxPages = grantedPlan ? grantedPlan[1].maxPages : 5
+
     await supabase
       .from('users')
-      .update({ credits: (currentUser?.credits ?? 0) + creditsToAdd })
+      .update({
+        credits: (currentUser?.credits ?? 0) + creditsToAdd,
+        plan: planName,
+        max_pages_per_scan: maxPages,
+      })
       .eq('id', req.user!.id)
 
     res.json({
@@ -220,16 +234,26 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           .update({ status: 'completed' })
           .eq('stripe_session_id', orderId)
 
-        // Add credits — idempotency is protected by payment.status check above
+        // Add credits and update plan — idempotency protected by payment.status check above
         const { data: webhookUser } = await supabase
           .from('users')
           .select('credits')
           .eq('id', payment.user_id)
           .single()
 
+        const webhookPlan = Object.entries(plans).find(
+          ([, p]) => p.credits === creditsToAdd
+        )
+        const webhookPlanName = webhookPlan ? webhookPlan[0] : 'basic'
+        const webhookMaxPages = webhookPlan ? webhookPlan[1].maxPages : 5
+
         await supabase
           .from('users')
-          .update({ credits: (webhookUser?.credits ?? 0) + creditsToAdd })
+          .update({
+            credits: (webhookUser?.credits ?? 0) + creditsToAdd,
+            plan: webhookPlanName,
+            max_pages_per_scan: webhookMaxPages,
+          })
           .eq('id', payment.user_id)
       }
     }

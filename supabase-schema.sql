@@ -9,9 +9,16 @@ CREATE TABLE public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL UNIQUE,
   credits INTEGER DEFAULT 1 NOT NULL,
+  plan TEXT DEFAULT 'free' NOT NULL,
+  max_pages_per_scan INTEGER DEFAULT 5 NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
 );
+
+-- Migration (run if table already exists):
+-- ALTER TABLE public.users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free' NOT NULL;
+-- ALTER TABLE public.users ADD COLUMN IF NOT EXISTS max_pages_per_scan INTEGER DEFAULT 5 NOT NULL;
+-- ALTER TABLE public.audits ADD COLUMN IF NOT EXISTS crawl_depth INTEGER DEFAULT 3 NOT NULL;
 
 -- Audits table
 CREATE TABLE public.audits (
@@ -19,6 +26,7 @@ CREATE TABLE public.audits (
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   website_url TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'scanning', 'completed', 'failed')),
+  crawl_depth INTEGER DEFAULT 3 NOT NULL,
   pages_scanned INTEGER DEFAULT 0 NOT NULL,
   total_violations INTEGER DEFAULT 0 NOT NULL,
   critical_count INTEGER DEFAULT 0 NOT NULL,
