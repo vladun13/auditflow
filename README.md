@@ -1,335 +1,264 @@
 # AuditFlow — Accessibility Audit Generator
 
+**Live:** https://auditflow.me  
 **GitHub:** https://github.com/vladun13/auditflow
 
 A full-stack B2B SaaS tool that automatically generates WCAG-compliant accessibility audit reports for websites. Built with React, Express.js, Supabase, and Claude AI.
 
 ## Features
 
-- 🔐 **User Authentication** - Secure email/password authentication via Supabase
-- 🔍 **Website Scanning** - Automated crawling with Puppeteer + Axe accessibility testing
-- 🤖 **AI-Powered Recommendations** - Claude generates fix instructions for each violation
-- 📊 **WCAG Scoring** - Automatic compliance scoring (A, AA, AAA levels)
-- 📄 **PDF Reports** - Professional downloadable reports
-- 💳 **Payment Integration** - LemonSqueezy checkout for credit purchases
-- 📧 **Email Notifications** - Scan completion alerts
-- 📱 **Responsive Design** - Mobile-friendly interface
+- **User Authentication** — Email/password + Google OAuth via Supabase
+- **Website Scanning** — Automated crawling with Puppeteer + axe-core
+- **AI-Powered Recommendations** — Claude generates plain-English fix instructions per violation
+- **WCAG Scoring** — Automatic compliance scoring (A, AA, AAA levels)
+- **PDF Reports** — Professional downloadable reports
+- **Credit Packs** — Pay-as-you-go via LemonSqueezy (Basic / Pro / Enterprise)
+- **Responsive Design** — Mobile, tablet, and desktop layouts
 
 ## Tech Stack
 
 ### Frontend
 - React 19 + TypeScript
-- React Router for navigation
-- Tailwind CSS for styling
-- Supabase Client (auth)
-- Lemon Squeezy (payments)
-- Vite (build tool)
+- React Router v7 (client-side SPA)
+- Tailwind CSS v4 + shadcn/ui
+- Supabase JS client (auth)
+- LemonSqueezy JS (payments)
+- Vite 7 (build tool)
 
 ### Backend
-- Node.js + Express.js
+- Node.js 20+ + Express 4
 - TypeScript
-- Puppeteer (web crawling)
-- @axe-core/puppeteer (accessibility testing)
+- Puppeteer (headless Chrome crawling)
+- @axe-core/puppeteer (WCAG testing)
 - Anthropic Claude API (AI recommendations)
-- Lemon Squeezy API (payments)
-- SendGrid (email - optional)
+- LemonSqueezy API (payments + webhooks)
+- helmet + express-rate-limit (security)
 
 ### Database
-- Supabase (PostgreSQL)
-- Row Level Security enabled
-- Automatic user profile creation
+- Supabase (PostgreSQL + auth + RLS)
+- Row Level Security on all tables
+- Automatic user profile creation via trigger
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js 20.19+ (or upgrade from 20.18.0)
+- Node.js 20.19+
 - Supabase account
 - Anthropic API key
-- Lemon Squeezy account
+- LemonSqueezy account
 
 ### 1. Clone and Install
 
 ```bash
-# Install frontend dependencies
 npm install
-
-# Install backend dependencies
-cd backend
-npm install
-cd ..
+cd backend && npm install && cd ..
 ```
 
 ### 2. Set Up Supabase
 
-1. Create a new Supabase project at https://supabase.com
-2. Go to SQL Editor and run the schema from `supabase-schema.sql`
-3. Get your project URL and keys from Settings > API
+1. Create a project at https://supabase.com
+2. Run `supabase-schema.sql` in the SQL Editor
+3. Copy your project URL and API keys from Settings → API
 
 ### 3. Configure Environment Variables
 
-**Frontend (.env):**
-```bash
-cp .env.example .env
-# Edit .env with your values
-```
-
+**Frontend (`.env`):**
 ```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
 VITE_API_URL=http://localhost:3001
 ```
 
-**Backend (backend/.env):**
-```bash
-cd backend
-cp .env.example .env
-# Edit .env with your values
-```
-
+**Backend (`backend/.env`):**
 ```env
 PORT=3001
 NODE_ENV=development
-
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-LEMONSQUEEZY_API_KEY=your_lemonsqueezy_api_key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...
+SUPABASE_ANON_KEY=eyJ...
+ANTHROPIC_API_KEY=sk-ant-...
+LEMONSQUEEZY_API_KEY=eyJ0...
 LEMONSQUEEZY_STORE_ID=your_store_id
-LEMONSQUEEZY_VARIANT_ID_BASIC=your_basic_variant_id
-LEMONSQUEEZY_VARIANT_ID_PRO=your_pro_variant_id
-LEMONSQUEEZY_VARIANT_ID_ENTERPRISE=your_enterprise_variant_id
-LEMONSQUEEZY_WEBHOOK_SECRET=your_webhook_secret
-
-SENDGRID_API_KEY=your_sendgrid_api_key (optional)
-SENDGRID_FROM_EMAIL=noreply@yourdomain.com
-
+LEMONSQUEEZY_VARIANT_ID_BASIC=...
+LEMONSQUEEZY_VARIANT_ID_PRO=...
+LEMONSQUEEZY_VARIANT_ID_ENTERPRISE=...
+LEMONSQUEEZY_WEBHOOK_SECRET=...
 FRONTEND_URL=http://localhost:5173
+SENDGRID_API_KEY=        # optional
+SENDGRID_FROM_EMAIL=
 ```
 
 ### 4. Run Development Servers
 
-**Terminal 1 - Frontend:**
 ```bash
+# Terminal 1 — Frontend (http://localhost:5173)
 npm run dev
-```
 
-**Terminal 2 - Backend:**
-```bash
-cd backend
-npm run dev
+# Terminal 2 — Backend (http://localhost:3001)
+cd backend && npm run dev
 ```
-
-The app will be available at:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3001
 
 ## Project Structure
 
 ```
 .
 ├── src/                          # Frontend source
-│   ├── types/
-│   │   └── index.ts              # Centralized types (Audit, Violation, Payment, etc.)
-│   ├── contexts/
-│   │   └── AuthContext.tsx       # Supabase auth state
+│   ├── types/index.ts            # Centralized types (Audit, Violation, Payment, etc.)
+│   ├── contexts/AuthContext.tsx  # Supabase auth state + Google OAuth
 │   ├── lib/
 │   │   ├── api.ts                # API client (all backend calls)
 │   │   ├── supabase.ts           # Supabase client init
 │   │   └── utils.ts              # cn() helper
-│   ├── layouts/                  # Shared page layouts
+│   ├── layouts/
 │   │   ├── DashboardLayout.tsx   # Sidebar + header + <Outlet/>
 │   │   └── SettingsLayout.tsx    # Settings left nav + <Outlet/>
-│   ├── hooks/                    # Custom data hooks
+│   ├── hooks/
 │   │   ├── useAudits.ts
-│   │   ├── useAudit.ts
+│   │   ├── useAudit.ts           # Polls every 3s until scan completes
 │   │   ├── useCredits.ts
 │   │   └── usePayments.ts
 │   ├── components/
-│   │   ├── Navbar.tsx            # Landing navbar
-│   │   ├── Hero.tsx              # Landing hero
-│   │   ├── Features.tsx          # Landing features
-│   │   ├── HowItWorks.tsx        # Landing how-it-works
-│   │   ├── Footer.tsx            # Landing footer
-│   │   ├── sidebar.tsx           # Dashboard sidebar
-│   │   ├── modals/               # Modal dialogs
-│   │   │   ├── BuyCreditsModal.tsx
-│   │   │   ├── UpgradeModal.tsx
-│   │   │   ├── ShareReportModal.tsx
-│   │   │   └── ...
+│   │   ├── Navbar.tsx / Hero.tsx / Features.tsx / HowItWorks.tsx / Footer.tsx
+│   │   ├── SocialProof.tsx / StatsBar.tsx / ComplianceBadges.tsx / Testimonials.tsx / CtaBanner.tsx
+│   │   ├── modals/               # BuyCreditsModal, CancelSubscriptionModal, ReactivateModal,
+│   │   │                         # ShareReportModal, RescanModal, PreviewModal
 │   │   └── ui/                   # shadcn/ui primitives (65+ components)
 │   └── pages/
-│       ├── Landing.tsx           # Public landing page
-│       ├── Login.tsx             # Auth
-│       ├── SignUp.tsx            # Auth
-│       ├── ForgotPassword.tsx    # Auth
-│       ├── Pricing.tsx           # Pricing & checkout
-│       ├── DashboardNew.tsx      # Main dashboard
-│       ├── NewScan.tsx           # Scan creation
-│       ├── AuditDetail.tsx       # Audit results
-│       ├── Reports.tsx           # All reports list
+│       ├── Landing.tsx / Login.tsx / SignUp.tsx / ForgotPassword.tsx / Pricing.tsx
+│       ├── DashboardNew.tsx / NewScan.tsx / AuditDetail.tsx / Reports.tsx
+│       ├── PaymentSuccess.tsx / NotFound.tsx
+│       ├── Terms.tsx / Privacy.tsx
 │       └── settings/
-│           ├── Account.tsx
-│           ├── Security.tsx
-│           ├── Notifications.tsx
-│           ├── PlansAndCredits.tsx
-│           ├── PaymentHistory.tsx
-│           └── CreditHistory.tsx
+│           ├── Account.tsx / Security.tsx / Notifications.tsx
+│           ├── PlansAndCredits.tsx / PaymentHistory.tsx / CreditHistory.tsx
 │
-├── backend/                      # Backend source
-│   └── src/
-│       ├── config/
-│       │   └── supabase.ts       # Supabase admin client
-│       ├── middleware/
-│       │   └── auth.ts           # JWT verification
-│       ├── routes/
-│       │   ├── auth.ts           # Auth endpoints
-│       │   ├── audits.ts         # Audit CRUD + scan + PDF
-│       │   ├── payments.ts       # LemonSqueezy checkout + webhook
-│       │   └── user.ts           # Credits + profile
-│       ├── services/
-│       │   ├── scanService.ts    # Puppeteer + axe-core scanning
-│       │   ├── aiService.ts      # Claude AI recommendations
-│       │   └── pdfService.ts     # PDF generation
-│       └── server.ts             # Express app entry point
+├── backend/src/
+│   ├── server.ts                 # Express app, helmet, rate limiting, route mounts
+│   ├── config/supabase.ts        # Supabase admin client (service_role)
+│   ├── middleware/auth.ts        # JWT verification
+│   ├── routes/
+│   │   ├── auth.ts               # GET /auth/me
+│   │   ├── audits.ts             # CRUD + scan + PDF (rate-limited per endpoint)
+│   │   ├── payments.ts           # LemonSqueezy checkout + webhook
+│   │   └── user.ts               # Credits + profile + password + credit history
+│   ├── services/
+│   │   ├── scanService.ts        # Puppeteer crawl + axe-core
+│   │   ├── aiService.ts          # Claude AI explanations + fix steps
+│   │   └── pdfService.ts         # PDF generation
+│   └── utils/validateUrl.ts      # SSRF protection
 │
-├── supabase-schema.sql           # Database schema (run in Supabase SQL Editor)
+├── public/_redirects             # Netlify SPA catch-all rewrite
+├── supabase-schema.sql           # Full DB schema
+├── render.yaml                   # Render.com backend blueprint
 ├── PRD.md                        # Product Requirements Document
 ├── CLAUDE.md                     # Claude Code project guide
-└── SETUP_GUIDE.md                # Detailed step-by-step setup
+└── SETUP_GUIDE.md                # Detailed setup walkthrough
 ```
 
 ## API Endpoints
 
-### Authentication
-- `GET /auth/me` - Get current user
+### Auth
+- `GET /auth/me` — Current user info
 
 ### Audits
-- `POST /api/audits/create` - Create new audit
-- `POST /api/audits/:id/scan` - Start scanning
-- `GET /api/audits/:id` - Get audit details + violations
-- `GET /api/audits` - List user's audits
-- `DELETE /api/audits/:id` - Delete audit
-- `GET /api/audits/:id/report/pdf` - Download PDF (coming soon)
+- `POST /api/audits/create` — Create audit (rate-limited: 20/hr)
+- `POST /api/audits/:id/scan` — Start scan, async (rate-limited: 20/hr)
+- `GET /api/audits/:id` — Audit details + violations
+- `GET /api/audits` — List user's audits
+- `DELETE /api/audits/:id` — Delete audit
+- `GET /api/audits/:id/report/pdf` — Download PDF
 
 ### Payments
-- `POST /api/payments/checkout` - Create Lemon Squeezy checkout
-- `GET /api/payments/success/:order_id` - Confirm payment
-- `POST /api/payments/webhook` - Lemon Squeezy webhook handler
+- `POST /api/payments/checkout` — Create LemonSqueezy checkout session
+- `GET /api/payments/success/:order_id` — Confirm payment + credit grant
+- `POST /api/payments/webhook` — LemonSqueezy webhook (no auth, HMAC-verified)
+- `GET /api/payments/history` — Payment history
+- `GET /api/payments/subscription` — Subscription info (pay-as-you-go only)
 
 ### User
-- `GET /api/user/credits` - Get credit balance
-
-## Database Schema
-
-See `supabase-schema.sql` for the complete schema with:
-- Users table (extends Supabase auth)
-- Audits table
-- Violations table
-- Payments table
-- Claude cache table
-- Row Level Security policies
-- Triggers and functions
+- `GET /api/user/credits` — Credit balance
+- `GET /api/user/profile` — Profile info
+- `PUT /api/user/profile` — Update profile
+- `PUT /api/user/password` — Change password
+- `GET /api/user/credit-history` — Credit usage log
 
 ## Deployment
 
-### Frontend (Vercel)
+### Frontend (Netlify)
 
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy
+1. Push to GitHub, connect repo to Netlify
+2. Build command: `npm run build` / Publish dir: `dist`
+3. Set env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
+4. SPA routing handled by `public/_redirects`
 
-### Backend (Render.com or Railway)
+### Backend (Render.com)
 
-1. Create new Web Service
-2. Connect GitHub repository
-3. Set build command: `cd backend && npm install && npm run build`
-4. Set start command: `cd backend && npm start`
-5. Add environment variables
-6. Deploy
+1. Create Web Service from GitHub repo
+2. Build command: `cd backend && npm install && npx puppeteer browsers install chrome && npm run build`
+3. Start command: `cd backend && npm start`
+4. Required env vars — all backend `.env` vars plus:
+   - `PUPPETEER_CACHE_DIR=/opt/render/project/src/backend/.cache/puppeteer`
+   - `FRONTEND_URL=https://auditflow.me` (no trailing slash)
 
 ### Database (Supabase)
 
-Already hosted! Just run the schema in SQL Editor.
-
-## Testing
-
-### Test Lemon Squeezy Payments
-
-When testing in development mode:
-1. Lemon Squeezy automatically uses test mode when `NODE_ENV=development`
-2. You can complete test purchases without real payment
-3. Test orders will be marked as "test" in your Lemon Squeezy dashboard
-4. No test credit card needed - just proceed through checkout
-
-### Test Accessibility Scanning
-
-1. Sign up for an account
-2. Enter a test URL (e.g., `https://example.com`)
-3. Click "Start Scan"
-4. Wait 2-5 minutes for results
+Already hosted. Run `supabase-schema.sql` in SQL Editor once.
 
 ## Troubleshooting
 
-### CORS Errors
-- Ensure `FRONTEND_URL` in backend .env matches your frontend URL
-- Check that backend is running on port 3001
+### CORS errors
+- `FRONTEND_URL` on Render must match your Netlify domain exactly (no trailing slash)
 
-### Supabase Connection Issues
-- Verify SUPABASE_URL and keys are correct
-- Ensure RLS policies are enabled
-- Check that schema was created successfully
+### 404 on page refresh (Netlify)
+- Ensure `public/_redirects` is present: `/* /index.html 200`
 
-### Scanning Timeouts
-- Puppeteer may timeout on slow sites
-- Increase timeout in `scanService.ts` if needed
-- Ensure website is publicly accessible
+### Puppeteer / Chrome not found on Render
+- Set `PUPPETEER_CACHE_DIR` env var and include `npx puppeteer browsers install chrome` in build command
 
-### Payment Issues
-- Ensure Lemon Squeezy API key has correct permissions
-- Check that variant IDs match your products in Lemon Squeezy
-- Verify webhook secret is correctly set
-- Check Lemon Squeezy dashboard for payment status
+### Scanning timeouts
+- Puppeteer may time out on slow or JS-heavy sites — increase timeout in `scanService.ts`
+
+### Payment issues
+- Verify all `LEMONSQUEEZY_VARIANT_ID_*` vars match products in your LemonSqueezy dashboard
+- Webhook secret must match what's configured in LemonSqueezy
+
+## Testing
+
+```bash
+# Run all tests (133 tests, Vitest + React Testing Library)
+npm test
+
+# Watch mode
+npm run test:watch
+```
 
 ## Roadmap
 
-### In Progress (v1.0)
-- [ ] Shared dashboard layout (sidebar + header extracted to `DashboardLayout`)
-- [ ] Redesigned Dashboard, NewScan, AuditDetail, Pricing pages (matching Figma)
-- [ ] Settings pages: Account, Security, Notifications
-- [ ] Billing pages: Plans & Credits, Payment History, Credit History
-- [ ] PDF report generation
-- [ ] Buy Credits / Upgrade / Share Report modals
-- [ ] Custom hooks for all API calls
+### Done (v1.0)
+- Full landing page + auth pages
+- Dashboard, NewScan, AuditDetail, Pricing, Reports
+- All settings pages + billing pages
+- All modals (BuyCredits, CancelSub, Reactivate, Share, Rescan, Preview)
+- PDF report export
+- Google OAuth
+- Backend security hardening (helmet, rate limiting, SSRF, IDOR, TOCTOU)
+- Deployed: frontend on Netlify, backend on Render
 
-### Future (v1.1+)
-- [ ] Email notifications with SendGrid
-- [ ] Scheduled recurring scans
-- [ ] Custom report branding / white-label
-- [ ] Team collaboration (multi-user accounts)
-- [ ] Historical trend charts
-- [ ] CI/CD integration (GitHub Actions)
-- [ ] REST API for third-party integrations
-
-See `PRD.md` for the full product requirements and implementation plan.
+### Upcoming (v1.1)
+- Onboarding + tutorial flows
+- Animations, loading skeletons, micro-interactions
+- Rescan + share-link backend endpoints
+- E2E test suite
+- Email notifications (SendGrid)
+- Scheduled recurring scans
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT — see LICENSE for details.
 
 ## Support
 
-For issues or questions:
-1. Check the troubleshooting section above
-2. Review `PRD.md` for feature specifications
-3. Review `CLAUDE.md` for architecture and implementation details
-4. Open an issue at https://github.com/vladun13/auditflow/issues
-
----
-
-**Built with Claude Code** 🤖
-
-Generated following the comprehensive Product Requirements Document for an accessibility audit SaaS platform.
+- Email: support@auditflow.me
+- Issues: https://github.com/vladun13/auditflow/issues
+- Full architecture: see `CLAUDE.md`

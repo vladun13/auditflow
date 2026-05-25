@@ -16,11 +16,12 @@ This file is the authoritative context document for Claude Code working on this 
 | Pro | $299 | 5 | 10 |
 | Enterprise | $499 | 15 | Unlimited |
 
-**GitHub repo:** https://github.com/vladun13/auditflow
+**GitHub repo:** https://github.com/vladun13/auditflow  
+**Live:** https://auditflow.me
 
 ---
 
-## Current State (as of 2026-03-25)
+## Current State (as of 2026-05-25)
 
 ### What is DONE (built and styled)
 - Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme ✓
@@ -47,9 +48,10 @@ This file is the authoritative context document for Claude Code working on this 
 - Backend new routes: `GET/PUT /api/user/profile`, `PUT /api/user/password`, `GET /api/user/credit-history`, `GET /api/payments/history`, `GET /api/payments/subscription` ✓
 - Test suite: 18 test files, 133 tests passing (Vitest + React Testing Library + happy-dom) ✓
 - Plus Jakarta Sans font loaded globally (Google Fonts + Tailwind config + `index.css`) ✓
-- `vercel.json` — SPA rewrite config for Vercel deployment ✓
-- `tsconfig.app.json` — test files excluded from `tsc -b` (prevents Vercel build failures) ✓
-- Frontend deployed to Vercel ✓
+- `vercel.json` — SPA rewrite config (kept for reference) ✓
+- `public/_redirects` — Netlify SPA catch-all rewrite (`/* /index.html 200`) ✓
+- `tsconfig.app.json` — test files excluded from `tsc -b` (prevents build failures) ✓
+- Frontend deployed to Netlify at `https://auditflow.me` ✓
 - Supabase database schema deployed ✓
 - `Login.tsx` — redesigned: Google OAuth button restored, icon-only logo, new right-panel illustration ✓
 - `SignUp.tsx` — same illustration as Login (shared design), `h-screen overflow-hidden` full-height layout ✓
@@ -58,7 +60,7 @@ This file is the authoritative context document for Claude Code working on this 
 - `src/pages/PaymentSuccess.tsx` — payment success page ✓
 - `src/pages/NotFound.tsx` — 404 page ✓
 - **Modals — all implemented ✓**
-  - `BuyCreditsModal.tsx` — 3-step: amount selection (presets + custom) → purchase confirmation → success screen ✓
+  - `BuyCreditsModal.tsx` — 3-step: plan selection (Basic/Pro/Enterprise named packs) → purchase confirmation → success screen ✓
   - `CancelSubscriptionModal.tsx` — 2-step: radio reason list + comments textarea → cancellation confirmed screen ✓
   - `ReactivateModal.tsx` — confirm reactivation with next billing date + success toast ✓
   - `ShareReportModal.tsx` — share report link flow ✓
@@ -75,8 +77,12 @@ This file is the authoritative context document for Claude Code working on this 
 - Backend deployed to Render.com at `https://auditflow-zi2m.onrender.com` ✓
 - `backend/tsconfig.json` — added `"dom"` to `lib` so Puppeteer `page.evaluate()` DOM types compile ✓
 - `backend/src/server.ts` — `app.set('trust proxy', 1)` added for Render's reverse proxy (fixes rate-limiter X-Forwarded-For warning) ✓
-- `VITE_API_URL` set on Vercel → `https://auditflow-zi2m.onrender.com` ✓
-- Vercel env vars all set: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` ✓
+- `VITE_API_URL` set on Netlify → `https://auditflow-zi2m.onrender.com` ✓
+- Netlify env vars all set: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` ✓
+- Scan rate limiter moved from `server.ts` global middleware into `audits.ts` per-endpoint ✓
+- LemonSqueezy checkout `productOptions.redirectUrl` points to `/payment/success` ✓
+- Footer internal links use React Router `<Link>` instead of `<a href>` ✓
+- All contact emails updated to `auditflow.me` domain ✓
 
 ### What is NOT YET DONE (pending implementation)
 - Figma redesigns: `NewScan` (needs Figma fetch for `105:16689`)
@@ -227,7 +233,7 @@ This file is the authoritative context document for Claude Code working on this 
 | Supabase | PostgreSQL database + auth + RLS |
 | LemonSqueezy | Payment processing + webhooks |
 | Anthropic Claude API | AI-generated fix recommendations |
-| Vercel | Frontend hosting — deployed at `https://auditflow-two.vercel.app` |
+| Netlify | Frontend hosting — deployed at `https://auditflow.me` |
 | Render.com | Backend hosting — deployed at `https://auditflow-zi2m.onrender.com` (free tier, spins down after 15min inactivity) |
 
 ---
@@ -454,8 +460,8 @@ All mock-data view files (`dashboard-view.tsx`, `scan-view.tsx`, `reports-view.t
 ### Google OAuth requires Supabase dashboard setup
 `signInWithGoogle()` in `AuthContext` calls `supabase.auth.signInWithOAuth({ provider: 'google' })`. This will 400 until Google is enabled in the Supabase project: Authentication → Providers → Google → enable + add Client ID/Secret.
 
-### Vercel deployment
-Frontend is deployed. Build command: `npm run build` (`tsc -b && vite build`). Test files are excluded from `tsconfig.app.json` so they don't break the production build. `vercel.json` handles SPA rewrites. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` in Vercel project settings.
+### Netlify deployment
+Frontend is deployed at `https://auditflow.me`. Build command: `npm run build` (`tsc -b && vite build`). Test files are excluded from `tsconfig.app.json` so they don't break the production build. `public/_redirects` handles SPA routing (`/* /index.html 200`). Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` in Netlify site settings. `FRONTEND_URL` on Render must be set to `https://auditflow.me` (no trailing slash) for CORS and LemonSqueezy redirect to work.
 
 ### No "use client" directives
 This is a Vite app, not Next.js. Never add `"use client"`. Remove it from any file that has it.
@@ -523,7 +529,7 @@ Refer to `PRD.md` for full details. Summary:
 | 3B | Remove mock data components | **Done** ✓ |
 | Security | Helmet, rate limiting, SSRF, IDOR, TOCTOU, timing attack, error sanitization | **Done** ✓ |
 | Tests | 18 test files, 133 tests — all pages, hooks, layouts | **Done** ✓ |
-| Deploy | Vercel frontend deploy + vercel.json + tsconfig build fix | **Done** ✓ |
+| Deploy | Netlify frontend deploy + _redirects + tsconfig build fix | **Done** ✓ |
 | Auth+ | Google OAuth on Login/SignUp | **Done** ✓ (requires Supabase dashboard config) |
 | 4A | Modals (BuyCredits, CancelSub, Reactivate, ShareReport, Rescan, Preview) | **Done** ✓ |
 | 4B | PDF report (PdfReport component + pdf.ts lib) | **Done** ✓ |
@@ -547,8 +553,8 @@ Refer to `PRD.md` for full details. Summary:
 
 | Layer | Platform |
 |-------|----------|
-| Frontend | Vercel — connect `vladun13/auditflow`, set env vars, auto-deploy on push to `main` |
-| Backend | Render.com or Railway — build: `cd backend && npm install && npm run build`, start: `cd backend && npm start` |
+| Frontend | Netlify — `https://auditflow.me`, auto-deploys on push to `main`; SPA routing via `public/_redirects` |
+| Backend | Render.com — `https://auditflow-zi2m.onrender.com`; build includes `npx puppeteer browsers install chrome` |
 | Database | Supabase (already hosted, production-ready) |
 
 ---
