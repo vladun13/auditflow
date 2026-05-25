@@ -64,6 +64,9 @@ router.post('/checkout', authenticate, async (req: AuthRequest, res) => {
             plan: plan
           }
         },
+        productOptions: {
+          redirectUrl: `${process.env.FRONTEND_URL}/payment/success`,
+        },
         checkoutOptions: {
           embed: false,
           media: true,
@@ -270,7 +273,7 @@ router.get('/history', authenticate, async (req: AuthRequest, res) => {
 })
 
 // Subscription info — AuditFlow is pay-as-you-go, no recurring subscriptions
-router.get('/subscription', authenticate, async (req: AuthRequest, res) => {
+router.get('/subscription', authenticate, async (_req: AuthRequest, res) => {
   res.json({ subscription: null, plan: 'pay_as_you_go' })
 })
 

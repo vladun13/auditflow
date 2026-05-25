@@ -116,12 +116,12 @@ describe('AuditDetail', () => {
     expect(screen.getByText(/scanning in progress/i)).toBeInTheDocument()
   })
 
-  it('shows scan step indicators: Crawling pages, Running axe-core, Generating AI fixes', () => {
+  it('shows scan step indicators: Crawling pages, Scanning your site, Generating AI fixes', () => {
     const audit = makeAudit({ status: 'scanning' })
     mockUseAudit.mockReturnValue({ audit, loading: false })
     renderAuditDetail()
     expect(screen.getByText('Crawling pages')).toBeInTheDocument()
-    expect(screen.getByText('Running axe-core')).toBeInTheDocument()
+    expect(screen.getByText('Scanning your site')).toBeInTheDocument()
     expect(screen.getByText('Generating AI fixes')).toBeInTheDocument()
   })
 

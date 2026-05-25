@@ -7,7 +7,7 @@ interface ScanningViewProps {
 
 const STEPS = [
   { label: 'Crawling pages', description: 'Discovering and loading pages on your site' },
-  { label: 'Running axe-core', description: 'Testing each page against WCAG 2.1 guidelines' },
+  { label: 'Scanning your site', description: 'Testing each page against WCAG 2.1 guidelines' },
   { label: 'Generating AI fixes', description: 'Creating plain-English explanations and fix steps' },
 ] as const
 

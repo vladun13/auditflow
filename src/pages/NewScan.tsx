@@ -291,6 +291,13 @@ export function NewScan() {
   const [error, setError] = useState('')
   const [phase, setPhase] = useState<ScanPhase>('form')
   const [completedAuditId, setCompletedAuditId] = useState('')
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
 
   const validateUrl = (url: string) => {
     try {
@@ -327,10 +334,22 @@ export function NewScan() {
     if (scanError) {
       setError(scanError)
       setPhase('form')
-    } else {
-      setCompletedAuditId(auditId)
-      setPhase('complete')
+      return
     }
+
+    // Poll until the scan finishes, then show the complete screen
+    pollRef.current = setInterval(async () => {
+      const { data: auditData } = await auditApi.get(auditId)
+      if (auditData && (auditData as { status: string }).status === 'completed') {
+        if (pollRef.current) clearInterval(pollRef.current)
+        setCompletedAuditId(auditId)
+        setPhase('complete')
+      } else if (auditData && (auditData as { status: string }).status === 'failed') {
+        if (pollRef.current) clearInterval(pollRef.current)
+        setError('Scan failed. Please try again.')
+        setPhase('form')
+      }
+    }, 5000)
   }
 
   const noCredits = !isAdmin && credits !== null && credits === 0

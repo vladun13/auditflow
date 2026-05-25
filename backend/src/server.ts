@@ -43,15 +43,6 @@ const globalLimiter = rateLimit({
 })
 app.use(globalLimiter)
 
-// Strict limiter for scan creation — expensive operation
-const scanLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many scan requests, please try again later' },
-})
-
 // Strict limiter for payment checkout
 const paymentLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -68,7 +59,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/auth', authRoutes)
-app.use('/api/audits', scanLimiter, auditRoutes)
+app.use('/api/audits', auditRoutes)
 app.use('/api/payments', paymentLimiter, paymentRoutes)
 app.use('/api/user', userRoutes)
 

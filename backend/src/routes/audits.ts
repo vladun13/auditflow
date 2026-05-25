@@ -1,4 +1,5 @@
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 import { authenticate, AuthRequest } from '../middleware/auth.js'
 import { supabase } from '../config/supabase.js'
 import { ScanService } from '../services/scanService.js'
@@ -11,8 +12,16 @@ const scanService = new ScanService()
 const aiService = new AIService()
 const pdfService = new PDFService()
 
+const scanLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many scan requests, please try again later' },
+})
+
 // Create new audit
-router.post('/create', authenticate, async (req: AuthRequest, res) => {
+router.post('/create', scanLimiter, authenticate, async (req: AuthRequest, res) => {
   try {
     const { website_url, crawl_depth } = req.body
 
@@ -69,7 +78,7 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
 })
 
 // Start scan
-router.post('/:id/scan', authenticate, async (req: AuthRequest, res) => {
+router.post('/:id/scan', scanLimiter, authenticate, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params
 

@@ -122,7 +122,7 @@ export function Pricing() {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Upgrade your plan</h1>
           <p className="text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
-            It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+            One-time credit packs — no subscriptions, no recurring charges. Buy credits when you need them and run audits at your own pace.
           </p>
         </div>
 

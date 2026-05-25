@@ -53,6 +53,6 @@ export const WCAG_PRINCIPLES = [
 
 export const SCAN_STEPS = [
   { id: 'crawl', label: 'Crawling pages', description: 'Discovering linked pages' },
-  { id: 'analyze', label: 'Running axe-core', description: 'Testing WCAG compliance' },
+  { id: 'analyze', label: 'Scanning your site', description: 'Testing WCAG compliance' },
   { id: 'ai', label: 'Generating AI fixes', description: 'Creating fix recommendations' },
 ]

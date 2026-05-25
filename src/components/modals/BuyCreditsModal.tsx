@@ -1,106 +1,86 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { ShoppingCart, X, ChevronLeft } from 'lucide-react'
+import { ShoppingCart, X, ChevronLeft, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { paymentApi } from '@/lib/api'
 import { toast } from 'sonner'
 
 type Step = 'amount' | 'confirm' | 'success'
 
-const PRESET_AMOUNTS = [10, 25, 100, 500]
+interface Plan {
+  id: 'basic' | 'pro' | 'enterprise'
+  name: string
+  price: number
+  credits: number
+  maxPages: string
+  popular?: boolean
+}
+
+const PLANS: Plan[] = [
+  { id: 'basic', name: 'Basic', price: 149, credits: 1, maxPages: '5 pages' },
+  { id: 'pro', name: 'Pro', price: 299, credits: 5, maxPages: '10 pages', popular: true },
+  { id: 'enterprise', name: 'Enterprise', price: 499, credits: 15, maxPages: 'Unlimited pages' },
+]
 
 interface BuyCreditsModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-// ─── Visa card row ────────────────────────────────────────────────────────────
-
-function CardRow({ onChangeCard }: { onChangeCard: () => void }) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-gray-200 px-5 py-4 mb-6">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5">
-          <span className="text-xl font-black italic text-blue-800 tracking-tighter">VISA</span>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-900 tracking-widest">
-            **** **** **** ****
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">Text</p>
-        </div>
-      </div>
-      <button
-        onClick={onChangeCard}
-        className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-      >
-        Change
-      </button>
-    </div>
-  )
-}
-
-// ─── Step 1: Amount selection ─────────────────────────────────────────────────
+// ─── Step 1: Plan selection ───────────────────────────────────────────────────
 
 function AmountStep({
-  selectedAmount,
-  onSelectAmount,
-  customAmount,
-  onCustomAmount,
+  selectedPlan,
+  onSelectPlan,
   onCancel,
   onContinue,
 }: {
-  selectedAmount: number | null
-  onSelectAmount: (amount: number) => void
-  customAmount: string
-  onCustomAmount: (val: string) => void
+  selectedPlan: Plan
+  onSelectPlan: (plan: Plan) => void
   onCancel: () => void
   onContinue: () => void
 }) {
-
   return (
     <>
-      <CardRow onChangeCard={() => {}} />
-
       <div className="mb-5">
-        <p className="text-sm font-semibold text-gray-900 mb-3">Amount</p>
-        <div className="flex gap-2">
-          {PRESET_AMOUNTS.map((amt) => (
+        <p className="text-sm font-semibold text-gray-900 mb-3">Select a credit pack</p>
+        <div className="flex flex-col gap-3">
+          {PLANS.map((plan) => (
             <button
-              key={amt}
-              onClick={() => {
-                onSelectAmount(amt)
-                onCustomAmount('')
-              }}
+              key={plan.id}
+              onClick={() => onSelectPlan(plan)}
               className={cn(
-                'flex-1 rounded-full py-2.5 text-sm font-semibold border transition-colors',
-                selectedAmount === amt && customAmount === ''
-                  ? 'bg-[#4F46E5] text-white border-[#4F46E5]'
-                  : 'bg-white text-gray-900 border-gray-200 hover:border-gray-300',
+                'relative flex items-center justify-between rounded-xl border px-5 py-4 text-left transition-colors',
+                selectedPlan.id === plan.id
+                  ? 'border-[#4F46E5] bg-indigo-50'
+                  : 'border-gray-200 bg-white hover:border-gray-300',
               )}
             >
-              ${amt}
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  'flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors',
+                  selectedPlan.id === plan.id
+                    ? 'border-[#4F46E5] bg-[#4F46E5]'
+                    : 'border-gray-300',
+                )}>
+                  {selectedPlan.id === plan.id && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-gray-900">{plan.name}</span>
+                    {plan.popular && (
+                      <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">Popular</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {plan.credits} audit credit{plan.credits !== 1 ? 's' : ''} · {plan.maxPages}
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-gray-900">${plan.price}</span>
             </button>
           ))}
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <p className="text-sm text-gray-500 mb-2">Custom Amount</p>
-        <div className="flex items-center rounded-xl border border-gray-200 px-4 py-3 focus-within:border-[#4F46E5] transition-colors">
-          <span className="text-gray-400 mr-2 text-sm">$</span>
-          <input
-            type="number"
-            min={1}
-            placeholder="00"
-            value={customAmount}
-            onChange={(e) => {
-              onCustomAmount(e.target.value)
-              onSelectAmount(0) // clear preset
-            }}
-            className="flex-1 text-sm text-gray-900 outline-none placeholder-gray-300 bg-transparent"
-          />
         </div>
       </div>
 
@@ -113,8 +93,7 @@ function AmountStep({
         </button>
         <button
           onClick={onContinue}
-          disabled={!selectedAmount && !customAmount}
-          className="rounded-full bg-[#4F46E5] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4338CA] disabled:opacity-40 transition-colors"
+          className="rounded-full bg-[#4F46E5] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4338CA] transition-colors"
         >
           Continue
         </button>
@@ -126,13 +105,13 @@ function AmountStep({
 // ─── Step 2: Confirmation ─────────────────────────────────────────────────────
 
 function ConfirmStep({
-  amount,
+  plan,
   loading,
   onBack,
   onCancel,
   onPurchase,
 }: {
-  amount: number
+  plan: Plan
   loading: boolean
   onBack: () => void
   onCancel: () => void
@@ -148,18 +127,32 @@ function ConfirmStep({
         Back
       </button>
 
-      <CardRow onChangeCard={() => {}} />
-
       <p className="text-base font-bold text-gray-900 mb-5">Please confirm your purchase</p>
 
-      <div className="flex items-center justify-between py-4 border-t border-b border-gray-100 mb-4">
-        <span className="text-sm font-semibold text-gray-900">Amount</span>
-        <span className="text-sm font-semibold text-gray-900">${amount.toFixed(2)} USD</span>
+      <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 mb-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Plan</span>
+          <span className="text-sm font-semibold text-gray-900">{plan.name}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Credits</span>
+          <span className="text-sm font-semibold text-gray-900">
+            {plan.credits} audit credit{plan.credits !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-600">Max pages per scan</span>
+          <span className="text-sm font-semibold text-gray-900">{plan.maxPages}</span>
+        </div>
+        <div className="border-t border-gray-200 pt-2 flex items-center justify-between">
+          <span className="text-sm font-semibold text-gray-900">Total</span>
+          <span className="text-sm font-semibold text-gray-900">${plan.price} USD</span>
+        </div>
       </div>
 
       <p className="text-sm text-gray-500 leading-relaxed mb-8">
-        You are about to purchase ${amount.toFixed(2)} USD worth of credits. Credits will be added
-        to your account immediately after payment is confirmed.
+        You will be redirected to our secure payment page. Credits are added to your account
+        immediately after payment is confirmed.
       </p>
 
       <div className="flex justify-end gap-3">
@@ -174,39 +167,34 @@ function ConfirmStep({
           disabled={loading}
           className="rounded-full bg-[#4F46E5] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#4338CA] disabled:opacity-60 transition-colors"
         >
-          {loading ? 'Processing…' : 'Purchase Credits'}
+          {loading ? 'Redirecting…' : 'Purchase Credits'}
         </button>
       </div>
     </>
   )
 }
 
-// ─── Step 3: Success ──────────────────────────────────────────────────────────
+// ─── Step 3: Success (shown if checkout URL isn't returned) ───────────────────
 
 function SuccessStep({ onGoHome }: { onGoHome: () => void }) {
   return (
     <div className="flex flex-col items-center text-center py-4">
-      {/* Illustration */}
       <div className="w-full rounded-2xl bg-indigo-50 flex items-center justify-center mb-6 py-8">
         <div className="relative">
-          {/* Bill / receipt illustration */}
           <div className="relative w-20 h-24 bg-white rounded-lg shadow-md border border-gray-200 flex flex-col items-center justify-center gap-1.5 mx-auto">
             <div className="text-xs font-bold text-gray-700">BILL</div>
             <div className="w-12 h-1 rounded bg-gray-200" />
             <div className="w-10 h-1 rounded bg-gray-200" />
             <div className="w-12 h-1 rounded bg-gray-200" />
-            {/* Check badge */}
             <div className="absolute -top-3 -right-3 w-7 h-7 rounded-full bg-[#4F46E5] flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
           </div>
-          {/* Dollar coin */}
           <div className="absolute -bottom-3 -left-5 w-9 h-9 rounded-full bg-[#4F46E5] flex items-center justify-center shadow-md">
             <span className="text-white font-bold text-sm">$</span>
           </div>
-          {/* Brick stack decorations */}
           <div className="absolute -bottom-2 -right-6 flex gap-1">
             <div className="w-3 h-6 rounded-sm bg-[#4F46E5] opacity-70" />
             <div className="w-3 h-4 rounded-sm bg-[#4F46E5] opacity-50" />
@@ -223,7 +211,7 @@ function SuccessStep({ onGoHome }: { onGoHome: () => void }) {
         onClick={onGoHome}
         className="w-full rounded-full bg-[#4F46E5] py-3 text-sm font-semibold text-white hover:bg-[#4338CA] transition-colors"
       >
-        Go to Homepage
+        Go to Dashboard
       </button>
     </div>
   )
@@ -234,38 +222,28 @@ function SuccessStep({ onGoHome }: { onGoHome: () => void }) {
 export function BuyCreditsModal({ open, onOpenChange }: BuyCreditsModalProps) {
   const navigate = useNavigate()
   const [step, setStep] = useState<Step>('amount')
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(10)
-  const [customAmount, setCustomAmount] = useState('')
+  const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[1]) // default to Pro
   const [loading, setLoading] = useState(false)
-
-  const finalAmount =
-    customAmount !== '' ? parseFloat(customAmount) : (selectedAmount ?? 0)
 
   const handleClose = () => {
     onOpenChange(false)
-    // reset after animation
     setTimeout(() => {
       setStep('amount')
-      setSelectedAmount(10)
-      setCustomAmount('')
+      setSelectedPlan(PLANS[1])
     }, 300)
   }
 
   const handlePurchase = async () => {
     setLoading(true)
     try {
-      // Map amount to closest pack or use basic as default
-      const pack = finalAmount >= 500 ? 'enterprise' : finalAmount >= 100 ? 'pro' : 'basic'
-      const { data, error } = await paymentApi.createCheckout(pack)
+      const { data, error } = await paymentApi.createCheckout(selectedPlan.id)
       if (error || !data) {
         toast.error(error || 'Failed to start checkout')
         setLoading(false)
         return
       }
-      // If checkout returns a URL, redirect; otherwise show success step
       const url = (data as { url?: string }).url
       if (url) {
-        // Only allow https:// URLs to prevent open redirect attacks
         if (!url.startsWith('https://')) {
           toast.error('Invalid checkout URL')
           setLoading(false)
@@ -277,7 +255,6 @@ export function BuyCreditsModal({ open, onOpenChange }: BuyCreditsModalProps) {
       }
     } catch {
       toast.error('Something went wrong')
-    } finally {
       setLoading(false)
     }
   }
@@ -320,27 +297,16 @@ export function BuyCreditsModal({ open, onOpenChange }: BuyCreditsModalProps) {
         <div className="px-7 py-6">
           {step === 'amount' && (
             <AmountStep
-              selectedAmount={selectedAmount}
-              onSelectAmount={setSelectedAmount}
-              customAmount={customAmount}
-              onCustomAmount={setCustomAmount}
+              selectedPlan={selectedPlan}
+              onSelectPlan={setSelectedPlan}
               onCancel={handleClose}
-              onContinue={() => {
-                if (customAmount !== '') {
-                  const parsed = parseFloat(customAmount)
-                  if (!isFinite(parsed) || parsed < 1) {
-                    toast.error('Please enter a valid amount (minimum $1)')
-                    return
-                  }
-                }
-                setStep('confirm')
-              }}
+              onContinue={() => setStep('confirm')}
             />
           )}
 
           {step === 'confirm' && (
             <ConfirmStep
-              amount={finalAmount}
+              plan={selectedPlan}
               loading={loading}
               onBack={() => setStep('amount')}
               onCancel={handleClose}
