@@ -32,7 +32,7 @@ const sections = [
       },
       {
         subtitle: 'Account Security',
-        text: 'You are responsible for all activity that occurs under your account. Notify us immediately at security@auditflow.io if you suspect any unauthorised use of your account. We are not liable for any loss resulting from unauthorised account access.',
+        text: 'You are responsible for all activity that occurs under your account. Notify us immediately at security@auditflow.me if you suspect any unauthorised use of your account. We are not liable for any loss resulting from unauthorised account access.',
       },
       {
         subtitle: 'Eligibility',
@@ -53,7 +53,7 @@ const sections = [
       },
       {
         subtitle: 'Refunds',
-        text: 'Credits that have not been used may be refunded within 14 days of purchase by contacting support@auditflow.io. Credits partially consumed are non-refundable. We reserve the right to decline refund requests in cases of suspected abuse.',
+        text: 'Credits that have not been used may be refunded within 14 days of purchase by contacting support@auditflow.me. Credits partially consumed are non-refundable. We reserve the right to decline refund requests in cases of suspected abuse.',
       },
       {
         subtitle: 'Free Credit',
@@ -175,7 +175,7 @@ const sections = [
     content: [
       {
         subtitle: '',
-        text: 'For questions about these Terms, please contact us at legal@auditflow.io. We aim to respond within 5 business days.',
+        text: 'For questions about these Terms, please contact us at legal@auditflow.me. We aim to respond within 5 business days.',
       },
     ],
   },
@@ -231,8 +231,8 @@ export function Terms() {
         <div className="mt-14 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-6 py-5">
           <p className="text-sm text-indigo-700">
             Questions about these Terms?{' '}
-            <a href="mailto:legal@auditflow.io" className="font-semibold underline underline-offset-2 hover:text-indigo-900 transition-colors">
-              legal@auditflow.io
+            <a href="mailto:legal@auditflow.me" className="font-semibold underline underline-offset-2 hover:text-indigo-900 transition-colors">
+              legal@auditflow.me
             </a>
             {' '}— we're happy to help.
           </p>

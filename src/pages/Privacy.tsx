@@ -99,7 +99,7 @@ const sections = [
       },
       {
         subtitle: 'Responsible Disclosure',
-        text: 'If you discover a security vulnerability, please report it to security@auditflow.io. We ask that you give us reasonable time to address issues before public disclosure.',
+        text: 'If you discover a security vulnerability, please report it to security@auditflow.me. We ask that you give us reasonable time to address issues before public disclosure.',
       },
     ],
   },
@@ -116,7 +116,7 @@ const sections = [
       },
       {
         subtitle: 'GDPR & CCPA',
-        text: 'If you are located in the EU, UK, or California, you have additional rights including the right to object to processing, restrict processing, and lodge a complaint with a supervisory authority. Contact us at privacy@auditflow.io to exercise these rights.',
+        text: 'If you are located in the EU, UK, or California, you have additional rights including the right to object to processing, restrict processing, and lodge a complaint with a supervisory authority. Contact us at privacy@auditflow.me to exercise these rights.',
       },
     ],
   },
@@ -143,7 +143,7 @@ const sections = [
     content: [
       {
         subtitle: '',
-        text: 'If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us at privacy@auditflow.io. We aim to respond within 5 business days.',
+        text: 'If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us at privacy@auditflow.me. We aim to respond within 5 business days.',
       },
     ],
   },
@@ -199,8 +199,8 @@ export function Privacy() {
         <div className="mt-14 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-6 py-5">
           <p className="text-sm text-indigo-700">
             Questions about this policy?{' '}
-            <a href="mailto:privacy@auditflow.io" className="font-semibold underline underline-offset-2 hover:text-indigo-900 transition-colors">
-              privacy@auditflow.io
+            <a href="mailto:privacy@auditflow.me" className="font-semibold underline underline-offset-2 hover:text-indigo-900 transition-colors">
+              privacy@auditflow.me
             </a>
             {' '}— we're happy to help.
           </p>

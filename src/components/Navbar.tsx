@@ -54,7 +54,7 @@ const CREDITS_FAQS = [
   },
   {
     q: "How can we get in touch?",
-    a: ["Reach us at support@auditflow.app. We reply within one business day."],
+    a: ["Reach us at support@auditflow.me. We reply within one business day."],
   },
 ]
 

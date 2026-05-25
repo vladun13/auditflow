@@ -102,6 +102,13 @@ export function Footer() {
                           Soon
                         </span>
                       </span>
+                    ) : link.href.startsWith('/') ? (
+                      <Link
+                        to={link.href}
+                        className="text-sm text-gray-500 transition-colors duration-200 hover:text-gray-900"
+                      >
+                        {link.label}
+                      </Link>
                     ) : (
                       <a
                         href={link.href}
