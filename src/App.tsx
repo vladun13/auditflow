@@ -20,6 +20,7 @@ import { Pricing } from '@/pages/Pricing'
 import { PaymentSuccess } from '@/pages/PaymentSuccess'
 import { Privacy } from '@/pages/Privacy'
 import { Terms } from '@/pages/Terms'
+import { FAQ } from '@/pages/FAQ'
 import { NotFound } from '@/pages/NotFound'
 
 // Onboarding
@@ -88,6 +89,7 @@ function App() {
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/faq" element={<FAQ />} />
 
           {/* Email verified (public, auto-redirects) */}
           <Route path="/email-verified" element={<EmailVerified />} />

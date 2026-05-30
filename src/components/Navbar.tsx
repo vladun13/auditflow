@@ -432,6 +432,9 @@ export function Navbar() {
           <Link to="/pricing" className="text-sm text-gray-700 hover:text-gray-900 transition-colors">
             Pricing
           </Link>
+          <Link to="/faq" className="text-sm text-gray-700 hover:text-gray-900 transition-colors">
+            FAQ
+          </Link>
           <a href="#blog" className="text-sm text-gray-700 hover:text-gray-900 transition-colors cursor-pointer">
             Blog
           </a>

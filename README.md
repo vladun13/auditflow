@@ -12,7 +12,7 @@ A full-stack B2B SaaS tool that automatically generates WCAG-compliant accessibi
 - **AI-Powered Recommendations** — Claude generates plain-English fix instructions per violation
 - **WCAG Scoring** — Automatic compliance scoring (A, AA, AAA levels)
 - **PDF Reports** — Professional downloadable reports
-- **Credit Packs** — Pay-as-you-go via LemonSqueezy (Basic / Pro / Enterprise)
+- **Scan Packs** — Pay-as-you-go via LemonSqueezy (Free / Starter $29 / Pro $79 / Enterprise $149)
 - **Responsive Design** — Mobile, tablet, and desktop layouts
 
 ## Tech Stack
@@ -125,10 +125,11 @@ cd backend && npm run dev
 │   │   │                         # ShareReportModal, RescanModal, PreviewModal
 │   │   └── ui/                   # shadcn/ui primitives (65+ components)
 │   └── pages/
-│       ├── Landing.tsx / Login.tsx / SignUp.tsx / ForgotPassword.tsx / Pricing.tsx
+│       ├── Landing.tsx / Login.tsx / SignUp.tsx / ForgotPassword.tsx / ResetPassword.tsx
+│       ├── AuthCallback.tsx / EmailVerified.tsx / Pricing.tsx / FAQ.tsx / Terms.tsx / Privacy.tsx
+│       ├── Onboarding.tsx / Tutorial.tsx
 │       ├── DashboardNew.tsx / NewScan.tsx / AuditDetail.tsx / Reports.tsx
 │       ├── PaymentSuccess.tsx / NotFound.tsx
-│       ├── Terms.tsx / Privacy.tsx
 │       └── settings/
 │           ├── Account.tsx / Security.tsx / Notifications.tsx
 │           ├── PlansAndCredits.tsx / PaymentHistory.tsx / CreditHistory.tsx
@@ -244,9 +245,13 @@ npm run test:watch
 - Google OAuth
 - Backend security hardening (helmet, rate limiting, SSRF, IDOR, TOCTOU)
 - Deployed: frontend on Netlify, backend on Render
+- Pricing redesign: Free / Starter $29 / Pro $79 / Enterprise $149 tiers
+- FAQ page at /faq with accordion layout
+- Onboarding + tutorial flows (/onboarding, /tutorial)
+- AuthCallback, ResetPassword, EmailVerified pages
+- Logged-in navbar with credits panel, notifications panel, profile panel
 
 ### Upcoming (v1.1)
-- Onboarding + tutorial flows
 - Animations, loading skeletons, micro-interactions
 - Rescan + share-link backend endpoints
 - E2E test suite

@@ -8,20 +8,21 @@ This file is the authoritative context document for Claude Code working on this 
 
 **AuditFlow** is a B2B SaaS web application that automatically generates WCAG accessibility audit reports for websites. Users enter a URL, the backend crawls the site with Puppeteer + axe-core, scans every page against WCAG 2.1 guidelines, then Claude AI generates plain-English explanations and step-by-step fix instructions for each violation. Results appear as an interactive dashboard report and downloadable PDF.
 
-**Business model:** Pay-as-you-go credit packs (no subscription). Each scan = 1 credit.
+**Business model:** Pay-as-you-go scan packs (no subscription). Each scan = 1 credit.
 
-| Pack | Price | Credits | Max pages/scan |
-|------|-------|---------|----------------|
-| Basic | $149 | 1 | 5 |
-| Pro | $299 | 5 | 10 |
-| Enterprise | $499 | 15 | Unlimited |
+| Pack | Price | Scans | Max pages/scan |
+|------|-------|-------|----------------|
+| Free | $0 | 3 | 3 |
+| Starter | $29 | 50 | 10 |
+| Pro | $79 | 150 | 30 |
+| Enterprise | $149 | 400 | Unlimited |
 
 **GitHub repo:** https://github.com/vladun13/auditflow  
 **Live:** https://auditflow.me
 
 ---
 
-## Current State (as of 2026-05-25)
+## Current State (as of 2026-05-30)
 
 ### What is DONE (built and styled)
 - Landing page: `Navbar`, `Hero`, `Features`, `HowItWorks`, `Footer` — fully redesigned to Figma light theme ✓
@@ -31,7 +32,8 @@ This file is the authoritative context document for Claude Code working on this 
 - `DashboardNew.tsx` — functional with real API data, uses `DashboardLayout`; dashboard redesigned to Figma with interactive elements ✓
 - `NewScan.tsx` — functional, Crawl Depth dropdown redesigned to card-row layout ✓
 - `AuditDetail.tsx` — redesigned to Figma: compliant state, issues sidebar, overview section, violation details, how-to-fix panel ✓
-- `Pricing.tsx` — functional with LemonSqueezy, redesigned to light theme ✓
+- `Pricing.tsx` — functional with LemonSqueezy, redesigned to light theme; new tiers (Free/Starter/Pro/Enterprise) ✓
+- `FAQ.tsx` — accordion FAQ page at `/faq` ✓
 - `Reports.tsx` — extracted reports route with status filtering and delete ✓
 - `src/types/index.ts` — centralized type definitions ✓
 - `src/layouts/DashboardLayout.tsx` — shared sidebar + header + `<Outlet/>` for all auth pages ✓
@@ -83,6 +85,13 @@ This file is the authoritative context document for Claude Code working on this 
 - LemonSqueezy checkout `productOptions.redirectUrl` points to `/payment/success` ✓
 - Footer internal links use React Router `<Link>` instead of `<a href>` ✓
 - All contact emails updated to `auditflow.me` domain ✓
+- `Onboarding.tsx` — onboarding flow at `/onboarding`, requires auth, no sidebar ✓
+- `Tutorial.tsx` — tutorial flow at `/tutorial`, requires auth, no sidebar ✓
+- `AuthCallback.tsx` — OAuth callback handler at `/auth/callback` ✓
+- `ResetPassword.tsx` — password reset page at `/reset-password` ✓
+- `EmailVerified.tsx` — email verification landing at `/email-verified` (auto-redirects) ✓
+- `App.tsx` — `PublicOnlyRoute` routes authenticated users to `/onboarding` (if not completed) or `/dashboard`; `OnboardingRoute` protects onboarding/tutorial without sidebar ✓
+- `Navbar.tsx` — full logged-in navbar: credits panel with FAQ accordion, notifications panel, profile panel with theme switcher ✓
 
 ### What is NOT YET DONE (pending implementation)
 - Figma redesigns: `NewScan` (needs Figma fetch for `105:16689`)
@@ -92,7 +101,6 @@ This file is the authoritative context document for Claude Code working on this 
 - Enable Google OAuth provider in Supabase dashboard (Authentication → Providers → Google)
 - Puppeteer Chrome cache on Render: must set `PUPPETEER_CACHE_DIR=/opt/render/project/src/backend/.cache/puppeteer` as Render env var, and Render build command must be `cd backend && npm install && npx puppeteer browsers install chrome && npm run build`
 - Backend endpoints for rescan and share: `POST /api/audits/:id/rescan`, `POST /api/audits/:id/share`
-- Onboarding + Tutorial flows (Figma `210:58803`, `210:58819`)
 - Animations, loading skeletons, micro-interactions (Phase 4D)
 - E2E testing suite (Phase 5)
 
@@ -130,7 +138,13 @@ This file is the authoritative context document for Claude Code working on this 
 │   │   ├── Login.tsx                 # Auth — redesigned + Google OAuth ✓
 │   │   ├── SignUp.tsx                # Auth — redesigned + Google OAuth ✓
 │   │   ├── ForgotPassword.tsx        # Auth — redesigned ✓
-│   │   ├── Pricing.tsx               # Pricing — redesigned to light theme ✓
+│   │   ├── ResetPassword.tsx         # Password reset (from email link) ✓
+│   │   ├── AuthCallback.tsx          # Supabase OAuth callback (/auth/callback) ✓
+│   │   ├── EmailVerified.tsx         # Email verified confirmation (auto-redirects) ✓
+│   │   ├── Onboarding.tsx            # Post-signup onboarding flow ✓
+│   │   ├── Tutorial.tsx              # Interactive tutorial ✓
+│   │   ├── Pricing.tsx               # Pricing — redesigned; new tiers Free/Starter/Pro/Enterprise ✓
+│   │   ├── FAQ.tsx                   # FAQ accordion page ✓
 │   │   ├── DashboardNew.tsx          # Active dashboard — uses DashboardLayout ✓
 │   │   ├── NewScan.tsx               # Scan form — functional, needs Figma redesign
 │   │   ├── Reports.tsx               # Reports list with filtering ✓
@@ -143,7 +157,7 @@ This file is the authoritative context document for Claude Code working on this 
 │   │       ├── PaymentHistory.tsx    # Past payments list ✓
 │   │       └── CreditHistory.tsx     # Credit usage log ✓
 │   ├── components/
-│   │   ├── Navbar.tsx                # Landing navbar — redesigned ✓
+│   │   ├── Navbar.tsx                # Landing (public) + LoggedIn navbar — redesigned ✓
 │   │   ├── Hero.tsx                  # Landing hero — redesigned ✓
 │   │   ├── Features.tsx              # Landing features — redesigned ✓
 │   │   ├── HowItWorks.tsx            # Landing how-it-works — redesigned ✓
@@ -304,13 +318,24 @@ minor     →  blue   (bg-blue-100 / text-blue-800)
 - **State:** Local component state (`useState`) + custom hooks. No Redux/Zustand.
 - **Forms:** React Hook Form + Zod validation
 
-### Routing Structure (target state)
+### Routing Structure (current state)
 ```
 /                         → Landing (public)
-/login                    → Login (public)
-/signup                   → SignUp (public)
+/login                    → Login (PublicOnlyRoute)
+/signup                   → SignUp (PublicOnlyRoute)
+/auth/callback            → AuthCallback (OAuth callback)
 /forgot-password          → ForgotPassword (public)
+/reset-password           → ResetPassword (public)
 /pricing                  → Pricing (public)
+/faq                      → FAQ (public)
+/privacy                  → Privacy (public)
+/terms                    → Terms (public)
+/payment/success          → PaymentSuccess (public)
+/email-verified           → EmailVerified (public, auto-redirects)
+
+Onboarding (requires auth, no sidebar — OnboardingRoute):
+  /onboarding             → Onboarding
+  /tutorial               → Tutorial
 
 Protected (under DashboardLayout):
   /dashboard              → DashboardNew
@@ -324,6 +349,8 @@ Protected (under DashboardLayout):
     /settings/plans       → PlansAndCredits
     /settings/payments    → PaymentHistory
     /settings/credits     → CreditHistory
+
+PublicOnlyRoute: authenticated users redirect to /onboarding (if localStorage.onboarding_complete absent) or /dashboard
 ```
 
 ### Backend Architecture
@@ -502,8 +529,8 @@ All screens are in the same Figma file. Node IDs for screens not yet implemented
 | Reactivate modal | `185:36490` | **Implemented** ✓ |
 | Share Report modal | `105:15673` | **Implemented** ✓ |
 | PDF Report | `105:16115` | **Implemented** ✓ |
-| Onboarding | `210:58803` | Pending |
-| Tutorial | `210:58819` | Pending |
+| Onboarding | `210:58803` | **Implemented** ✓ |
+| Tutorial | `210:58819` | **Implemented** ✓ |
 
 **Important:** The Figma MCP has a daily call limit on the starter plan. Spread fetches across sessions (max ~4 screens per session). Always check which screens have already been fetched before requesting new ones.
 
@@ -533,7 +560,7 @@ Refer to `PRD.md` for full details. Summary:
 | Auth+ | Google OAuth on Login/SignUp | **Done** ✓ (requires Supabase dashboard config) |
 | 4A | Modals (BuyCredits, CancelSub, Reactivate, ShareReport, Rescan, Preview) | **Done** ✓ |
 | 4B | PDF report (PdfReport component + pdf.ts lib) | **Done** ✓ |
-| 4C | Onboarding + Tutorial flows | Pending |
+| 4C | Onboarding + Tutorial flows | **Done** ✓ |
 | 4D | Animations, skeletons, toasts | Pending |
 | 5 | Cleanup: design consistency, responsive polish, E2E testing | Pending |
 
@@ -541,7 +568,7 @@ Refer to `PRD.md` for full details. Summary:
 
 ## Key User Flows (for testing)
 
-1. **Unauthenticated:** `/` → `/pricing` → `/signup` → OTP → `/dashboard`
+1. **Unauthenticated:** `/` → `/pricing` → `/signup` → email verify → `/onboarding` → `/tutorial` → `/dashboard`
 2. **Core flow:** `/dashboard` → `/scan` → scanning → `/audits/:id` → PDF download
 3. **Settings:** `/settings` → `/settings/account` → `/settings/security`
 4. **Billing:** `/settings/plans` → Buy Credits modal → LemonSqueezy → credit/payment history
