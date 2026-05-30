@@ -15,23 +15,23 @@ lemonSqueezySetup({
 const plans = {
   basic: {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_BASIC!,
-    credits: 1,
-    name: 'Basic',
-    price: 149,
-    maxPages: 5,
+    credits: 50,
+    name: 'Starter',
+    price: 29,
+    maxPages: 10,
   },
   pro: {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_PRO!,
-    credits: 5,
+    credits: 150,
     name: 'Pro',
-    price: 299,
-    maxPages: 10,
+    price: 79,
+    maxPages: 30,
   },
   enterprise: {
     variantId: process.env.LEMONSQUEEZY_VARIANT_ID_ENTERPRISE!,
-    credits: 15,
+    credits: 400,
     name: 'Enterprise',
-    price: 499,
+    price: 149,
     maxPages: 0, // 0 = unlimited
   }
 }
@@ -130,7 +130,7 @@ router.get('/success/:order_id', authenticate, async (req: AuthRequest, res) => 
 
     // Validate credits_added is a safe positive integer before using in raw SQL
     const creditsToAdd = Math.floor(Number(payment.credits_added))
-    if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 1000) {
+    if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 500) {
       console.error('Invalid credits_added value in payment record:', payment.credits_added)
       return res.status(500).json({ error: 'Failed to confirm payment' })
     }
@@ -224,7 +224,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       if (payment && payment.status === 'pending') {
         // Validate credits_added before using in raw SQL
         const creditsToAdd = Math.floor(Number(payment.credits_added))
-        if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 1000) {
+        if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 500) {
           console.error('Invalid credits_added in webhook payment record:', payment.credits_added)
           return res.status(500).send('Webhook processing error')
         }
@@ -285,8 +285,7 @@ router.get('/history', authenticate, async (req: AuthRequest, res) => {
       credits_added: p.credits_added,
       status: p.status,
       created_at: p.created_at,
-      // Derive plan name from credit count
-      plan: p.credits_added === 1 ? 'Basic' : p.credits_added === 5 ? 'Pro' : 'Enterprise',
+      plan: p.credits_added === 50 ? 'Starter' : p.credits_added === 150 ? 'Pro' : p.credits_added === 400 ? 'Enterprise' : 'Unknown',
     }))
 
     res.json(mapped)
