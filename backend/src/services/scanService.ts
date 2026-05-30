@@ -26,11 +26,19 @@ export class ScanService {
           '--disable-dev-shm-usage',
           '--disable-gpu',
           '--no-zygote',
+          '--single-process',
           '--disable-extensions',
           '--disable-plugins',
           '--disable-background-networking',
           '--disable-default-apps',
+          '--disable-sync',
+          '--disable-translate',
+          '--hide-scrollbars',
+          '--metrics-recording-only',
           '--mute-audio',
+          '--no-first-run',
+          '--safebrowsing-disable-auto-update',
+          '--js-flags=--max-old-space-size=256',
         ]
       })
 
@@ -241,13 +249,8 @@ export class ScanService {
   }
 
   private async configurePage(page: any) {
-    // Evade bot detection with a realistic User-Agent
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
-    
-    // Set typical browser viewport size to prevent mobile-only/empty renders
     await page.setViewport({ width: 1280, height: 800 })
-    
-    // Set extra HTTP headers to look like a standard browser request
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'en-US,en;q=0.9',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -256,6 +259,17 @@ export class ScanService {
       'sec-ch-ua-mobile': '?0',
       'sec-ch-ua-platform': '"macOS"',
       'Upgrade-Insecure-Requests': '1'
+    })
+
+    // Block images, fonts, media and tracking — not needed for axe-core, saves ~50-100MB per page
+    await page.setRequestInterception(true)
+    page.on('request', (req: any) => {
+      const type = req.resourceType()
+      if (['image', 'media', 'font', 'stylesheet'].includes(type)) {
+        req.abort()
+      } else {
+        req.continue()
+      }
     })
   }
 
