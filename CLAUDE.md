@@ -83,6 +83,8 @@ This file is the authoritative context document for Claude Code working on this 
 - Netlify env vars all set: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` ✓
 - Scan rate limiter moved from `server.ts` global middleware into `audits.ts` per-endpoint ✓
 - LemonSqueezy checkout `productOptions.redirectUrl` points to `/payment/success` ✓
+- End-to-end payment flow working in production: checkout → `order_created` webhook → credit grant via `meta.custom_data` ✓
+- `PaymentSuccess.tsx` simplified — shows success unconditionally; credit grant is handled by webhook only ✓
 - Footer internal links use React Router `<Link>` instead of `<a href>` ✓
 - All contact emails updated to `auditflow.me` domain ✓
 - `Onboarding.tsx` — onboarding flow at `/onboarding`, requires auth, no sidebar ✓
@@ -394,8 +396,7 @@ GET    /api/audits/:id/report/pdf      Download PDF
 GET    /api/user/credits               Get credit balance {credits}
 
 POST   /api/payments/checkout          Create LemonSqueezy checkout {plan}
-GET    /api/payments/success/:id       Confirm payment
-POST   /api/payments/webhook           LemonSqueezy webhook (no auth)
+POST   /api/payments/webhook           LemonSqueezy webhook (no auth) — grants credits via meta.custom_data
 
 GET    /auth/me                        Get current user info
 GET    /health                         Health check
@@ -438,7 +439,7 @@ SUPABASE_ANON_KEY=eyJ...               # Public anon key — used for current-pa
 ANTHROPIC_API_KEY=sk-ant-...
 LEMONSQUEEZY_API_KEY=eyJ0...
 LEMONSQUEEZY_STORE_ID=your_store_id
-LEMONSQUEEZY_VARIANT_ID_BASIC=...
+LEMONSQUEEZY_VARIANT_ID_STARTER=...    # Render uses this name; code also accepts LEMONSQUEEZY_VARIANT_ID_BASIC
 LEMONSQUEEZY_VARIANT_ID_PRO=...
 LEMONSQUEEZY_VARIANT_ID_ENTERPRISE=...
 LEMONSQUEEZY_WEBHOOK_SECRET=...
@@ -498,6 +499,15 @@ This is a Vite app, not Next.js. Never add `"use client"`. Remove it from any fi
 
 ### LemonSqueezy vs Stripe
 The README and Pricing page say "Stripe" but the actual integration uses LemonSqueezy. Don't confuse the two. `LEMONSQUEEZY_VARIANT_ID_*` env vars control which products are available.
+
+### Webhook body parsing order (critical)
+`backend/src/server.ts` mounts `express.raw({ type: 'application/json' })` for `/api/payments/webhook` **before** `app.use(express.json())`. This is intentional — the webhook handler needs raw bytes to verify the HMAC-SHA256 signature. If `express.json()` runs first, the body is already parsed and signature verification fails (400). Never reorder these two middleware lines.
+
+### Webhook credit grant uses `meta.custom_data`
+The `order_created` webhook handler in `payments.ts` reads `event.meta.custom_data.user_id`, `.credits`, and `.plan` (set during checkout creation) to identify the user and grant credits. It does NOT look up by `stripe_session_id` — the checkout UUID stored there differs from the numeric LemonSqueezy order ID delivered in the webhook.
+
+### Supabase `users` table migration
+The `plan` and `max_pages_per_scan` columns were added via migration after initial deploy. The migration SQL is in `supabase-schema.sql` as commented `ALTER TABLE` statements. Run them if setting up a new Supabase project from an older schema snapshot.
 
 ### Credits start at 1
 New users get 1 free credit when they sign up (set in `supabase-schema.sql` via a trigger). This enables the "Get Free Scan" CTA on the landing page.

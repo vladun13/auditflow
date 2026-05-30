@@ -80,7 +80,7 @@ SUPABASE_ANON_KEY=eyJ...
 ANTHROPIC_API_KEY=sk-ant-...
 LEMONSQUEEZY_API_KEY=eyJ0...
 LEMONSQUEEZY_STORE_ID=your_store_id
-LEMONSQUEEZY_VARIANT_ID_BASIC=...
+LEMONSQUEEZY_VARIANT_ID_STARTER=...   # also accepted as LEMONSQUEEZY_VARIANT_ID_BASIC
 LEMONSQUEEZY_VARIANT_ID_PRO=...
 LEMONSQUEEZY_VARIANT_ID_ENTERPRISE=...
 LEMONSQUEEZY_WEBHOOK_SECRET=...
@@ -172,8 +172,7 @@ cd backend && npm run dev
 
 ### Payments
 - `POST /api/payments/checkout` — Create LemonSqueezy checkout session
-- `GET /api/payments/success/:order_id` — Confirm payment + credit grant
-- `POST /api/payments/webhook` — LemonSqueezy webhook (no auth, HMAC-verified)
+- `POST /api/payments/webhook` — LemonSqueezy webhook (no auth, HMAC-verified) — grants credits via `meta.custom_data`
 - `GET /api/payments/history` — Payment history
 - `GET /api/payments/subscription` — Subscription info (pay-as-you-go only)
 
@@ -221,8 +220,11 @@ Already hosted. Run `supabase-schema.sql` in SQL Editor once.
 - Puppeteer may time out on slow or JS-heavy sites — increase timeout in `scanService.ts`
 
 ### Payment issues
-- Verify all `LEMONSQUEEZY_VARIANT_ID_*` vars match products in your LemonSqueezy dashboard
-- Webhook secret must match what's configured in LemonSqueezy
+- Variant ID env var for the Starter plan must be named `LEMONSQUEEZY_VARIANT_ID_STARTER` (or `LEMONSQUEEZY_VARIANT_ID_BASIC`)
+- Verify all `LEMONSQUEEZY_VARIANT_ID_*` vars are the **variant** ID (numeric), not the product ID
+- Webhook secret must match exactly what's configured in LemonSqueezy Settings → Webhooks
+- Credits are granted via the `order_created` webhook using `meta.custom_data` — ensure the webhook endpoint is registered and `order_created` event is enabled
+- The webhook route requires raw body for signature verification; `express.raw()` is mounted before `express.json()` in `server.ts` — do not reorder these
 
 ## Testing
 
@@ -250,6 +252,7 @@ npm run test:watch
 - Onboarding + tutorial flows (/onboarding, /tutorial)
 - AuthCallback, ResetPassword, EmailVerified pages
 - Logged-in navbar with credits panel, notifications panel, profile panel
+- End-to-end payment flow: LemonSqueezy checkout → webhook → credit grant working in production
 
 ### Upcoming (v1.1)
 - Animations, loading skeletons, micro-interactions
