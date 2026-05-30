@@ -208,54 +208,82 @@ router.post('/webhook', async (req, res) => {
 
     // Handle order_created event
     if (event.meta?.event_name === 'order_created') {
-      const orderId = event.data?.id
+      const orderId = String(event.data?.id)
+      const customData = event.meta?.custom_data as Record<string, string> | undefined
+      const userId = customData?.user_id
+      const creditsStr = customData?.credits
+      const planKey = customData?.plan
 
-      if (!orderId) {
-        return res.status(400).send('Missing order ID')
+      if (!userId || !creditsStr || !orderId) {
+        console.error('Webhook missing required fields', { userId, creditsStr, orderId })
+        return res.status(400).send('Missing required webhook data')
       }
 
-      // Update payment record
-      const { data: payment } = await supabase
+      const creditsToAdd = Math.floor(Number(creditsStr))
+      if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 500) {
+        console.error('Invalid credits amount in webhook custom data:', creditsStr)
+        return res.status(400).send('Invalid credits amount')
+      }
+
+      // Idempotency: skip if this order was already processed
+      const { data: existing } = await supabase
         .from('payments')
-        .select('*')
+        .select('id, status')
         .eq('stripe_session_id', orderId)
+        .eq('user_id', userId)
         .single()
 
-      if (payment && payment.status === 'pending') {
-        // Validate credits_added before using in raw SQL
-        const creditsToAdd = Math.floor(Number(payment.credits_added))
-        if (!Number.isInteger(creditsToAdd) || creditsToAdd <= 0 || creditsToAdd > 500) {
-          console.error('Invalid credits_added in webhook payment record:', payment.credits_added)
-          return res.status(500).send('Webhook processing error')
-        }
+      if (existing?.status === 'completed') {
+        return res.json({ received: true })
+      }
 
+      // Find and mark the pending checkout record as completed
+      const { data: pendingPayment } = await supabase
+        .from('payments')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('credits_added', creditsToAdd)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (pendingPayment) {
         await supabase
           .from('payments')
-          .update({ status: 'completed' })
-          .eq('stripe_session_id', orderId)
-
-        // Add credits and update plan — idempotency protected by payment.status check above
-        const { data: webhookUser } = await supabase
-          .from('users')
-          .select('credits')
-          .eq('id', payment.user_id)
-          .single()
-
-        const webhookPlan = Object.entries(plans).find(
-          ([, p]) => p.credits === creditsToAdd
-        )
-        const webhookPlanName = webhookPlan ? webhookPlan[0] : 'basic'
-        const webhookMaxPages = webhookPlan ? webhookPlan[1].maxPages : 5
-
-        await supabase
-          .from('users')
-          .update({
-            credits: (webhookUser?.credits ?? 0) + creditsToAdd,
-            plan: webhookPlanName,
-            max_pages_per_scan: webhookMaxPages,
-          })
-          .eq('id', payment.user_id)
+          .update({ status: 'completed', stripe_session_id: orderId })
+          .eq('id', pendingPayment.id)
+      } else {
+        await supabase.from('payments').insert({
+          user_id: userId,
+          stripe_session_id: orderId,
+          amount: Math.round((event.data?.attributes?.total ?? 0)),
+          credits_added: creditsToAdd,
+          status: 'completed',
+        })
       }
+
+      // Add credits to user
+      const { data: webhookUser } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', userId)
+        .single()
+
+      const planEntry = Object.entries(plans).find(([key]) => key === planKey)
+      const webhookPlanName = planEntry ? planEntry[0] : 'basic'
+      const webhookMaxPages = planEntry ? planEntry[1].maxPages : 5
+
+      await supabase
+        .from('users')
+        .update({
+          credits: (webhookUser?.credits ?? 0) + creditsToAdd,
+          plan: webhookPlanName,
+          max_pages_per_scan: webhookMaxPages,
+        })
+        .eq('id', userId)
+
+      console.log(`Webhook: added ${creditsToAdd} credits to user ${userId}`)
     }
 
     res.json({ received: true })
