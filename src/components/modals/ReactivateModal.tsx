@@ -16,7 +16,7 @@ export function ReactivateModal({
   open,
   onOpenChange,
   
-  planPrice = 149,
+  planPrice = 29,
   nextBillingDate,
   onConfirm,
 }: ReactivateModalProps) {

@@ -18,9 +18,9 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
-  { id: 'basic', name: 'Basic', price: 149, credits: 1, maxPages: '5 pages' },
-  { id: 'pro', name: 'Pro', price: 299, credits: 5, maxPages: '10 pages', popular: true },
-  { id: 'enterprise', name: 'Enterprise', price: 499, credits: 15, maxPages: 'Unlimited pages' },
+  { id: 'basic', name: 'Starter', price: 29, credits: 50, maxPages: '10 pages' },
+  { id: 'pro', name: 'Pro', price: 79, credits: 150, maxPages: '30 pages', popular: true },
+  { id: 'enterprise', name: 'Enterprise', price: 149, credits: 400, maxPages: 'Unlimited pages' },
 ]
 
 interface BuyCreditsModalProps {

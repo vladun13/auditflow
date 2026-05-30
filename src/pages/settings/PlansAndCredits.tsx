@@ -960,7 +960,7 @@ export function PlansAndCredits() {
         open={reactivateModalOpen}
         onOpenChange={setReactivateModalOpen}
         planName={subscription?.plan ?? 'Starter'}
-        planPrice={149}
+        planPrice={subscription?.plan === 'enterprise' ? 149 : subscription?.plan === 'pro' ? 79 : 29}
         onConfirm={handleReactivate}
       />
     </div>
