@@ -1,8 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { paymentApi } from '@/lib/api'
-import { Loader2, XCircle } from 'lucide-react'
 
 function SuccessIllustration() {
   return (
@@ -34,91 +31,26 @@ function SuccessIllustration() {
   )
 }
 
-type Status = 'loading' | 'success' | 'already_processed' | 'error' | 'no_order'
-
 export function PaymentSuccess() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [status, setStatus] = useState<Status>('loading')
-  const [creditsAdded, setCreditsAdded] = useState<number | null>(null)
-
-  useEffect(() => {
-    const orderId = searchParams.get('order_id')
-    if (!orderId) {
-      setStatus('no_order')
-      return
-    }
-
-    paymentApi.confirmPayment(orderId).then(({ data, error }) => {
-      if (error) {
-        setStatus('error')
-        return
-      }
-      const result = data as { success: boolean; credits_added?: number; message?: string }
-      if (result?.success) {
-        if (result.message === 'Payment already processed') {
-          setStatus('already_processed')
-        } else {
-          setCreditsAdded(result.credits_added ?? null)
-          setStatus('success')
-        }
-      } else {
-        setStatus('error')
-      }
-    })
-  }, [searchParams])
 
   return (
     <div className="min-h-screen bg-gray-200/60 flex items-center justify-center p-4">
       <Dialog open>
         <DialogContent className="sm:max-w-[440px] p-0 gap-0 rounded-2xl overflow-hidden [&>button]:hidden">
-          {status === 'loading' && (
-            <>
-              <SuccessIllustration />
-              <div className="px-8 py-7 text-center">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-600 mx-auto mb-3" />
-                <p className="text-sm text-gray-500">Confirming your payment…</p>
-              </div>
-            </>
-          )}
-
-          {(status === 'success' || status === 'already_processed') && (
-            <>
-              <SuccessIllustration />
-              <div className="px-8 py-7 text-center">
-                <h2 className="text-lg font-bold text-gray-900 mb-2">Thank you for your purchase!</h2>
-                <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                  {creditsAdded != null
-                    ? `${creditsAdded} credit${creditsAdded !== 1 ? 's' : ''} have been added to your account and are ready to use.`
-                    : 'Your credits have been added to your account and are ready to use.'}
-                </p>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold py-3 transition-colors"
-                >
-                  Go to Dashboard
-                </button>
-              </div>
-            </>
-          )}
-
-          {(status === 'error' || status === 'no_order') && (
-            <div className="px-8 py-10 text-center">
-              <XCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
-              <h2 className="text-lg font-bold text-gray-900 mb-2">Something went wrong</h2>
-              <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                {status === 'no_order'
-                  ? 'No order found. If you completed a purchase, please contact support.'
-                  : 'We could not confirm your payment. Your credits may still be added automatically. Please check your account in a few minutes or contact support.'}
-              </p>
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="w-full rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold py-3 transition-colors"
-              >
-                Go to Dashboard
-              </button>
-            </div>
-          )}
+          <SuccessIllustration />
+          <div className="px-8 py-7 text-center">
+            <h2 className="text-lg font-bold text-gray-900 mb-2">Thank you for your purchase!</h2>
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              Your credits will be added to your account within a minute. Go to your dashboard to start scanning.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="w-full rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold py-3 transition-colors"
+            >
+              Go to Dashboard
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
