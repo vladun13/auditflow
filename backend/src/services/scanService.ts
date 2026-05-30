@@ -25,6 +25,12 @@ export class ScanService {
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
+          '--no-zygote',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-background-networking',
+          '--disable-default-apps',
+          '--mute-audio',
         ]
       })
 
@@ -90,10 +96,13 @@ export class ScanService {
         await this.configurePage(page)
         
         try {
-          await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 })
-        } catch (gotoError: any) {
-          console.warn(`networkidle2 crawl timeout for ${url}, falling back to load:`, gotoError.message)
-          await page.goto(url, { waitUntil: 'load', timeout: 15000 })
+          await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 })
+        } catch {
+          try {
+            await page.goto(url, { waitUntil: 'load', timeout: 30000 })
+          } catch {
+            await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+          }
         }
 
         // Validate the page content before extracting links
@@ -139,10 +148,13 @@ export class ScanService {
       await this.configurePage(page)
       
       try {
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 })
-      } catch (gotoError: any) {
-        console.warn(`networkidle2 scan timeout for ${url}, falling back to load:`, gotoError.message)
-        await page.goto(url, { waitUntil: 'load', timeout: 15000 })
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 })
+      } catch {
+        try {
+          await page.goto(url, { waitUntil: 'load', timeout: 30000 })
+        } catch {
+          await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+        }
       }
 
       // Wait briefly for JS-rendered content to settle
@@ -253,46 +265,33 @@ export class ScanService {
         const title = document.title;
         const bodyText = document.body ? document.body.innerText : '';
         const elementCount = document.body ? document.body.querySelectorAll('*').length : 0;
-        
         return { title, bodyText, elementCount };
       });
-      
-      const { title, bodyText, elementCount } = pageInfo;
-      
-      // Check for bot challenge or security check indicators
-      const challengeTerms = [
-        'cloudflare',
+
+      const { title, elementCount } = pageInfo;
+
+      // Only treat as a bot challenge if the page is nearly empty AND the title signals a block.
+      // A real content page with thousands of elements can legitimately mention "cloudflare" etc.
+      const blockTitles = [
         'checking your browser',
-        'security check',
+        'just a moment',
         'access denied',
-        'please enable js',
-        'please enable javascript',
         'ddos protection',
-        'bot protection',
-        'captcha'
+        'security check',
+        'attention required',
+        'please wait',
       ];
-      
       const lowerTitle = title.toLowerCase();
-      const lowerBody = bodyText.toLowerCase();
-      
-      const isChallenge = challengeTerms.some(term => 
-        lowerTitle.includes(term) || lowerBody.includes(term)
-      );
-      
-      if (isChallenge) {
-        throw new Error(`Bot challenge or security check detected on page: "${title}"`);
+      const isEmptyChallenge = elementCount < 30 && blockTitles.some(t => lowerTitle.includes(t));
+
+      if (isEmptyChallenge) {
+        throw new Error(`Bot challenge detected: "${title}" — this site blocks automated scanners`);
       }
-      
-      // Ensure the page has reasonable structural elements
+
       if (elementCount < 5) {
-        throw new Error(`Loaded page has virtually empty DOM (only ${elementCount} elements inside body)`);
+        throw new Error(`Page has virtually empty DOM (${elementCount} elements) — likely failed to load`);
       }
-      
-      // Ensure we don't have a blank body with extremely low content
-      if (!bodyText.trim() && elementCount < 10) {
-        throw new Error(`Page body is empty and has very few elements (${elementCount})`);
-      }
-      
+
     } catch (error: any) {
       console.error(`Page validation failed for ${url}:`, error.message);
       throw new Error(`Failed to load valid page content for ${url}: ${error.message}`);
