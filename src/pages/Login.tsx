@@ -24,8 +24,12 @@ export function Login() {
     if (error) {
       setError(error.message)
     } else {
+      const pendingPlan = sessionStorage.getItem('auditflow_pending_plan')
       const pendingUrl = sessionStorage.getItem('auditflow_pending_url')
-      if (pendingUrl) {
+      if (pendingPlan) {
+        sessionStorage.removeItem('auditflow_pending_plan')
+        navigate(`/pricing?autostart=${pendingPlan}`)
+      } else if (pendingUrl) {
         sessionStorage.removeItem('auditflow_pending_url')
         navigate(`/scan?url=${encodeURIComponent(pendingUrl)}`)
       } else {

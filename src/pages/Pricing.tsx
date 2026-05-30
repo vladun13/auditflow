@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { paymentApi } from '@/lib/api'
 import { Check } from 'lucide-react'
@@ -91,7 +91,17 @@ const PLANS = [
 export function Pricing() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState<string | null>(null)
+
+  // After login/signup with a pending plan, auto-trigger checkout
+  useEffect(() => {
+    const autostart = searchParams.get('autostart')
+    if (!autostart || !user) return
+    const plan = PLANS.find(p => p.apiName === autostart)
+    if (plan) handleCta(plan)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, searchParams])
 
   const handleCta = async (plan: typeof PLANS[number]) => {
     if (!plan.apiName) {
@@ -99,6 +109,7 @@ export function Pricing() {
       return
     }
     if (!user) {
+      sessionStorage.setItem('auditflow_pending_plan', plan.apiName)
       navigate('/signup')
       return
     }
