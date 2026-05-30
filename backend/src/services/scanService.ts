@@ -261,11 +261,12 @@ export class ScanService {
       'Upgrade-Insecure-Requests': '1'
     })
 
-    // Block images, fonts, media and tracking — not needed for axe-core, saves ~50-100MB per page
+    // Block images, fonts, and media — axe-core only needs DOM + CSS, not the actual files
+    // Stylesheets are kept: axe needs computed styles for color contrast and visibility checks
     await page.setRequestInterception(true)
     page.on('request', (req: any) => {
       const type = req.resourceType()
-      if (['image', 'media', 'font', 'stylesheet'].includes(type)) {
+      if (['image', 'media', 'font'].includes(type)) {
         req.abort()
       } else {
         req.continue()
