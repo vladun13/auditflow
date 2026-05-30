@@ -14,7 +14,7 @@ lemonSqueezySetup({
 
 const plans = {
   basic: {
-    variantId: process.env.LEMONSQUEEZY_VARIANT_ID_BASIC!,
+    variantId: process.env.LEMONSQUEEZY_VARIANT_ID_STARTER ?? process.env.LEMONSQUEEZY_VARIANT_ID_BASIC!,
     credits: 50,
     name: 'Starter',
     price: 29,
