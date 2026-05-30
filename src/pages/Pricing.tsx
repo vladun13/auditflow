@@ -95,7 +95,6 @@ export function Pricing() {
 
   const handleCta = async (plan: typeof PLANS[number]) => {
     if (!plan.apiName) {
-      // Free plan
       navigate(user ? '/scan' : '/signup')
       return
     }
@@ -103,7 +102,7 @@ export function Pricing() {
       navigate('/signup')
       return
     }
-    setLoading(plan.apiName)
+    setLoading(plan.id)
     const { data, error } = await paymentApi.createCheckout(plan.apiName)
     if (error || !data) {
       alert(error || 'Failed to create checkout session')
@@ -171,18 +170,18 @@ export function Pricing() {
               {plan.popular ? (
                 <button
                   onClick={() => handleCta(plan)}
-                  disabled={loading === plan.apiName}
+                  disabled={loading === plan.id}
                   className="w-full rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm font-semibold py-2.5 transition-colors mb-2 disabled:opacity-60"
                 >
-                  {loading === plan.apiName ? 'Processing…' : plan.cta}
+                  {loading === plan.id ? 'Processing…' : plan.cta}
                 </button>
               ) : (
                 <button
                   onClick={() => handleCta(plan)}
-                  disabled={loading === plan.apiName}
+                  disabled={loading === plan.id}
                   className="w-full rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 text-sm font-semibold py-2.5 transition-colors mb-2 disabled:opacity-60"
                 >
-                  {loading === plan.apiName ? 'Processing…' : plan.cta}
+                  {loading === plan.id ? 'Processing…' : plan.cta}
                 </button>
               )}
 

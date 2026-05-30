@@ -43,7 +43,7 @@ const FAQS = [
   },
   {
     q: 'I have a question not covered here.',
-    a: 'Email vlad@auditflow.me. I read every message and usually respond within a day.',
+    a: 'Email support@auditflow.me. I read every message and usually respond within a day.',
   },
 ]
 
@@ -62,8 +62,8 @@ export function FAQ() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">FAQ</h1>
           <p className="text-base text-gray-500 leading-relaxed">
             Answers to the questions we get most. If yours isn't here, email{' '}
-            <a href="mailto:vlad@auditflow.me" className="text-[#4F46E5] hover:underline">
-              vlad@auditflow.me
+            <a href="mailto:support@auditflow.me" className="text-[#4F46E5] hover:underline">
+              support@auditflow.me
             </a>
             .
           </p>
